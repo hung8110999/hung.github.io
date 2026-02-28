@@ -493,6 +493,103 @@ h6 {
   font-size: var(--fs-lg);
 }
 
+/* Topic Tags (Math Page) */
+.topic-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.topic-tag-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.topic-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.topic-tag::after {
+  content: '▾';
+  font-size: 0.8em;
+  transition: transform var(--transition-fast);
+}
+
+.topic-tag.active::after {
+  transform: rotate(180deg);
+}
+
+/* Colors for specific tags */
+.tag-linear {
+  background: #eef2ff;
+  color: #4f46e5;
+  border-color: #c7d2fe;
+}
+
+.tag-linear:hover,
+.tag-linear.active {
+  background: #e0e7ff;
+}
+
+.tag-calculus {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+.tag-calculus:hover,
+.tag-calculus.active {
+  background: #dcfce7;
+}
+
+.tag-stats {
+  background: #fff7ed;
+  color: #ea580c;
+  border-color: #ffedd5;
+}
+
+.tag-stats:hover,
+.tag-stats.active {
+  background: #ffedd5;
+}
+
+/* Tag Explanation Dropdown */
+.tag-explanation {
+  display: none;
+  position: absolute;
+  top: calc(100% + var(--space-sm));
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-md);
+  z-index: 10;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  text-align: left;
+  line-height: 1.6;
+}
+
+.topic-tag-wrapper.open .tag-explanation {
+  display: block;
+}
+
 /* ---------- Section ---------- */
 .section {
   padding: var(--space-2xl) var(--space-xl);
@@ -540,9 +637,9 @@ h6 {
 }
 
 .log-entries {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-lg);
 }
 
 .log-entry {
@@ -550,7 +647,19 @@ h6 {
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   padding: var(--space-lg) var(--space-xl);
-  border-left: 3px solid var(--blue-400);
+  border-top: 3px solid var(--blue-400);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.log-entry:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--blue-300);
 }
 
 .log-entry .log-date {

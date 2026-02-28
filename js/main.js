@@ -6,6 +6,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   initNavbar();
   initTopicToggles();
+  initTags();
 });
 
 // ---------- Navbar ----------
@@ -42,6 +43,39 @@ function initTopicToggles() {
         if (openCard !== card) openCard.classList.remove('open');
       });
       card.classList.toggle('open');
+    });
+  });
+}
+
+// ---------- Math Tags ----------
+function initTags() {
+  document.querySelectorAll('.topic-tag').forEach(tag => {
+    tag.addEventListener('click', (e) => {
+      // Prevent click from bubbling up and instantly closing
+      e.stopPropagation();
+
+      const wrapper = tag.closest('.topic-tag-wrapper');
+      const isOpen = wrapper.classList.contains('open');
+
+      // Close all other tag dropdowns
+      document.querySelectorAll('.topic-tag-wrapper.open').forEach(openWrapper => {
+        openWrapper.classList.remove('open');
+        openWrapper.querySelector('.topic-tag').classList.remove('active');
+      });
+
+      // Toggle current
+      if (!isOpen) {
+        wrapper.classList.add('open');
+        tag.classList.add('active');
+      }
+    });
+  });
+
+  // Close tags when clicking anywhere outside
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.topic-tag-wrapper.open').forEach(wrapper => {
+      wrapper.classList.remove('open');
+      wrapper.querySelector('.topic-tag').classList.remove('active');
     });
   });
 }
