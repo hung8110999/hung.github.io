@@ -428,6 +428,14 @@ h6 {
   line-height: 1.7;
 }
 
+.news-item-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+}
+
 /* ---------- Content Page Header ---------- */
 .content-header {
   text-align: center;
