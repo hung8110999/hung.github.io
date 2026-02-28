@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coding Notes — Hung's Blog</title>
-    <meta name="description"
-        content="Coding study notes — Python, JavaScript, Data Structures, Algorithms, and Projects.">
+    <meta name="description" content="Coding study notes and daily learning log — Python, Web Dev, AI/ML, and more.">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
@@ -22,19 +21,17 @@
                 Hung
             </a>
             <ul class="nav-links" id="navLinks">
-                <li><a href="index.html">🏠 Profile</a></li>
-                <li><a href="road.html">🛤️ My Road</a></li>
+                <li><a href="index.html">Profile</a></li>
+                <li><a href="road.html">My Road</a></li>
                 <li class="nav-dropdown">
-                    <a href="study.html">📚 Study ▾</a>
+                    <a href="#" class="active">Study ▾</a>
                     <div class="dropdown-menu">
-                        <a href="math.html">📐 Math</a>
-                        <a href="english.html">📝 English</a>
-                        <a href="coding.html">💻 Coding</a>
+                        <a href="math.html">Math</a>
+                        <a href="english.html">English</a>
+                        <a href="coding.html" class="active">Coding</a>
                     </div>
                 </li>
-                <li><a href="projects.html">🔨 Projects <span class="coming-soon">Soon</span></a></li>
-                <li><a href="blog.html">✍️ Blog <span class="coming-soon">Soon</span></a></li>
-                <li><a href="resources.html">📦 Resources <span class="coming-soon">Soon</span></a></li>
+                <li><a href="blog.html">Blog</a></li>
             </ul>
             <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
                 <span></span><span></span><span></span>
@@ -46,10 +43,43 @@
 
         <div class="content-header">
             <div class="page-icon">💻</div>
-            <h1>Coding</h1>
-            <p>My programming study notes — languages, data structures, algorithms, and projects.</p>
+            <h1>Programming</h1>
+            <p>My software engineering and AI research notes.</p>
         </div>
 
+        <!-- Daily Learning Log -->
+        <section class="learning-log">
+            <h2>📝 Daily Learning Log</h2>
+            <div class="log-entries">
+
+                <div class="log-entry">
+                    <div class="log-date">March 1, 2026</div>
+                    <h3>PyTorch Custom Datasets</h3>
+                    <p>Learned how to create a custom Dataset class in PyTorch for loading medical imaging data.</p>
+                    <ul>
+                        <li>Implemented `__len__` and `__getitem__` methods</li>
+                        <li>Used `torchvision.transforms` for data augmentation</li>
+                        <li>Created a DataLoader with multiprocessing workers</li>
+                    </ul>
+                </div>
+
+                <div class="log-entry">
+                    <div class="log-date">February 28, 2026</div>
+                    <h3>Algorithms: Dynamic Programming</h3>
+                    <p>Practiced solving grid-based dynamic programming problems on LeetCode.</p>
+                    <ul>
+                        <li>Solved "Unique Paths" and "Minimum Path Sum"</li>
+                        <li>Understood state definition and state transition equations</li>
+                        <li>Optimized space complexity from O(M*N) to O(N)</li>
+                    </ul>
+                </div>
+
+                <!-- Add more entries here as you learn -->
+
+            </div>
+        </section>
+
+        <!-- Topic Notes -->
         <section class="section content-page">
             <div class="section-container">
 
@@ -58,31 +88,19 @@
                     <div class="topic-header">
                         <h3>
                             <span class="topic-number">1</span>
-                            Python Fundamentals
+                            Python Mastery
                         </h3>
                         <span class="toggle-icon">▼</span>
                     </div>
                     <div class="topic-body">
                         <div class="topic-content">
-                            <p>Python is a versatile, beginner-friendly language perfect for learning programming
-                                concepts.</p>
+                            <p>Deep dive into Python specifics.</p>
                             <ul>
-                                <li>Variables, data types, and operators</li>
-                                <li>Control flow: if/elif/else, loops (for, while)</li>
-                                <li>Functions, arguments, and return values</li>
-                                <li>Lists, dictionaries, tuples, and sets</li>
-                                <li>File handling and error handling (try/except)</li>
+                                <li>Generators and iterators</li>
+                                <li>Decorators and context managers</li>
+                                <li>Multithreading vs Multiprocessing</li>
+                                <li>Memory management and Garbage Collection</li>
                             </ul>
-                            <div class="code-block">
-                                <code>
-<span class="comment"># Example: A simple function</span>
-<span class="keyword">def</span> <span class="function">greet</span>(name):
-    <span class="keyword">return</span> <span class="string">f"Hello, {name}! Welcome to coding."</span>
-
-<span class="function">print</span>(<span class="function">greet</span>(<span class="string">"Hung"</span>))
-<span class="comment"># Output: Hello, Hung! Welcome to coding.</span>
-                </code>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -92,31 +110,19 @@
                     <div class="topic-header">
                         <h3>
                             <span class="topic-number">2</span>
-                            JavaScript & Web Development
+                            Machine Learning Foundations
                         </h3>
                         <span class="toggle-icon">▼</span>
                     </div>
                     <div class="topic-body">
                         <div class="topic-content">
-                            <p>JavaScript powers the interactive web. Essential for front-end and full-stack
-                                development.</p>
+                            <p>Core concepts algorithms in ML.</p>
                             <ul>
-                                <li>DOM manipulation and events</li>
-                                <li>ES6+ features: arrow functions, destructuring, modules</li>
-                                <li>Async programming: Promises, async/await</li>
-                                <li>Frameworks: React, Vue, or vanilla JS</li>
-                                <li>Node.js for backend development</li>
+                                <li>Linear / Logistic Regression from scratch</li>
+                                <li>Decision Trees & Random Forests</li>
+                                <li>Support Vector Machines (SVM)</li>
+                                <li>Gradient Descent variants (SGD, Adam)</li>
                             </ul>
-                            <div class="code-block">
-                                <code>
-<span class="comment">// Example: Fetching data with async/await</span>
-<span class="keyword">const</span> <span class="function">fetchData</span> = <span class="keyword">async</span> (url) => {
-  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(url);
-  <span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="function">json</span>();
-  <span class="keyword">return</span> data;
-};
-                </code>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -126,84 +132,19 @@
                     <div class="topic-header">
                         <h3>
                             <span class="topic-number">3</span>
-                            Data Structures
+                            Web Development
                         </h3>
                         <span class="toggle-icon">▼</span>
                     </div>
                     <div class="topic-body">
                         <div class="topic-content">
-                            <p>Data structures are the building blocks of efficient programs.</p>
+                            <p>Building the full stack.</p>
                             <ul>
-                                <li><strong>Arrays & Linked Lists:</strong> Sequential and node-based storage</li>
-                                <li><strong>Stacks & Queues:</strong> LIFO and FIFO structures</li>
-                                <li><strong>Hash Tables:</strong> Key-value pairs for fast lookups</li>
-                                <li><strong>Trees:</strong> Binary trees, BST, AVL trees</li>
-                                <li><strong>Graphs:</strong> Adjacency list/matrix, traversals (BFS, DFS)</li>
+                                <li>HTML5 semantics and CSS3 layouts (Flexbox/Grid)</li>
+                                <li>Vanilla JavaScript DOM manipulation</li>
+                                <li>RESTful API design</li>
+                                <li>Basic React concepts (State, Props, Hooks)</li>
                             </ul>
-                            <div class="code-block">
-                                <code>
-<span class="comment"># Example: Stack implementation</span>
-<span class="keyword">class</span> <span class="function">Stack</span>:
-    <span class="keyword">def</span> <span class="function">__init__</span>(self):
-        self.items = []
-
-    <span class="keyword">def</span> <span class="function">push</span>(self, item):
-        self.items.<span class="function">append</span>(item)
-
-    <span class="keyword">def</span> <span class="function">pop</span>(self):
-        <span class="keyword">return</span> self.items.<span class="function">pop</span>()
-                </code>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Topic 4 -->
-                <div class="topic-card">
-                    <div class="topic-header">
-                        <h3>
-                            <span class="topic-number">4</span>
-                            Algorithms
-                        </h3>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="topic-body">
-                        <div class="topic-content">
-                            <p>Algorithms are step-by-step procedures for solving problems efficiently.</p>
-                            <ul>
-                                <li><strong>Sorting:</strong> Bubble, Merge, Quick, Heap sort</li>
-                                <li><strong>Searching:</strong> Binary search, linear search</li>
-                                <li><strong>Dynamic Programming:</strong> Memoization, tabulation</li>
-                                <li><strong>Greedy Algorithms:</strong> Optimal local choices</li>
-                                <li><strong>Big O Notation:</strong> Time & space complexity analysis</li>
-                            </ul>
-                            <p><strong>Key Insight:</strong> Always analyze time complexity before choosing an
-                                algorithm. O(n log n) sorting is much better than O(n²) for large datasets!</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Topic 5 -->
-                <div class="topic-card">
-                    <div class="topic-header">
-                        <h3>
-                            <span class="topic-number">5</span>
-                            Projects & Practice
-                        </h3>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="topic-body">
-                        <div class="topic-content">
-                            <p>Building projects is the best way to solidify your knowledge and create a portfolio.</p>
-                            <ul>
-                                <li>Start small: Calculator, To-do app, Weather app</li>
-                                <li>Intermediate: Blog site, REST API, Chat app</li>
-                                <li>Advanced: ML model deployment, Full-stack SaaS</li>
-                                <li>Contribute to open-source projects on GitHub</li>
-                                <li>Practice on LeetCode, HackerRank, or Codeforces</li>
-                            </ul>
-                            <p><strong>Current Projects:</strong> This blog! Built with HTML, CSS, and JavaScript,
-                                hosted on GitHub Pages. 🎉</p>
                         </div>
                     </div>
                 </div>
@@ -214,7 +155,7 @@
     </main>
 
     <footer class="footer">
-        <p>© 2026 Hung — Built with 💙 for self-study. Hosted on <a href="https://pages.github.com"
+        <p>© 2026 Nguyen Gia Hung — Built with 💙 for self-study. Hosted on <a href="https://pages.github.com"
                 target="_blank">GitHub Pages</a>.</p>
     </footer>
 

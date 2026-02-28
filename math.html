@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Notes — Hung's Blog</title>
-    <meta name="description" content="Math study notes — Algebra, Calculus, Statistics, and more.">
+    <meta name="description"
+        content="Math study notes and daily learning log — Algebra, Calculus, Statistics, and more.">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
@@ -21,19 +22,17 @@
                 Hung
             </a>
             <ul class="nav-links" id="navLinks">
-                <li><a href="index.html">🏠 Profile</a></li>
-                <li><a href="road.html">🛤️ My Road</a></li>
+                <li><a href="index.html">Profile</a></li>
+                <li><a href="road.html">My Road</a></li>
                 <li class="nav-dropdown">
-                    <a href="study.html">📚 Study ▾</a>
+                    <a href="#" class="active">Study ▾</a>
                     <div class="dropdown-menu">
-                        <a href="math.html">📐 Math</a>
-                        <a href="english.html">📝 English</a>
-                        <a href="coding.html">💻 Coding</a>
+                        <a href="math.html" class="active">Math</a>
+                        <a href="english.html">English</a>
+                        <a href="coding.html">Coding</a>
                     </div>
                 </li>
-                <li><a href="projects.html">🔨 Projects <span class="coming-soon">Soon</span></a></li>
-                <li><a href="blog.html">✍️ Blog <span class="coming-soon">Soon</span></a></li>
-                <li><a href="resources.html">📦 Resources <span class="coming-soon">Soon</span></a></li>
+                <li><a href="blog.html">Blog</a></li>
             </ul>
             <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
                 <span></span><span></span><span></span>
@@ -49,6 +48,41 @@
             <p>My math study notes — from foundational concepts to advanced topics.</p>
         </div>
 
+        <!-- Daily Learning Log -->
+        <section class="learning-log">
+            <h2>📝 Daily Learning Log</h2>
+            <div class="log-entries">
+
+                <div class="log-entry">
+                    <div class="log-date">March 1, 2026</div>
+                    <h3>Reviewed Integration Techniques</h3>
+                    <p>Practiced integration by substitution and by parts. Worked through 10 exercises from the
+                        textbook.</p>
+                    <ul>
+                        <li>Substitution method for trigonometric integrals</li>
+                        <li>Integration by parts — LIATE rule</li>
+                        <li>Solved 8/10 problems correctly on first try</li>
+                    </ul>
+                </div>
+
+                <div class="log-entry">
+                    <div class="log-date">February 28, 2026</div>
+                    <h3>Eigenvalues & Eigenvectors</h3>
+                    <p>Started the eigenvalue chapter in Linear Algebra. Understood the geometric interpretation of
+                        eigenvectors.</p>
+                    <ul>
+                        <li>Characteristic equation: det(A - λI) = 0</li>
+                        <li>Computed eigenvalues for 3×3 matrices</li>
+                        <li>Need more practice on eigenvector calculation</li>
+                    </ul>
+                </div>
+
+                <!-- Add more entries here as you learn -->
+
+            </div>
+        </section>
+
+        <!-- Topic Notes -->
         <section class="section content-page">
             <div class="section-container">
 
@@ -73,8 +107,6 @@
                                 <li>Polynomials and rational expressions</li>
                             </ul>
                             <p><strong>Key Formula:</strong> The quadratic formula: x = (-b ± √(b² - 4ac)) / 2a</p>
-                            <p>This topic forms the base for Calculus and Linear Algebra. Make sure to practice solving
-                                equations!</p>
                         </div>
                     </div>
                 </div>
@@ -124,8 +156,6 @@
                                 <li>Eigenvalues and eigenvectors</li>
                                 <li>Linear transformations</li>
                             </ul>
-                            <p>Understanding Linear Algebra is critical for anyone pursuing AI/ML or advanced computing.
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -184,7 +214,7 @@
     </main>
 
     <footer class="footer">
-        <p>© 2026 Hung — Built with 💙 for self-study. Hosted on <a href="https://pages.github.com"
+        <p>© 2026 Nguyen Gia Hung — Built with 💙 for self-study. Hosted on <a href="https://pages.github.com"
                 target="_blank">GitHub Pages</a>.</p>
     </footer>
 

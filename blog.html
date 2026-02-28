@@ -12,49 +12,45 @@
 </head>
 
 <body>
+    <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="index.html" class="nav-logo"><span class="logo-icon">H</span> Hung</a>
             <ul class="nav-links" id="navLinks">
-                <li><a href="index.html">🏠 Profile</a></li>
-                <li><a href="road.html">🛤️ My Road</a></li>
+                <li><a href="index.html">Profile</a></li>
+                <li><a href="road.html">My Road</a></li>
                 <li class="nav-dropdown">
-                    <a href="study.html">📚 Study ▾</a>
+                    <a href="#">Study ▾</a>
                     <div class="dropdown-menu">
-                        <a href="math.html">📐 Math</a>
-                        <a href="english.html">📝 English</a>
-                        <a href="coding.html">💻 Coding</a>
+                        <a href="math.html">Math</a>
+                        <a href="english.html">English</a>
+                        <a href="coding.html">Coding</a>
                     </div>
                 </li>
-                <li><a href="projects.html">🔨 Projects <span class="coming-soon">Soon</span></a></li>
-                <li><a href="blog.html">✍️ Blog <span class="coming-soon">Soon</span></a></li>
-                <li><a href="resources.html">📦 Resources <span class="coming-soon">Soon</span></a></li>
+                <li><a href="blog.html" class="active">Blog</a></li>
             </ul>
-            <button class="nav-toggle" id="navToggle"
-                aria-label="Toggle menu"><span></span><span></span><span></span></button>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </nav>
 
     <main class="main-content">
-        <section class="hero" style="min-height: calc(100vh - 160px);">
-            <div class="hero-grid"></div>
+        <section class="hero">
             <div class="hero-content">
-                <div class="page-icon"
-                    style="width:80px;height:80px;background:rgba(59,130,246,0.15);border-radius:1.5rem;display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin:0 auto var(--space-xl);box-shadow:var(--shadow-glow);">
-                    ✍️</div>
+                <div class="page-icon" style="font-size: 3rem; margin-bottom: 1rem;">✍️</div>
                 <h1>Blog</h1>
                 <p class="hero-description">This section is coming soon! I'll be writing about my learning experiences,
                     insights, tips, and reflections here.</p>
                 <div class="hero-cta">
-                    <a href="index.html" class="btn btn-primary">← Back to Home</a>
-                    <a href="study.html" class="btn btn-secondary">📚 View Study Hub</a>
+                    <a href="index.html" class="btn btn-primary">← Back to Profile</a>
                 </div>
             </div>
         </section>
     </main>
 
     <footer class="footer">
-        <p>© 2026 Hung — Built with 💙 for self-study. Hosted on <a href="https://pages.github.com"
+        <p>© 2026 Nguyen Gia Hung — Built with 💙 for self-study. Hosted on <a href="https://pages.github.com"
                 target="_blank">GitHub Pages</a>.</p>
     </footer>
     <script src="js/main.js"></script>
