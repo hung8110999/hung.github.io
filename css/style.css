@@ -1179,7 +1179,12 @@ pre code {
 
 .timeline-item:nth-of-type(1) .timeline-dot,
 .timeline-item:nth-of-type(2) .timeline-dot {
-  transform: translateY(calc(-50% - 16px - 2pt));
+  transform: translateY(calc(-50% - 16px - 2pt + 8px));
+}
+
+.timeline-item:nth-of-type(1) .timeline-content-wrapper,
+.timeline-item:nth-of-type(2) .timeline-content-wrapper {
+  transform: translateY(-8px);
 }
 
 .timeline-item:nth-of-type(3) .timeline-dot,
@@ -1581,7 +1586,12 @@ pre code {
 
 .timeline-item:nth-of-type(1) .timeline-dot,
 .timeline-item:nth-of-type(2) .timeline-dot {
-  transform: translateY(calc(-50% - 16px - 2pt));
+  transform: translateY(calc(-50% - 16px - 2pt + 8px));
+}
+
+.timeline-item:nth-of-type(1) .timeline-content-wrapper,
+.timeline-item:nth-of-type(2) .timeline-content-wrapper {
+  transform: translateY(-8px);
 }
 
 .timeline-item:nth-of-type(3) .timeline-dot,
