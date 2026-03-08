@@ -1179,17 +1179,17 @@ pre code {
 
 .timeline-item:nth-of-type(1) .timeline-dot,
 .timeline-item:nth-of-type(2) .timeline-dot {
-  transform: translateY(calc(-50% - 16px - 2pt + 8px));
+  transform: translateY(calc(-50% - 16px - 2pt + 2px));
 }
 
 .timeline-item:nth-of-type(1) .timeline-content-wrapper,
 .timeline-item:nth-of-type(2) .timeline-content-wrapper {
-  transform: translateY(-8px);
+  transform: translateY(-2px);
 }
 
 .timeline-item:nth-of-type(3) .timeline-dot,
 .timeline-item:nth-of-type(4) .timeline-dot {
-  transform: translateY(calc(-50% - 16px - 2pt - 10px - 8px));
+  transform: translateY(calc(-50% - 16px - 2pt - 10px - 2px));
 }
 
 .timeline-landmark {
@@ -1586,17 +1586,17 @@ pre code {
 
 .timeline-item:nth-of-type(1) .timeline-dot,
 .timeline-item:nth-of-type(2) .timeline-dot {
-  transform: translateY(calc(-50% - 16px - 2pt + 8px));
+  transform: translateY(calc(-50% - 16px - 2pt + 2px));
 }
 
 .timeline-item:nth-of-type(1) .timeline-content-wrapper,
 .timeline-item:nth-of-type(2) .timeline-content-wrapper {
-  transform: translateY(-8px);
+  transform: translateY(-2px);
 }
 
 .timeline-item:nth-of-type(3) .timeline-dot,
 .timeline-item:nth-of-type(4) .timeline-dot {
-  transform: translateY(calc(-50% - 16px - 2pt - 10px - 8px));
+  transform: translateY(calc(-50% - 16px - 2pt - 10px - 2px));
 }
 
 .timeline-landmark .timeline-date {
