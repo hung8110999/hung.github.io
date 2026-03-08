@@ -1172,7 +1172,7 @@ pre code {
   position: absolute;
   left: -7px;
   top: 50%;
-  transform: translateY(calc(-50% - 16px));
+  transform: translateY(calc(-50% - 16px - 2pt));
   z-index: 10;
   box-shadow: 0 0 0 4px rgba(74, 158, 206, 0.2);
 }
@@ -1564,7 +1564,7 @@ pre code {
   position: absolute;
   left: -7px;
   top: 50%;
-  transform: translateY(calc(-50% - 16px));
+  transform: translateY(calc(-50% - 16px - 2pt));
   z-index: 10;
   box-shadow: 0 0 0 4px rgba(74, 158, 206, 0.2);
 }
