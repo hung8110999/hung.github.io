@@ -10,7 +10,7 @@ if (!fs.existsSync(assetsImagesDir)) {
     fs.mkdirSync(assetsImagesDir, { recursive: true });
 }
 
-const templateFile = path.join(outputPostsDir, 'self-study-ai-math.html');
+const templateFile = path.join(__dirname, 'post_template.html');
 const templateContent = fs.readFileSync(templateFile, 'utf8');
 
 // Basic Markdown to HTML converter (regex-based)
@@ -79,34 +79,18 @@ function generatePost(folderName) {
     // Prepare HTML from template
     let finalHtml = templateContent;
 
-    // Replace Metadata
-    finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${title} — Hung's Blog</title>`);
-    finalHtml = finalHtml.replace(/<meta\s+name=["']description["']\s+content=["'].*?["']/i, `<meta name="description" content="${description}"`);
-    finalHtml = finalHtml.replace(/<meta\s+name=["']date["']\s+content=["'].*?["']/i, `<meta name="date" content="${date}"`);
+    const d = new Date(date);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = d.toLocaleDateString('en-US', options);
 
-    // Replace Header Date and Title
-    finalHtml = finalHtml.replace(/<div[^>]*color:\s*var\(--blue-600\)[^>]*>([\s\S]*?)<\/div>/i, (match, p1) => {
-        const d = new Date(date);
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        const formattedDate = d.toLocaleDateString('en-US', options);
-        return match.replace(p1, formattedDate);
-    });
-    
-    // Find the H1 in the main content and replace it
-    // The template has the H1 for the blog post title
-    finalHtml = finalHtml.replace(/<h1[^>]*>[\s\S]*?<\/h1>/i, `<h1 style="font-size: var(--fs-4xl); margin-bottom: var(--space-lg); line-height: 1.2;">${title}</h1>`);
+    const cleanBodyHtml = bodyHtml.replace(/<h1.*?>.*?<\/h1>/i, '');
 
-    // Replace Content
-    // In our template, the content is inside <div class="topic-content" ...>
-    const contentRegex = /<div\s+class=["']topic-content["'][\s\S]*?>([\s\S]*?)<\/div>\s*<!-- Footer Call to Action -->/i;
-    finalHtml = finalHtml.replace(contentRegex, (match, p1) => {
-        // We remove the first h1 from bodyHtml since we already set it in the header
-        const cleanBodyHtml = bodyHtml.replace(/<h1.*?>.*?<\/h1>/i, '');
-        return `<div class="topic-content" style="font-size: var(--fs-lg); line-height: 1.8; color: var(--text-primary); padding: 0;">\n${cleanBodyHtml}\n</div>\n<!-- Footer Call to Action -->`;
-    });
-
-    // Remove the sample image from template if it's there
-    finalHtml = finalHtml.replace(/<img\s+src=["']\.\.\/assets\/images\/sample_blog_img\.png["'][\s\S]*?>/i, '');
+    // Replace Placeholders
+    finalHtml = finalHtml.replace(/{{TITLE}}/g, title);
+    finalHtml = finalHtml.replace(/{{DESCRIPTION}}/g, description);
+    finalHtml = finalHtml.replace(/{{DATE}}/g, date);
+    finalHtml = finalHtml.replace(/{{FORMATTED_DATE}}/g, formattedDate);
+    finalHtml = finalHtml.replace(/{{CONTENT}}/g, cleanBodyHtml);
 
     const outputPath = path.join(outputPostsDir, `${folderName}.html`);
     fs.writeFileSync(outputPath, finalHtml);
