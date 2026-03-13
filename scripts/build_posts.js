@@ -26,14 +26,20 @@ function convertMarkdownToHtml(markdown, folderName) {
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
-    // Images: ![alt](path)
+    // Images: ![alt](path){style}
     // We reference images directly from markdown_posts folder
-    html = html.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, imgPath) => {
+    // Added support for optional {style} after image
+    html = html.replace(/!\[(.*?)\]\((.*?)\)(?:{(.*?)})?/g, (match, alt, imgPath, style) => {
         // Normalize path and ensure it's relative to the posts/ folder
         const normalizedImgPath = imgPath.replace(/\\/g, '/');
         const finalImgPath = `../markdown_posts/${folderName}/${normalizedImgPath}`;
         
-        return `<img src="${finalImgPath}" alt="${alt}" style="width: 100%; border-radius: var(--radius-lg); margin-top: var(--space-xl); border: 1px solid var(--border-light);">`;
+        let inlineStyle = 'width: 100%; border-radius: var(--radius-lg); margin-top: var(--space-xl); border: 1px solid var(--border-light);';
+        if (style) {
+            inlineStyle = style; // Use user defined style if provided
+        }
+        
+        return `<img src="${finalImgPath}" alt="${alt}" style="${inlineStyle}">`;
     });
 
     // Lists

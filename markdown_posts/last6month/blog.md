@@ -13,3 +13,6 @@ Tất cả mục tiêu học thuật và **giấc mơ khoa học** của mình t
 ![Chụp hình sau buổi bảo vệ](image\grad.png)
 
 *Figure 1: Chụp hình kỷ niệm sau buổi bảo vệ với "đồng chí" Huy — chung team cả quân sự, KLTN và Taiwan2025 sau này.*
+
+![paper](image\paper.png)
+*Figure 2 : Paper đầu tay, tuy có nhiều tiếc nuối nhưng mà vẫn vui vì lần đầu được "làm khoa học" :DD

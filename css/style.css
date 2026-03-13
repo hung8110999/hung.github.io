@@ -295,7 +295,7 @@ h6 {
 
 /* ---------- Container ---------- */
 .container {
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--space-xl);
 }
@@ -744,7 +744,7 @@ h6 {
 }
 
 .section-container {
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
