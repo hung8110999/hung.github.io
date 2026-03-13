@@ -10,9 +10,9 @@ Chắc bởi vì có **cực kì nhiều chuyện để kể** (có khi phải c
 Tất cả mục tiêu học thuật và **giấc mơ khoa học** của mình trong **3.5 năm đại học** đều được bùng nổ trong thời gian này, và tới tận bây giờ mình vẫn còn thấy **khó tin vcc :DD**.
 
 ## 1. Bảo vệ khóa luận tốt nghiệp và paper đầu tay
-![Chụp hình sau buổi bảo vệ](image\grad.png)
+![Chụp hình sau buổi bảo vệ](image\grad.png){width: 50%}
 
 *Figure 1: Chụp hình kỷ niệm sau buổi bảo vệ với "đồng chí" Huy — chung team cả quân sự, KLTN và Taiwan2025 sau này.*
 
-![paper](image\paper.png)
-*Figure 2 : Paper đầu tay, tuy có nhiều tiếc nuối nhưng mà vẫn vui vì lần đầu được "làm khoa học" :DD
+![paper](image\paper.png){width: 50%}
+*Figure 2 : Paper đầu tay, tuy có nhiều tiếc nuối nhưng mà vẫn vui vì lần đầu được "làm khoa học" :D
