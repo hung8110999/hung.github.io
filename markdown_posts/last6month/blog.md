@@ -14,7 +14,7 @@ Tất cả mục tiêu học thuật và **giấc mơ khoa học** của mình t
 
 Mới đầu 2 thằng chỉ chọn chủ đề này ( Unlearning GAN ) tại vì nó nghe lạ lạ hay hay với cái mechanism 2 module đấu nhau của nó(:DD??). Rồi tới chuỗi ngày thằng Huy đi summer school bên Đài (~~đi date với Huy Phú~~) với bị viêm não (solo trong 2 tháng đầu luôn). Tiếp đó là chuỗi ngày chả hiểu mình đang làm cái gì, báo cáo thầy Thái thì cứ "sắp adapt được model rồi thầy ơi" rồi vẫn stuck tiếp (cảm ơn thầy vì đã không đấm tụi em :DD). 
 
-![paper](image\paper.png){width: 70%}
+![paper](image\paper.png){width: 50%}
 *Paper đầu tay, tuy có nhiều tiếc nuối nhưng mà vẫn vui vì lần đầu được "làm khoa học" :DD
 Mà hay ở chỗ 2 thằng vẫn cho ra được nhiều ý tưởng để tiếp tục chủ đề này, cứ như vậy vẫn lê lết cho đến lúc hoàn thành base, lit review, chốt ý tưởng. Đùng 1 cái đến 1 ngày đi họp với thầy Thái, thầy kêu là "2 đứa viết báo nha, nộp cái hội nghị này nè" ( khúc này là còn 2 tháng nữa là bảo vệ,1 tháng nữa là nộp paper ), cả 2 thằng ai cũng vui tại cuối cùng cũng được nộp conf, cũng chả nhưng mà cũng cóng tay tại cái gì cũng sắp tới rồi mà codebase với paper chưa viết. 
 
@@ -42,7 +42,7 @@ Số lượng bạn bè mình tăng bất thường trong 6 tháng này (ít nh�
 *Huy Phú ngủ như điên ở đâu đó . Cre : Huy Tống*
 
 ## 2.2 Duy Tùng
-![GOAT Comp Science](image\duytung.jpg){width: 70%}
+![GOAT Comp Science](image\duytung.jpg){width: 50%}
 
 *Đi nhậu bữa cuối với em Vinh xong chụp được quả ảnh này*
 
