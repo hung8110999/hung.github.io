@@ -232,10 +232,12 @@ def main():
     ])
 
     for folder in folders:
-        md_file = os.path.join(MARKDOWN_DIR, folder, 'blog.md')
-        if not os.path.exists(md_file):
-            print(f"[SKIP] Skipping '{folder}' -- no blog.md found.")
+        folder_path = os.path.join(MARKDOWN_DIR, folder)
+        md_files = [f for f in os.listdir(folder_path) if f.endswith('.md')]
+        if not md_files:
+            print(f"[SKIP] Skipping '{folder}' -- no .md file found.")
             continue
+        md_file = os.path.join(folder_path, md_files[0])
 
         with open(md_file, 'r', encoding='utf-8') as f:
             raw = f.read()
