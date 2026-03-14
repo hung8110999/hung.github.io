@@ -40,3 +40,19 @@ Số lượng bạn bè mình tăng bất thường trong 6 tháng này (ít nh�
 ![Huy Phú đang ngủ](image\huyphu_sleep.jpg){width: 70%}
 
 *Huy Phú ngủ như điên ở đâu đó . Cre : Huy Tống*
+
+## 2.2 Duy Tùng
+![GOAT Comp Science](image\duytung.jpg){width: 70%}
+
+*Đi nhậu bữa cuối với em Vinh xong chụp được quả ảnh này*
+
+## 2.3 Huang Lab
+![alt text](image\huanglab.jpg){width: 70%}
+*Bữa ăn tối cuối cùng của mình với mọi người trong lab trước khi về Việt Nam*
+## 2.4 International friend (Hiroto-Naufal-Naoki-Ryota-Lea-Peicheng)
+![alt text](image\withLea.jpg){width: 70%}
+*Gặp Lea và Hiroto lần đầu trong chuyến đi tới Taichung*
+![alt text](image\noLea.jpg){width: 70%} 
+*Gặp Naufal và Ryota (mới qua) lần đầu ở chợ đêm*
+![alt text](image\jpbros.jpg){width: 70%} 
+*Đi chơi với Naoki và Ryota ở Hehuanshan*
