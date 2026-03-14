@@ -33,6 +33,8 @@ Số lượng bạn bè mình tăng bất thường trong 6 tháng này (ít nh�
 ## 2.1 Huy Tống - Huy Phú
 2 thằng này bằng 1 cách nào đó đã gặp và quen biết nhau trước. Sau đó thì mình biết được và làm quen mỗi thằng do công việc và hoàn cảnh không liên quan gì tới nhau, xong sau này cả 3 thằng mới vỡ lẽ ra là biết nhau :DD
  Ảo vcl.
+
+Huy Tống thì biết nó từ lúc quân sự năm nhất lựn. Vô random nên không ai quen ai, chọn giường tầng random luôn và nó thì chọn giường với mình (mình trên nó dưới). Hồi đó ngủ cái giường thì lỏng lẻo nên mỗi lần con vợ này trở mình là cái giường lắc như động đất luôn. Sau quân sự thì tới tận Khóa luận tốt nghiệp mới liên lạc lại và làm việc với nhau. Từ đó tiếp tục với chuyến đi Đài. À, thằng này Wjbu chúa.
 ![Huy Tống đang ngủ](image\huytong_sleep.jpg){width: 70%}
 
 *Huy Tống ngủ như điên ở Đài, cụ thể là international house Taipei*
