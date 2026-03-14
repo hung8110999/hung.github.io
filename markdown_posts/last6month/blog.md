@@ -37,11 +37,17 @@ Số lượng bạn bè mình tăng bất thường trong 6 tháng này (ít nh�
 
 *Huy Tống ngủ như điên ở Đài, cụ thể là international house Taipei*
 
+Vô tình quen biết Huy Phú là do mình tham gia cái Erasmus Mundus Mentorship Program 2025. Lúc đó là không biết nó là ai luôn, chỉ biết là trước đó Huy Tống có nói là quen 1 thằng bạn EM, tự nhiên nộp hồ sơ xong Huy Tong kêu là "thằng bạn" nó nhắn là biết thằng nào tên Gia Hưng không, xong 2 thằng mới vỡ lẽ ra là biết nhau :DD. Rồi từ đó mới nói chuyện dần rồi quen dần như bây giờ. 
+
 ![Huy Phú đang ngủ](image\huyphu_sleep.jpg){width: 70%}
 
 *Huy Phú ngủ như điên ở đâu đó . Cre : Huy Tống*
 
+Điểm chung của 2 thằng này là đều thích ngủ và yêu thích vật lý nghiên cứu, dù thực tế là hướng này ở Việt Nam hiện đang khá ngợp ( năm 2025 ). Tinh thần khoa học của 2 thằng này khá là cao, các task tưởng chỉ có ở các viện nghiên cứu siêu tân tiến trong phim thì 2 con vợ này đều biết hoặc thậm chí là đang làm project luôn. Respect respect.
 ## 2.2 Duy Tùng
+Có thể nói ngắn gọn là GOAT máy tính trong tất cả các ae ( Nhì QG Nhì QG Nhì QG) ( Đọ tay với Thanh Hoa Bắc Đại ). Chơi với nhau từ hồi lớp 2 nhưng mà được đúng năm lớp 2 đó xong không chơi với nhau nữa do khác lớp khác trường. Xong đùng cái tới lớp 12 học IELTS chung nên có practice chung nhóm, xong từ đó mới nói chuyện lại. Tính xuôi tính ngược gì thằng này cũng học bá, giỏi mọi thứ luôn (từ toán đến lập trình thi đấu xong research nữa) nên khá là muốn học hỏi từ nó nhiều.
+
+Mặc dù học giỏi nhưng mà thằng này lâu lâu vẫn điên theo chu kì, nên là lâu lâu vẫn chả hiểu nó đang làm/hay đang nói cái gì :DD??
 ![GOAT Comp Science](image\duytung.jpg){width: 50%}
 
 *Đi nhậu bữa cuối với em Vinh xong chụp được quả ảnh này*
