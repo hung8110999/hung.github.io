@@ -39,4 +39,4 @@ Số lượng bạn bè mình tăng bất thường trong 6 tháng này (ít nh�
 
 ![Huy Phú đang ngủ](image\huyphu_sleep.jpg){width: 70%}
 
-*Huy Phú ngủ như điên ở đâu đó cre : Huy Tống*
+*Huy Phú ngủ như điên ở đâu đó . Cre : Huy Tống*
