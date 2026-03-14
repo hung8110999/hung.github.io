@@ -3,7 +3,7 @@ name: Update Posts Index
 on:
   push:
     paths:
-      - 'posts/**.html'
+      - 'markdown_posts/**'
     branches:
       - main
       - master
@@ -16,18 +16,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          node-version: '18'
+          python-version: '3.10'
 
-      - name: Generate posts.json
-        run: node scripts/build_index.js
+      - name: Generate posts and posts.json
+        run: python scripts/convert.py
 
       - name: Commit changes
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add posts.json
-          git commit -m "Auto-generate posts.json" || echo "No changes to commit"
+          git add posts/
+          git commit -m "Auto-generate blog posts and index" || echo "No changes to commit"
           git push

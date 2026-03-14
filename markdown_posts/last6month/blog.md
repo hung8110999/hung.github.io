@@ -37,7 +37,7 @@ Số lượng bạn bè mình tăng bất thường trong 6 tháng này (ít nh�
 
 *Huy Tống ngủ như điên ở Đài, cụ thể là international house Taipei*
 
-Vô tình quen biết Huy Phú là do mình tham gia cái Erasmus Mundus Mentorship Program 2025. Lúc đó là không biết nó là ai luôn, chỉ biết là trước đó Huy Tống có nói là quen 1 thằng bạn EM, tự nhiên nộp hồ sơ xong Huy Tong kêu là "thằng bạn" nó nhắn là biết thằng nào tên Gia Hưng không, xong 2 thằng mới vỡ lẽ ra là biết nhau :DD. Rồi từ đó mới nói chuyện dần rồi quen dần như bây giờ. 
+Vô tình quen biết Huy Phú là do mình tham gia cái Erasmus Mundus Mentorship Program 2025. Lúc đó là không biết nó là ai luôn, chỉ biết là trước đó Huy Tống có nói là quen 1 thằng bạn EM, tự nhiên nộp hồ sơ xong Huy Tong kêu là "thằng bạn" nó nhắn là biết thằng nào tên Gia Hưng không, xong 2 thằng mới vỡ lẽ ra là biết nhau :DD. Rồi từ đó mới nói chuyện dần rồi quen dần như bây giờ. Hiện thằng này đang ở Ý, thỉnh thoảng thì ghé mấy chỗ gần Iran coi ~~tên lửa~~ 
 
 ![Huy Phú đang ngủ](image\huyphu_sleep.jpg){width: 70%}
 
