@@ -92,14 +92,12 @@ def convert_markdown(md, folder_name):
 
     html = '\n'.join(processed)
 
-    # ── Image captions: lines starting with * immediately after a figure ──
+    # ── Image captions: lines starting with * or <em> after a figure (allows blank lines) ──
     html = re.sub(
-        r'</figure>\s*\n\s*\*([^*\n]+)',
-        lambda m: f'<figcaption class="blog-post-caption">{m.group(1).strip()}</figcaption>\n</figure>',
+        r'</figure>\s*(?:\*|<em>)\s*([^\n]+)',
+        lambda m: f'<figcaption class="blog-post-caption">{m.group(1).replace("</em>", "").strip("* ").strip()}</figcaption>\n</figure>',
         html
     )
-    # Fix: move figcaption inside the figure tag
-    html = html.replace('</figure>\n<figcaption', '<figcaption')
 
     # ── Paragraphs: wrap plain text lines ──
     final_lines = html.split('\n')

@@ -1728,6 +1728,7 @@ pre code {
 
 .blog-post-img {
   max-width: 100%;
+  margin: 0 auto;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
   transition: transform var(--transition-base);
@@ -1738,11 +1739,17 @@ pre code {
 }
 
 .blog-post-caption {
-  font-size: var(--fs-sm);
+  font-size: 0.85rem;
   color: var(--text-secondary);
   font-style: italic;
-  margin-top: var(--space-sm);
+  text-align: center;
+  margin: var(--space-md) auto 0;
+  padding: 8px 16px;
   line-height: 1.6;
+  background-color: var(--blue-50);
+  border-radius: var(--radius-md);
+  display: inline-block;
+  max-width: 85%;
 }
 
 .blog-post-list {
