@@ -1,6 +1,6 @@
 <!--
 date: 2026-03-10
-description: Một cái nhìn lại về nửa cuối năm 2025 đầy biến động và thành công, từ bảo vệ khóa luận đến những bài báo khoa học đầu tay.
+description: Nhìn lại nửa cuối năm 2025 của mình hehe
 -->
 # Nửa cuối 2025
 
@@ -39,7 +39,7 @@ Huy Tống (cựu HCMUS) thì biết nó từ lúc quân sự năm nhất lựn.
 
 *Huy Tống ngủ như điên ở Đài, cụ thể là international house Taipei*
 
-Vô tình quen biết Huy Phú (EM student) là do mình tham gia cái Erasmus Mundus Mentorship Program 2025. Lúc đó là không biết nó là ai luôn, chỉ biết là trước đó Huy Tống có nói là quen 1 thằng bạn EM, tự nhiên nộp hồ sơ xong Huy Tong kêu là "thằng bạn" nó nhắn là biết thằng nào tên Gia Hưng không, xong 2 thằng mới vỡ lẽ ra là biết nhau :DD. Rồi từ đó mới nói chuyện dần rồi quen dần như bây giờ. Hiện thằng này đang ở Ý, thỉnh thoảng thì ghé mấy chỗ gần Iran coi ~~tên lửa~~ 
+Vô tình quen biết Huy Phú (Cựu USTH-Hanoi và giờ là EM student) là do mình tham gia cái Erasmus Mundus Mentorship Program 2025. Lúc đó là không biết nó là ai luôn, chỉ biết là trước đó Huy Tống có nói là quen 1 thằng bạn EM, tự nhiên nộp hồ sơ xong Huy Tong kêu là "thằng bạn" nó nhắn là biết thằng nào tên Gia Hưng không, xong 2 thằng mới vỡ lẽ ra là biết nhau :DD. Rồi từ đó mới nói chuyện dần rồi quen dần như bây giờ. Hiện thằng này đang ở Ý, thỉnh thoảng thì ghé mấy chỗ gần Iran coi ~~tên lửa~~ 
 
 ![Huy Phú đang ngủ](image\huyphu_sleep.jpg){width: 70%}
 
