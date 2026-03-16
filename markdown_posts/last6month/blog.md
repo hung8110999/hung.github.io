@@ -59,6 +59,16 @@ Mặc dù học giỏi nhưng mà thằng này lâu lâu vẫn điên theo chu k
 ## 2.3 Huang Lab
 ![alt text](image\huanglab.jpg){width: 70%}
 *Bữa ăn tối cuối cùng của mình với mọi người trong lab trước khi về Việt Nam*
+Thật là khó để nói hết về HuangLab trong 1 đoạn ngắn như thế này, vì vậy nên mình sẽ cố gắng miêu tả mỗi người trong 1 câu :DD
+Từ trái qua phải lần lượt là:
+- Demi : Lab manager, Thân thiện dễ gần với mình nhất (chuyên gia xin Demi đi muộn), gặp 1 chút khó khăn với tiếng Anh nhưng không phải vấn đề hehe.
+- Keke : Master student, cảm giác như Keke hướng nội nhất Lab (Keke không phải tên thật, mình quên mất tên rồi tại vì quen miệng gọi vậy rồi)
+- Yu-Hsuan : Master student, Nghệ nhất trong lab, hướng nội thứ 2 sau Keke, cảm giác Yu-Hsuan học giỏi mà khiêm tốn.
+- Yu-Jia : Master student, fan Kpop của Lab, thích đi du lịch.
+- Joy Lee : PhD Student, người trưởng thành nhất trong lab, cả về chuyên môn lẫn tính cách, nhưng mà cũng là người vui vẻ và năng động nhất.
+- Chang-Yu : Master student, cảm giác như Chang-Yu khá giống mình vì có nhiều điểm chung, nhưng hay ngại trước đám đông.
+- De-Fong : Research assistant, pha trộn giữa Joy Lee và Chang-Yu, hay ngại nhưng nói chuyện rất vui và dễ gần.
+- Frank : (không rõ role nữa tại Frank nói mình là mới tốt nghiệp Bs nên sinh hoạt ở Lab 1 thời gian) cảm giác em út của Lab, tuy nhiên học giỏi và nói tiếng Anh cực tốt (mới có offer ở John Hopkins, chúc mừng bro :DD)
 ## 2.4 International friend
 ![Lea Hiroto](image\withLea.jpg){width: 70%}
 *Gặp Lea và Hiroto lần đầu trong chuyến đi tới Taichung*
@@ -76,4 +86,12 @@ Hiện tại thì Hiroto đang vừa làm nghiên cứu 1 topic PhD ở Nhật v
 3 tháng bên Đài thì Hiroto có nói nhiều cái, nhưng mà vẫn nhớ câu nói "It's not about whether you're good or bad, but about whether you never give up."
 
 ### 2.4.2 Ryota
-Được Hiroto giới thiệu tới Đài và hướng dẫn đề tài, Master năm 2 ở Keio Uni
+Được Hiroto giới thiệu tới Đài và hướng dẫn đề tài, Master năm 2 ở Keio Uni. Mới đầu hơi qua thì đúng kiểu siêu rụt rè (Why brooo) nhưng mà 1 thời gian thì cũng điên điên hehehe. 
+![Ryota_sleep](image\ryota_sleep.jpg){width: 70%} 
+*Ryota ngủ như điên trên bus tới Taichung :DD*
+
+Trường Keio thì top server rồi nên trình của ông này khỏi bàn. Ngoài ngành đang học là Vật lý lượng tử (gớm vc ) thì Ryota còn nghiên cứu Astro Physics nữa, dù không hiểu nhiều nhưng lúc ngắm sao trước khách sạn mình có nói chuyện với Huy với Ryota về đủ thứ khoa học, Nobel 2016, sóng ánh sáng, hạt nhân, $E=mc^2$,... Cảm giác đây là 1 trong số ít người có cùng gu khoa học với mình hahahha (dù bro ở tận Tokyo T_T)
+![Star gazing](image\star.png){width: 70%}
+*Ngắm sao trước khách sạn với Ryota và Huy Cre : Điện thoại của Ryota*
+
+À quên nói, Ryota còn là người thích nghệ thuật, đúng cái vibe của ae Tokyo cả nhạc cả thời trang và gu ảnh, cái nào cũng nghệ.
