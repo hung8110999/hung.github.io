@@ -105,6 +105,5 @@ Chuyến đi tới Taichung và Hehuanshan cũng là lần đầu gặp Naoki, v
 ![LeaCo ffee](image\LeaCoffee.jpg){width: 70%}
 *Lea Coffee trong buổi sáng cuối ở Taichung *
 Quê của Lea ở Stuttgart, Đức. Tiếc là hơi xa chỗ của họ hàng mình (Berlin) nên qua chơi hơi bị khó. Nhưng mà khi biết vậy thì Lea cũng bảo là khi nào có dịp thì cứ qua nha Lea lead all kèo :DD
-( Luckily for you, Lea, I don't have any troll photos of you :DD)
 
 ### 2.4.5 Naufal
