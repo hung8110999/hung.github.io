@@ -80,14 +80,15 @@ Từ trái qua phải lần lượt là:
 Hiện tại là researcher về Astro tại UTokyo, hồi mới gặp Hiroto do quá ấn tượng với profile của cha này nên toàn gọi là GOAT Hiroto :DD
 
 Hồi mới gặp thì chỉ chào hỏi xã giao, cứ nghĩ Hiroto hướng nội ít nói, nhưng mà trên bus từ Gaomei Wetlands về lại trung tâm Taichung thì mình với Hiroto nói chuyện về khoa học như 2 thằng bạn thân. Từ đó mới biết Hiroto học Vật lý, sau đó do có thành tích học tập quá pro nên được chọn chuyên ngành (chứ không cần phải xét), ổng cũng muốn nộp MIT với mấy trường top bên Mỹ với châu Âu nữa nhưng mà cuối cùng chọn ở lại Nhật và chọn UTokyo (nghe đến đây ù tai luôn). Cũng khá là khó để hiểu hết mấy cái Hiroto nói do mình không nghiên cứu Vật lý, Hiroto giống mình ở chỗ khá là hứng thú với kiến thức Toán dùng nó để làm Vật lý, việc lấy Toán làm gốc để từ đó nghiên cứu khoa học là điều mà mình luôn ngưỡng mộ từ lâu (mình vẫn luôn đi theo phương pháp này (dù học toán ngu)).
-
+![Doraemon Hiroto](image\doraemonHiroto.jpg){width: 70%}
+*Hát Intro Doraemon với Hiroto bằng tiếng Việt và Nhật ở Đài Trung. Cre:Huy Tong*
 Hiện tại thì Hiroto đang vừa làm nghiên cứu 1 topic PhD ở Nhật và vừa colab nghiên cứu với Đài để xây dựng 1 kính thiên văn để theo dõi 1 loại sóng gì đó. 
 
 3 tháng bên Đài thì Hiroto có nói nhiều cái, nhưng mà vẫn nhớ câu nói "It's not about whether you're good or bad, but about whether you never give up."
 
 ### 2.4.2 Ryota
 Được Hiroto giới thiệu tới Đài và hướng dẫn đề tài, Master năm 2 ở Keio Uni. Mới đầu hơi qua thì đúng kiểu siêu rụt rè (Why brooo) nhưng mà 1 thời gian thì cũng điên điên hehehe. 
-![Ryota_sleep](image\Ryota_sleep.jpg){width: 20%} 
+![Ryota_sleep](image\Ryota_sleep.jpg){width: 30%} 
 *Ryota ngủ như điên trên bus tới Taichung :DD*
 
 Trường Keio thì top server rồi nên trình của ông này khỏi bàn. Ngoài ngành đang học là Vật lý lượng tử (gớm vc ) thì Ryota còn nghiên cứu Astro Physics nữa, dù không hiểu nhiều nhưng lúc ngắm sao trước khách sạn mình có nói chuyện với Huy với Ryota về đủ thứ khoa học, Nobel 2016, sóng ánh sáng, hạt nhân, $E=mc^2$,... Cảm giác đây là 1 trong số ít người có cùng gu khoa học với mình hahahha (dù bro ở tận Tokyo T_T)
@@ -95,3 +96,14 @@ Trường Keio thì top server rồi nên trình của ông này khỏi bàn. Ng
 *Ngắm sao trước khách sạn với Ryota và Huy Cre : Điện thoại của Ryota*
 
 À quên nói, Ryota còn là người thích nghệ thuật, đúng cái vibe của ae Tokyo cả nhạc cả thời trang và gu ảnh, cái nào cũng nghệ.
+### 2.4.3 Naoki
+1 học bá khác nữa, PhD năm 1 ở Tohoku University, topic của Naoki theo lời Huy Tống là active galactic nuclei, Naoki cũng cố gắng để giải thích cho mình hiểu nhưng mà khó quá ~~. 
+![Naoki and peach](image\Naoki2.jpg){width: 70%}
+*Naoki và quả đào khổng lồ chụp ở bữa sáng ngày cuối trip Hehuanshan. Cre: Huy Tong*
+Chuyến đi tới Taichung và Hehuanshan cũng là lần đầu gặp Naoki, vậy mà nói chuyện hợp điên :DD Thế là thân luôn. 1 fact nữa là quê của Naoki ở Fukushima, nơi từng bị ảnh hưởng bởi thảm họa hạt nhân năm 2011, vì vậy nên mình cũng có hỏi về tình trạng ở đó, thì Naoki bảo là giờ mọi thứ đã ổn rồi, người dân cũng đã quay trở lại sinh sống bình thường, chỉ là phần trung tâm vẫn bị ảnh hưởng nặng bởi phóng xạ nên bị cấm luôn rồi.
+### 2.4.4 Lea
+1 học sinh trao đổi đến từ Đức, học ngành kĩ thuật. Năng lượng của Lea đúng kiểu của các bạn phương Tây, cực kì vui vẻ và thoải mái, kiểu tích cực nhiều năng lượng. Cảm giác như Lea cực kì thích thiên nhiên và đi du lịch. 
+![LeaCo ffee](image\LeaCoffee.jpg){width: 70%}
+*Lea Coffee trong buổi sáng cuối ở Taichung *
+Quê của Lea ở Stuttgart, Đức. Tiếc là hơi xa chỗ của họ hàng mình (Berlin) nên qua chơi hơi bị khó. Nhưng mà khi biết vậy thì Lea cũng bảo là khi nào có dịp thì cứ qua nha Lea lead all kèo :DD
+(Luckily for you, Lea, I don't have any troll photos of you :DD)
