@@ -35,15 +35,14 @@ Số lượng bạn bè mình tăng bất thường trong 6 tháng này (ít nh�
  Ảo vcl.
 
 Huy Tống (cựu HCMUS) thì biết nó từ lúc quân sự năm nhất lựn. Vô random nên không ai quen ai, chọn giường tầng random luôn và nó thì chọn giường với mình (mình trên nó dưới). Hồi đó ngủ cái giường thì lỏng lẻo nên mỗi lần con vợ này trở mình là cái giường lắc như động đất luôn. Sau quân sự thì tới tận Khóa luận tốt nghiệp mới liên lạc lại và làm việc với nhau. Từ đó tiếp tục với chuyến đi Đài. À, thằng này Wjbu chúa.
-![Huy Tống đang ngủ](image\huytong_sleep.jpg){width: 70%}
+![Huy Tống đang ngủ](image\huytong.jpg){width: 70%}
 
-*Huy Tống ngủ như điên ở Đài, cụ thể là international house Taipei*
-
+*Huy Tống ở Quy Nhơn . Cre : Huy Tống*
 Vô tình quen biết Huy Phú (Cựu USTH-Hanoi và giờ là EM student) là do mình tham gia cái Erasmus Mundus Mentorship Program 2025. Lúc đó là không biết nó là ai luôn, chỉ biết là trước đó Huy Tống có nói là quen 1 thằng bạn EM, tự nhiên nộp hồ sơ xong Huy Tong kêu là "thằng bạn" nó nhắn là biết thằng nào tên Gia Hưng không, xong 2 thằng mới vỡ lẽ ra là biết nhau :DD. Rồi từ đó mới nói chuyện dần rồi quen dần như bây giờ. Hiện thằng này đang ở Ý, thỉnh thoảng thì ghé mấy chỗ gần Iran coi ~~tên lửa~~ 
 
-![Huy Phú đang ngủ](image\huyphu_sleep.jpg){width: 70%}
+![Huy Phú đang ngủ](image\huyphu.jpg){width: 70%}
 
-*Huy Phú ngủ như điên ở đâu đó . Cre : Huy Tống*
+*Huy Phú ở Quy Nhơn . Cre : Huy Tống*
 
 Điểm chung của 2 thằng này là đều thích ngủ và yêu thích vật lý nghiên cứu, dù thực tế là hướng này ở Việt Nam hiện đang khá ngợp ( năm 2025 ). Tinh thần khoa học của 2 thằng này khá là cao, các task tưởng chỉ có ở các viện nghiên cứu siêu tân tiến trong phim thì 2 con vợ này đều biết hoặc thậm chí là đang làm project luôn. Respect respect.
 ## 2.2 Duy Tùng
@@ -106,4 +105,6 @@ Chuyến đi tới Taichung và Hehuanshan cũng là lần đầu gặp Naoki, v
 ![LeaCo ffee](image\LeaCoffee.jpg){width: 70%}
 *Lea Coffee trong buổi sáng cuối ở Taichung *
 Quê của Lea ở Stuttgart, Đức. Tiếc là hơi xa chỗ của họ hàng mình (Berlin) nên qua chơi hơi bị khó. Nhưng mà khi biết vậy thì Lea cũng bảo là khi nào có dịp thì cứ qua nha Lea lead all kèo :DD
-(Luckily for you, Lea, I don't have any troll photos of you :DD)
+( Luckily for you, Lea, I don't have any troll photos of you :DD)
+
+### 2.4.5 Naufal
