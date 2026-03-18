@@ -111,3 +111,6 @@ GOAT Indonesia, cựu học giả MEXT, hiện tại là Postdoc tại Nhật. N
 ![Naufal](image\naufal.jpg){width: 70%}
 *Naufal ăn tối cùng ae Sinica. Cre: Huy Tong*
 Hơi tiếc vì chưa có cơ hội nói chuyện nhiều với Naufal. 
+
+# 3. Kết
+Còn nhiều tiếc nuối vì thời gian gặp nhau quá ít, thật vui vì được gặp mọi người. Hẹn gặp lại trong tương lai.
