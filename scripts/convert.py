@@ -123,18 +123,76 @@ def convert_markdown(md, folder_name):
 # Extract Metadata from HTML Comment Frontmatter
 # ──────────────────────────────────────────────
 
-def extract_metadata(md):
-    meta = {'date': '2026-01-01', 'description': '', 'title': 'Untitled'}
+def _parse_simple_kv(block: str):
+    """
+    Parse a loose 'key: value' block (one pair per line).
+    Keeps values as raw strings; ignores empty lines.
+    """
+    data = {}
+    for raw_line in block.splitlines():
+        line = raw_line.strip()
+        if not line or ':' not in line:
+            continue
+        k, v = line.split(':', 1)
+        k = k.strip().lower()
+        v = v.strip()
+        if k:
+            data[k] = v
+    return data
 
+
+def _extract_yaml_frontmatter(md: str):
+    """
+    Extract YAML-like frontmatter from the top of the file:
+    ---
+    key: value
+    ---
+    Returns (data_dict, start_idx, end_idx) where indices refer to md slice to remove,
+    or ({}, None, None) if not present.
+    """
+    if not md.startswith('---'):
+        return {}, None, None
+    m = re.match(r'^---\s*\n([\s\S]*?)\n---\s*(?:\n|$)', md)
+    if not m:
+        return {}, None, None
+    data = _parse_simple_kv(m.group(1))
+    return data, m.start(), m.end()
+
+
+def _parse_date_flexible(date_str: str):
+    date_str = (date_str or '').strip()
+    for fmt in ('%Y-%m-%d', '%Y/%m/%d', '%d-%m-%Y', '%d/%m/%Y'):
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            pass
+    return None
+
+
+def extract_metadata(md):
+    meta = {'date': '2026-01-01', 'description': '', 'title': 'Untitled', 'subtitle': ''}
+
+    # 1) YAML frontmatter at file start (preferred if present)
+    yaml_data, _, _ = _extract_yaml_frontmatter(md)
+    if yaml_data:
+        if 'date' in yaml_data:
+            meta['date'] = yaml_data.get('date', '').strip()
+        if 'description' in yaml_data:
+            meta['description'] = yaml_data.get('description', '').strip()
+        if 'subtitle' in yaml_data:
+            meta['subtitle'] = yaml_data.get('subtitle', '').strip()
+
+    # 2) HTML comment frontmatter anywhere in file
     comment_match = re.search(r'<!--([\s\S]*?)-->', md)
     if comment_match:
         block = comment_match.group(1)
-        date_match = re.search(r'date:\s*(.+)', block)
-        desc_match = re.search(r'description:\s*(.+)', block)
-        if date_match:
-            meta['date'] = date_match.group(1).strip()
-        if desc_match:
-            meta['description'] = desc_match.group(1).strip()
+        data = _parse_simple_kv(block)
+        if 'date' in data:
+            meta['date'] = data.get('date', '').strip()
+        if 'description' in data:
+            meta['description'] = data.get('description', '').strip()
+        if 'subtitle' in data:
+            meta['subtitle'] = data.get('subtitle', '').strip()
 
     title_match = re.search(r'^# (.+)$', md, re.MULTILINE)
     if title_match:
@@ -148,8 +206,9 @@ def extract_metadata(md):
 # ──────────────────────────────────────────────
 
 def build_post_html(meta, body_html):
-    d = datetime.strptime(meta['date'], '%Y-%m-%d')
-    formatted_date = d.strftime('%B %d, %Y')
+    d = _parse_date_flexible(meta.get('date', ''))
+    formatted_date = d.strftime('%B %d, %Y') if d else (meta.get('date') or '')
+    subtitle_html = f'<div class="blog-post-subtitle">{meta["subtitle"]}</div>' if meta.get('subtitle') else ''
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -194,6 +253,7 @@ def build_post_html(meta, body_html):
             <header class="blog-post-header">
                 <div class="blog-post-date">{formatted_date}</div>
                 <h1 class="blog-post-title">{meta['title']}</h1>
+                {subtitle_html}
             </header>
 
             <div class="blog-post-body">
@@ -243,7 +303,12 @@ def main():
         meta = extract_metadata(raw)
 
         # Remove metadata comment and first H1 from body
-        body = re.sub(r'<!--[\s\S]*?-->', '', raw).strip()
+        # Strip YAML frontmatter at top (if present)
+        _, fm_start, fm_end = _extract_yaml_frontmatter(raw)
+        body_src = raw[fm_end:] if fm_end is not None else raw
+
+        # Strip first HTML comment block (if used for metadata)
+        body = re.sub(r'<!--[\s\S]*?-->', '', body_src, count=1).strip()
         body = re.sub(r'^# .+$', '', body, count=1, flags=re.MULTILINE).strip()
 
         body_html = convert_markdown(body, folder)
@@ -258,6 +323,7 @@ def main():
             'title': meta['title'],
             'date': meta['date'],
             'description': meta['description'],
+            'subtitle': meta.get('subtitle', ''),
             'url': f'posts/{folder}.html',
         })
 
