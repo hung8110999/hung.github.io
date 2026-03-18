@@ -87,7 +87,7 @@ Hiện tại thì Hiroto đang vừa làm nghiên cứu 1 topic PhD ở Nhật v
 
 ### 2.4.2 Ryota
 Được Hiroto giới thiệu tới Đài và hướng dẫn đề tài, Master năm 2 ở Keio Uni. Mới đầu hơi qua thì đúng kiểu siêu rụt rè (Why brooo) nhưng mà 1 thời gian thì cũng điên điên hehehe. 
-![Ryota](image\Ryota.jpg){width: 30%} 
+![Ryota](image\Ryota.jpg){width: 50%} 
 *Ryota và mình*
 
 Trường Keio thì top server rồi nên trình của ông này khỏi bàn. Ngoài ngành đang học là Vật lý lượng tử (gớm vc ) thì Ryota còn nghiên cứu Astro Physics nữa, dù không hiểu nhiều nhưng lúc ngắm sao trước khách sạn mình có nói chuyện với Huy với Ryota về đủ thứ khoa học, Nobel 2016, sóng ánh sáng, hạt nhân, $E=mc^2$,... Cảm giác đây là 1 trong số ít người có cùng gu khoa học với mình hahahha (dù bro ở tận Tokyo T_T)
@@ -111,7 +111,7 @@ P/s : Cảm ơn Naoki vì quả áo khoác cứu mình trên đỉnh Hehuanshan.
 Quê của Lea ở Stuttgart, Đức. Tiếc là hơi xa chỗ của họ hàng mình (Berlin) nên qua chơi hơi bị khó. Nhưng mà khi biết vậy thì Lea cũng bảo là khi nào có dịp thì cứ qua nha Lea lead all kèo :DD
 
 ### 2.4.5 Naufal
-GOAT Indonesia, cựu học giả MEXT, hiện tại là Postdoc tại Nhật. Naufal nói chuyện rất thân thiện và giới thiệu cho mình các món ăn của Indo, Nasi Goreng, Nasi Lemak, Rendang. Đồng thời cũng bất ngờ vì mình nói rằng ở Đài Bắc có nhà hàng Indo (xui là ngày hôm sau cái nhà hàng đó đóng vửa vĩnh viễn luôn :D?)
+GOAT Indonesia, cựu học giả MEXT, hiện tại là Postdoc tại Đài. Naufal nói chuyện rất thân thiện và giới thiệu cho mình các món ăn của Indo, Nasi Goreng, Nasi Lemak, Rendang. Đồng thời cũng bất ngờ vì mình nói rằng ở Đài Bắc có nhà hàng Indo (xui là ngày hôm sau cái nhà hàng đó đóng vửa vĩnh viễn luôn :D?)
 ![Naufal](image\naufal.jpg){width: 70%}
 *Naufal ăn tối cùng ae Sinica. Cre: Huy Tong*
 Hơi tiếc vì chưa có cơ hội nói chuyện nhiều với Naufal. 
