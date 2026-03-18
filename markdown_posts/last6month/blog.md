@@ -100,6 +100,8 @@ Trường Keio thì top server rồi nên trình của ông này khỏi bàn. Ng
 ![Naoki and peach](image\Naoki2.jpg){width: 70%}
 *Naoki và quả đào khổng lồ chụp ở bữa sáng ngày cuối trip Hehuanshan. Cre: Huy Tong*
 Chuyến đi tới Taichung và Hehuanshan cũng là lần đầu gặp Naoki, vậy mà nói chuyện hợp điên :DD Thế là thân luôn. 1 fact nữa là quê của Naoki ở Fukushima, nơi từng bị ảnh hưởng bởi thảm họa hạt nhân năm 2011, vì vậy nên mình cũng có hỏi về tình trạng ở đó, thì Naoki bảo là giờ mọi thứ đã ổn rồi, người dân cũng đã quay trở lại sinh sống bình thường, chỉ là phần trung tâm vẫn bị ảnh hưởng nặng bởi phóng xạ nên bị cấm luôn rồi.
+
+P/s : Cảm ơn Naoki vì quả áo khoác cứu mình trên đỉnh Hehuanshan. Xin lỗi vì đã không chuẩn bị đầy đủ.
 ### 2.4.4 Lea
 1 học sinh trao đổi đến từ Đức, học ngành kĩ thuật. Năng lượng của Lea đúng kiểu của các bạn phương Tây, cực kì vui vẻ và thoải mái, kiểu tích cực nhiều năng lượng. Cảm giác như Lea cực kì thích thiên nhiên và đi du lịch. 
 ![LeaCoffee](image\LeaCoffee.jpg){width: 70%}
