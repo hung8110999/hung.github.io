@@ -102,8 +102,12 @@ Trường Keio thì top server rồi nên trình của ông này khỏi bàn. Ng
 Chuyến đi tới Taichung và Hehuanshan cũng là lần đầu gặp Naoki, vậy mà nói chuyện hợp điên :DD Thế là thân luôn. 1 fact nữa là quê của Naoki ở Fukushima, nơi từng bị ảnh hưởng bởi thảm họa hạt nhân năm 2011, vì vậy nên mình cũng có hỏi về tình trạng ở đó, thì Naoki bảo là giờ mọi thứ đã ổn rồi, người dân cũng đã quay trở lại sinh sống bình thường, chỉ là phần trung tâm vẫn bị ảnh hưởng nặng bởi phóng xạ nên bị cấm luôn rồi.
 ### 2.4.4 Lea
 1 học sinh trao đổi đến từ Đức, học ngành kĩ thuật. Năng lượng của Lea đúng kiểu của các bạn phương Tây, cực kì vui vẻ và thoải mái, kiểu tích cực nhiều năng lượng. Cảm giác như Lea cực kì thích thiên nhiên và đi du lịch. 
-![LeaCo ffee](image\LeaCoffee.jpg){width: 70%}
+![LeaCoffee](image\LeaCoffee.jpg){width: 70%}
 *Lea Coffee trong buổi sáng cuối ở Taichung *
 Quê của Lea ở Stuttgart, Đức. Tiếc là hơi xa chỗ của họ hàng mình (Berlin) nên qua chơi hơi bị khó. Nhưng mà khi biết vậy thì Lea cũng bảo là khi nào có dịp thì cứ qua nha Lea lead all kèo :DD
 
 ### 2.4.5 Naufal
+GOAT Indonesia, cựu học giả MEXT, hiện tại là Postdoc tại Nhật. Naufal nói chuyện rất thân thiện và giới thiệu cho mình các món ăn của Indo, Nasi Goreng, Nasi Lemak, Rendang. Đồng thời cũng bất ngờ vì mình nói rằng ở Đài Bắc có nhà hàng Indo (xui là ngày hôm sau cái nhà hàng đó đóng vửa vĩnh viễn luôn :D?)
+![Naufal](image\naufal.jpg){width: 70%}
+*Naufal ăn tối cùng ae Sinica. Cre: Huy Tong*
+Hơi tiếc vì chưa có cơ hội nói chuyện nhiều với Naufal. 
