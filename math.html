@@ -102,43 +102,13 @@
             </div>
         </div>
 
-        <!-- Daily Learning Log -->
-        <section class="learning-log">
-            <h2>📝 Daily Learning Log</h2>
-            <div class="log-entries">
-
-                <a href="math-logs/integration-techniques.html" class="log-entry">
-                    <div class="log-date">March 1, 2026</div>
-                    <div class="post-tags">
-                        <span class="post-tag bg-calculus">Calculus</span>
-                    </div>
-                    <h3>Reviewed Integration Techniques</h3>
-                    <p>Practiced integration by substitution and by parts. Worked through 10 exercises from the
-                        textbook.</p>
-                    <ul>
-                        <li>Substitution method for trigonometric integrals</li>
-                        <li>Integration by parts — LIATE rule</li>
-                        <li>Solved 8/10 problems correctly on first try</li>
-                    </ul>
-                </a>
-
-                <a href="math-logs/eigenvalues.html" class="log-entry">
-                    <div class="log-date">February 28, 2026</div>
-                    <div class="post-tags">
-                        <span class="post-tag bg-linear">Linear Algebra</span>
-                    </div>
-                    <h3>Eigenvalues & Eigenvectors</h3>
-                    <p>Started the eigenvalue chapter in Linear Algebra. Understood the geometric interpretation of
-                        eigenvectors.</p>
-                    <ul>
-                        <li>Characteristic equation: det(A - λI) = 0</li>
-                        <li>Computed eigenvalues for 3×3 matrices</li>
-                        <li>Need more practice on eigenvector calculation</li>
-                    </ul>
-                </a>
-
-                <!-- Add more entries here as you learn -->
-
+        <!-- Math Posts (from math_posts.json via convert_math.py) -->
+        <section class="section blog-listing" style="padding-top: 0;">
+            <div class="section-container">
+                <h2>📝 Math Posts</h2>
+                <div class="news-list" data-json="math_posts.json">
+                    <!-- Javascript injects posts from math_posts.json -->
+                </div>
             </div>
         </section>
 

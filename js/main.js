@@ -64,9 +64,10 @@ async function loadPosts() {
   if (!newsList) return;
 
   try {
-    // Determine the path to posts.json based on current page depth
-    const isPostPage = window.location.pathname.includes('/posts/');
-    const jsonPath = isPostPage ? '../posts.json' : 'posts.json';
+    // Use data-json if set (e.g. math_posts.json on math.html), else posts.json
+    const jsonFile = newsList.dataset.json || 'posts.json';
+    const isPostPage = window.location.pathname.includes('/posts/') || window.location.pathname.includes('/math-posts/');
+    const jsonPath = isPostPage ? `../${jsonFile}` : jsonFile;
 
     const response = await fetch(jsonPath);
     if (!response.ok) return;

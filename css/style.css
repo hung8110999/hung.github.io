@@ -1776,6 +1776,17 @@ pre code {
   font-family: 'Fira Code', 'Consolas', monospace;
 }
 
+/* Math (KaTeX) — for math-posts from convert_math.py */
+.math-block {
+  text-align: center;
+  margin: var(--space-xl) 0;
+  overflow-x: auto;
+}
+
+.math-inline {
+  display: inline;
+}
+
 .blog-post-footer {
   margin-top: var(--space-3xl);
   padding-top: var(--space-xl);
