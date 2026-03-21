@@ -84,21 +84,36 @@ async function loadPosts() {
     // Clear static fallback items
     newsList.innerHTML = '';
 
+    // Tag-to-CSS-class mapping for math posts (English display names)
+    const tagToClass = {
+      'Calculus': 'bg-calculus',
+      'Algebra': 'bg-algebra',
+      'Linear Algebra': 'bg-linear',
+      'Statistics': 'bg-stats',
+      'Discrete Math': 'bg-discrete'
+    };
+
     postsToDisplay.forEach(post => {
       // Date formatting logic
       const dateObj = new Date(post.date);
       const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      const formattedDate = dateObj.toLocaleDateString('en-US', options) !== 'Invalid Date' ? 
-                            dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : 
-                            post.date; 
-      
+      const formattedDate = dateObj.toLocaleDateString('en-US', options) !== 'Invalid Date' ?
+                            dateObj.toLocaleDateString('en-US', options) :
+                            post.date;
+
       const article = document.createElement(isHomePage ? 'div' : 'article');
       article.className = isHomePage ? 'home-news-item' : 'news-item';
-      
+
+      const isMathPosts = jsonFile === 'math_posts.json';
+      const tag = post.tag || '';
+      const tagClass = tagToClass[tag] || 'bg-algebra';
+      const tagHtml = (isMathPosts && tag) ? `<div class="post-tags"><span class="post-tag ${tagClass}">${tag}</span></div>` : '';
+
       if (!isHomePage) {
         article.style.transition = 'transform 0.2s, box-shadow 0.2s';
         article.innerHTML = `
           <div class="news-date">${formattedDate}</div>
+          ${tagHtml}
           <h3 style="font-size: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
               <a href="${post.url}" style="color: var(--text-heading);">${post.title}</a>
           </h3>

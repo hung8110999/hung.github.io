@@ -226,7 +226,7 @@ def _parse_date_flexible(date_str: str):
 
 
 def extract_metadata(md):
-    meta = {'date': '2026-01-01', 'description': '', 'title': 'Untitled', 'subtitle': ''}
+    meta = {'date': '2026-01-01', 'description': '', 'title': 'Untitled', 'subtitle': '', 'tag': ''}
 
     yaml_data, _, _ = _extract_yaml_frontmatter(md)
     if yaml_data:
@@ -236,6 +236,8 @@ def extract_metadata(md):
             meta['description'] = yaml_data.get('description', '').strip()
         if 'subtitle' in yaml_data:
             meta['subtitle'] = yaml_data.get('subtitle', '').strip()
+        if 'tag' in yaml_data:
+            meta['tag'] = yaml_data.get('tag', '').strip()
 
     comment_match = re.search(r'<!--([\s\S]*?)-->', md)
     if comment_match:
@@ -247,6 +249,8 @@ def extract_metadata(md):
             meta['description'] = data.get('description', '').strip()
         if 'subtitle' in data:
             meta['subtitle'] = data.get('subtitle', '').strip()
+        if 'tag' in data:
+            meta['tag'] = data.get('tag', '').strip()
 
     title_match = re.search(r'^# (.+)$', md, re.MULTILINE)
     if title_match:
@@ -400,6 +404,7 @@ def main():
             'date': meta['date'],
             'description': meta['description'],
             'subtitle': meta.get('subtitle', ''),
+            'tag': meta.get('tag', ''),
             'url': f'math-posts/{folder}.html',
         })
 
