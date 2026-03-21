@@ -6,7 +6,7 @@ subtitle: Integration and quadratic formula
 # Example Math Post
 
 This is a sample math blog post. Inline math: $E = mc^2$ and $x^2 + y^2 = z^2$.
-
+test
 ## Quadratic Formula
 
 The solutions to $ax^2 + bx + c = 0$ are:
