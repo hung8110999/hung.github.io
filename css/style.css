@@ -831,6 +831,15 @@ h6 {
   line-height: 1.8;
 }
 
+.log-entries[data-json="math_posts.json"] .log-entry {
+  aspect-ratio: 1 / 1;
+  justify-content: flex-start;
+}
+
+.log-entries[data-json="math_posts.json"] .log-entry p {
+  overflow: hidden;
+}
+
 .log-entry ul {
   list-style: none;
   padding: 0;
