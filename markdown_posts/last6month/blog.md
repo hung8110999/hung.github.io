@@ -123,7 +123,7 @@ Quê của Lea ở Stuttgart, Đức. Tiếc là hơi xa chỗ của họ hàng 
 
 ### 2.5.5 Naufal
 GOAT Indonesia, cựu học giả MEXT, hiện tại là Postdoc tại Đài. Naufal nói chuyện rất thân thiện và giới thiệu cho mình các món ăn của Indo, Nasi Goreng, Nasi Lemak, Rendang. Đồng thời cũng bất ngờ vì mình nói rằng ở Đài Bắc có nhà hàng Indo (xui là ngày hôm sau cái nhà hàng đó đóng vửa vĩnh viễn luôn :D?)
-![Naufal](image\naufal.jpg){width: 70%}
+![naufal](image/naufal.jpg){width: 70%}
 *Naufal ăn tối cùng ae Sinica. Cre: Huy Tong*
 Hơi tiếc vì chưa có cơ hội nói chuyện nhiều với Naufal. 
 
