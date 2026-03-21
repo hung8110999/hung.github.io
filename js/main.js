@@ -74,6 +74,7 @@ async function loadPosts() {
     const posts = await response.json();
 
     const isHomePage = document.querySelector('.home-name-section') !== null;
+    const layout = newsList.dataset.layout || (isHomePage ? 'home' : 'news');
     let postsToDisplay = posts;
 
     // Filter to latest 3 for home page
@@ -93,6 +94,8 @@ async function loadPosts() {
       'Discrete Math': 'bg-discrete'
     };
 
+    const isMathPosts = jsonFile.includes('math_posts');
+
     postsToDisplay.forEach(post => {
       // Date formatting logic
       const dateObj = new Date(post.date);
@@ -101,15 +104,24 @@ async function loadPosts() {
                             dateObj.toLocaleDateString('en-US', options) :
                             post.date;
 
-      const article = document.createElement(isHomePage ? 'div' : 'article');
-      article.className = isHomePage ? 'home-news-item' : 'news-item';
+      const article = document.createElement(layout === 'learning-log' ? 'a' : isHomePage ? 'div' : 'article');
+      article.className = layout === 'learning-log' ? 'log-entry' : isHomePage ? 'home-news-item' : 'news-item';
+      if (layout === 'learning-log') {
+        article.href = post.url;
+      }
 
-      const isMathPosts = jsonFile === 'math_posts.json';
       const tag = post.tag || '';
       const tagClass = tagToClass[tag] || 'bg-algebra';
       const tagHtml = (isMathPosts && tag) ? `<div class="post-tags"><span class="post-tag ${tagClass}">${tag}</span></div>` : '';
 
-      if (!isHomePage) {
+      if (layout === 'learning-log') {
+        article.innerHTML = `
+          <div class="log-date">${formattedDate}</div>
+          ${tagHtml}
+          <h3>${post.title}</h3>
+          <p>${post.description}</p>
+        `;
+      } else if (!isHomePage) {
         article.style.transition = 'transform 0.2s, box-shadow 0.2s';
         article.innerHTML = `
           <div class="news-date">${formattedDate}</div>
