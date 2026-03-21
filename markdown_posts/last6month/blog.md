@@ -30,7 +30,18 @@ Cuối cùng thì vẫn là cảm ơn thầy Thái hehe.
 Trong thời gian này mình gặp thêm nhiều người bạn mới  và gặp lại nhiều anh em cũ. Có nhiều khác biệt nhưng điểm chung là tất cả mọi người đều cho mình nhiều góc nhìn khác nhau về thứ gọi là "Khoa học"-cũng là thứ mà mình đã đang và định sẽ theo đuổi trong tương lai.
 
 Số lượng bạn bè mình tăng bất thường trong 6 tháng này (ít nhất là bất thường với 1 người hướng nội :DD) làm mình khá là bất ngờ :DD, có khi nào mình không hướng nội vậy hông ~~
-## 2.1 Huy Tống - Huy Phú
+## 2.1 Chị Kim - Anh "Khang"
+2 anh chị giúp đỡ mình cực kì nhiều từ những ngày đầu tiên cho đến khi mình kết thúc thời gian ở Đài Loan. 
+
+Chị Kim đang là Master student ở Taipei Medical University, nghiên cứu về Neuroscience và mấy cái liên quan tới não bộ, ngày ngày stress vì mổ quá nhiều chuột. Còn anh Khang (đúng hơn là anh Khoa :>> ) đang là Master Student ở National Taiwan University, nghiên cứu về ung thư, đúng vậy, ung thư đó. Anh Khang có giải thích cái gì về nuôi vi khuẩn để tấn công DNA, RNA xong rồi cái gì gì sau đó nữa chả hiểu
+(Sorry anh chị, nếu anh chị đang đọc thì đừng đấm em, em không học giỏi sinh đâu ~~ )
+
+Thực ra những cái mình kể chỉ là bể nổi của 2 anh chị này thôi, chứ profile thật còn giỏi hơn nữa. Đến tận bây giờ (tháng 3 năm 2026), mình vẫn còn thấy may mắn vì được 2 anh chị giúp đỡ. 
+
+Thật tiếc vì chưa có 1 bữa ăn đầy đủ cuối kì intern cùng nhau và cả 1 tấm hình chung, nhưng và chắc vì vậy nên mới có lí do gặp lại ha. Nếu anh chị đang đọc cái này, em thật lòng mong 2 anh chị sẽ đạt được những nguyện vọng và thành công trên con đường của mình.
+![AK-CK](image\AK-CK.png){width: 70%}
+*nhờ GPT gen ra tấm hình này, chưa thật lắm :)))*
+## 2.2 Huy Tống - Huy Phú
 2 thằng này bằng 1 cách nào đó đã gặp và quen biết nhau trước. Sau đó thì mình biết được và làm quen mỗi thằng do công việc và hoàn cảnh không liên quan gì tới nhau, xong sau này cả 3 thằng mới vỡ lẽ ra là biết nhau :DD
  Ảo vcl.
 
@@ -45,7 +56,7 @@ Vô tình quen biết Huy Phú (Cựu USTH-Hanoi và giờ là EM student) là d
 *Huy Phú ở Quy Nhơn . Cre : Huy Tống*
 
 Điểm chung của 2 thằng này là đều thích ngủ và yêu thích vật lý nghiên cứu, dù thực tế là hướng này ở Việt Nam hiện đang khá ngợp ( năm 2025 ). Tinh thần khoa học của 2 thằng này khá là cao, các task tưởng chỉ có ở các viện nghiên cứu siêu tân tiến trong phim thì 2 con vợ này đều biết hoặc thậm chí là đang làm project luôn. Respect respect.
-## 2.2 Duy Tùng
+## 2.3 Duy Tùng
 Tùng là cựu hs chuyên tin Lương Thế Vinh (Đồng Nai), giờ đang học CS ở VinUni.
 
 Có thể nói ngắn gọn là GOAT máy tính trong tất cả các ae ( Nhì QG Nhì QG Nhì QG) ( Đọ tay với Thanh Hoa Bắc Đại ). Chơi với nhau từ hồi lớp 2 nhưng mà được đúng năm lớp 2 đó xong không chơi với nhau nữa do khác lớp khác trường. Xong đùng cái tới lớp 12 học IELTS chung nên có practice chung nhóm, xong từ đó mới nói chuyện lại. Tính xuôi tính ngược gì thằng này cũng học bá, giỏi mọi thứ luôn (từ toán đến lập trình thi đấu xong research nữa) nên khá là muốn học hỏi từ nó nhiều.
@@ -55,7 +66,7 @@ Mặc dù học giỏi nhưng mà thằng này lâu lâu vẫn điên theo chu k
 
 *Đi nhậu bữa cuối với em Vinh xong chụp được quả ảnh này*
 
-## 2.3 Huang Lab
+## 2.4 Huang Lab
 ![alt text](image\huanglab.jpg){width: 70%}
 *Bữa ăn tối cuối cùng của mình với mọi người trong lab trước khi về Việt Nam*
 Thật là khó để nói hết về HuangLab trong 1 đoạn ngắn như thế này, vì vậy nên mình sẽ cố gắng miêu tả mỗi người trong 1 câu :DD
@@ -68,14 +79,14 @@ Từ trái qua phải lần lượt là:
 - Chang-Yu : Master student, cảm giác như Chang-Yu khá giống mình vì có nhiều điểm chung, nhưng hay ngại trước đám đông.
 - De-Fong : Research assistant, pha trộn giữa Joy Lee và Chang-Yu, hay ngại nhưng nói chuyện rất vui và dễ gần.
 - Frank : (không rõ role nữa tại Frank nói mình là mới tốt nghiệp Bs nên sinh hoạt ở Lab 1 thời gian) cảm giác em út của Lab, tuy nhiên học giỏi và nói tiếng Anh cực tốt (mới có offer ở John Hopkins, chúc mừng bro :DD)
-## 2.4 International friend
+## 2.5 International friend
 ![Lea Hiroto](image\withLea.jpg){width: 70%}
 *Gặp Lea và Hiroto lần đầu trong chuyến đi tới Taichung*
 ![Naufal Ryota](image\noLea.jpg){width: 70%} 
 *Gặp Naufal và Ryota (mới qua) lần đầu ở chợ đêm*
 ![Naoki Ryota](image\jpbros.jpg){width: 70%} 
 *Đi chơi với Naoki và Ryota ở Hehuanshan*
-### 2.4.1 Hiroto
+### 2.5.1 Hiroto
 Hiện tại là researcher về Astro tại UTokyo, hồi mới gặp Hiroto do quá ấn tượng với profile của cha này nên toàn gọi là GOAT Hiroto :DD
 
 Hồi mới gặp thì chỉ chào hỏi xã giao, cứ nghĩ Hiroto hướng nội ít nói, nhưng mà trên bus từ Gaomei Wetlands về lại trung tâm Taichung thì mình với Hiroto nói chuyện về khoa học như 2 thằng bạn thân. Từ đó mới biết Hiroto học Vật lý, sau đó do có thành tích học tập quá pro nên được chọn chuyên ngành (chứ không cần phải xét), ổng cũng muốn nộp MIT với mấy trường top bên Mỹ với châu Âu nữa nhưng mà cuối cùng chọn ở lại Nhật và chọn UTokyo (nghe đến đây ù tai luôn). Cũng khá là khó để hiểu hết mấy cái Hiroto nói do mình không nghiên cứu Vật lý, Hiroto giống mình ở chỗ khá là hứng thú với kiến thức Toán dùng nó để làm Vật lý, việc lấy Toán làm gốc để từ đó nghiên cứu khoa học là điều mà mình luôn ngưỡng mộ từ lâu (mình vẫn luôn đi theo phương pháp này (dù học toán ngu)).
@@ -85,7 +96,7 @@ Hiện tại thì Hiroto đang vừa làm nghiên cứu 1 topic PhD ở Nhật v
 
 3 tháng bên Đài thì Hiroto có nói nhiều cái, nhưng mà vẫn nhớ câu nói "It's not about whether you're good or bad, but about whether you never give up."
 
-### 2.4.2 Ryota
+### 2.5.2 Ryota
 Được Hiroto giới thiệu tới Đài và hướng dẫn đề tài, Master năm 2 ở Keio Uni. Mới đầu hơi qua thì đúng kiểu siêu rụt rè (Why brooo) nhưng mà 1 thời gian thì cũng điên điên hehehe. 
 ![Ryota](image\Ryota.jpg){width: 50%} 
 *Ryota và mình*
@@ -97,20 +108,20 @@ Trường Keio thì top server rồi nên trình của ông này khỏi bàn. Ng
 À quên nói, Ryota còn là người thích nghệ thuật, đúng cái vibe của ae Tokyo cả nhạc cả thời trang và gu ảnh, cái nào cũng nghệ.
 
 Nhớ ăn nhiều rau vào và qua đường nhớ nhìn kỹ nha bro :DD
-### 2.4.3 Naoki
+### 2.5.3 Naoki
 1 học bá khác nữa, PhD năm 1 ở Tohoku University, topic của Naoki theo lời Huy Tống là active galactic nuclei, Naoki cũng cố gắng để giải thích cho mình hiểu nhưng mà khó quá ~~. 
 ![Naoki and peach](image\Naoki2.jpg){width: 70%}
 *Naoki và quả đào khổng lồ chụp ở bữa sáng ngày cuối trip Hehuanshan. Cre: Huy Tong*
 Chuyến đi tới Taichung và Hehuanshan cũng là lần đầu gặp Naoki, vậy mà nói chuyện hợp điên :DD Thế là thân luôn. 1 fact nữa là quê của Naoki ở Fukushima, nơi từng bị ảnh hưởng bởi thảm họa hạt nhân năm 2011, vì vậy nên mình cũng có hỏi về tình trạng ở đó, thì Naoki bảo là giờ mọi thứ đã ổn rồi, người dân cũng đã quay trở lại sinh sống bình thường, chỉ là phần trung tâm vẫn bị ảnh hưởng nặng bởi phóng xạ nên bị cấm luôn rồi.
 
 P/s : Cảm ơn Naoki vì quả áo khoác cứu mình trên đỉnh Hehuanshan. Xin lỗi vì đã không chuẩn bị đầy đủ.
-### 2.4.4 Lea
+### 2.5.4 Lea
 1 học sinh trao đổi đến từ Đức, học ngành kĩ thuật. Năng lượng của Lea đúng kiểu của các bạn phương Tây, cực kì vui vẻ và thoải mái, kiểu tích cực nhiều năng lượng. Cảm giác như Lea cực kì thích thiên nhiên và đi du lịch. 
 ![LeaCoffee](image\LeaCoffee.jpg){width: 70%}
 *Lea Coffee trong buổi sáng cuối ở Taichung *
 Quê của Lea ở Stuttgart, Đức. Tiếc là hơi xa chỗ của họ hàng mình (Berlin) nên qua chơi hơi bị khó. Nhưng mà khi biết vậy thì Lea cũng bảo là khi nào có dịp thì cứ qua nha Lea lead all kèo :DD
 
-### 2.4.5 Naufal
+### 2.5.5 Naufal
 GOAT Indonesia, cựu học giả MEXT, hiện tại là Postdoc tại Đài. Naufal nói chuyện rất thân thiện và giới thiệu cho mình các món ăn của Indo, Nasi Goreng, Nasi Lemak, Rendang. Đồng thời cũng bất ngờ vì mình nói rằng ở Đài Bắc có nhà hàng Indo (xui là ngày hôm sau cái nhà hàng đó đóng vửa vĩnh viễn luôn :D?)
 ![Naufal](image\naufal.jpg){width: 70%}
 *Naufal ăn tối cùng ae Sinica. Cre: Huy Tong*
