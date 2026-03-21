@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test 2 — Hung's Math Blog</title>
+    <meta name="description" content="">
+    <meta name="date" content="2026-01-01">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+</head>
+
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo"><span class="logo-icon">H</span> Hung</a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="../index.html">Profile</a></li>
+                <li><a href="../road.html">My Road</a></li>
+                <li class="nav-dropdown">
+                    <a href="#">Study ▾</a>
+                    <div class="dropdown-menu">
+                        <a href="../math.html" class="active">Math</a>
+                        <a href="../english.html">English</a>
+                        <a href="../coding.html">Coding</a>
+                    </div>
+                </li>
+                <li><a href="../blog.html">Blog</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <article class="blog-post">
+            <header class="blog-post-header">
+                <div class="blog-post-date">January 01, 2026</div>
+                <h1 class="blog-post-title">Test 2</h1>
+                
+            </header>
+
+            <div class="blog-post-body">
+                <h2 class="blog-post-h2">1. test 1</h2>
+<h3 class="blog-post-h3">test 1.1</h3>
+            </div>
+
+            <div class="blog-post-footer">
+                <a href="../math.html" class="btn btn-secondary">← Back to Math Notes</a>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 Nguyen Gia Hung — Built with 💙 for self-study. Hosted on <a href="https://pages.github.com"
+                target="_blank">GitHub Pages</a>.</p>
+    </footer>
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".math-inline").forEach(function(el) {
+                var latex = el.getAttribute("data-math");
+                if (latex) {
+                    el.innerHTML = katex.renderToString(latex, { throwOnError: false, displayMode: false });
+                }
+            });
+            document.querySelectorAll(".math-block").forEach(function(el) {
+                var latex = el.getAttribute("data-math");
+                if (latex) {
+                    el.innerHTML = katex.renderToString(latex, { throwOnError: false, displayMode: true });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
