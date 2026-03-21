@@ -831,35 +831,30 @@ h6 {
   line-height: 1.8;
 }
 
-.log-entries[data-json="math/math_posts.json"],
-.log-entries[data-json="english/english_posts.json"] {
-  grid-template-columns: repeat(auto-fit, minmax(280px, 320px));
+.uniform-log-grid {
+  grid-template-columns: repeat(auto-fit, 320px);
   justify-content: center;
 }
 
-.log-entries[data-json="math/math_posts.json"] .log-entry,
-.log-entries[data-json="english/english_posts.json"] .log-entry {
-  width: 100%;
-  aspect-ratio: 1 / 1;
+.uniform-log-grid .log-entry {
+  width: 320px;
+  height: 320px;
+  box-sizing: border-box;
   justify-content: flex-start;
 }
 
-.log-entries[data-json="math/math_posts.json"] .log-entry h3,
-.log-entries[data-json="math/math_posts.json"] .log-entry p,
-.log-entries[data-json="english/english_posts.json"] .log-entry h3,
-.log-entries[data-json="english/english_posts.json"] .log-entry p {
+.uniform-log-grid .log-entry h3,
+.uniform-log-grid .log-entry p {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
 }
 
-.log-entries[data-json="math/math_posts.json"] .log-entry h3,
-.log-entries[data-json="english/english_posts.json"] .log-entry h3 {
+.uniform-log-grid .log-entry h3 {
   -webkit-line-clamp: 2;
 }
 
-.log-entries[data-json="math/math_posts.json"] .log-entry p,
-.log-entries[data-json="english/english_posts.json"] .log-entry p {
+.uniform-log-grid .log-entry p {
   -webkit-line-clamp: 4;
 }
 
