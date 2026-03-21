@@ -60,7 +60,7 @@ function alignTimelineDots() {
 
 // ---------- Dynamic Posts Loading ----------
 async function loadPosts() {
-  const newsList = document.querySelector('.news-list');
+  const newsList = document.querySelector('[data-json], .news-list');
   if (!newsList) return;
 
   try {
