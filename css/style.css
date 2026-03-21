@@ -848,6 +848,8 @@ h6 {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .uniform-log-grid .log-entry h3 {
@@ -856,8 +858,6 @@ h6 {
 
 .uniform-log-grid .log-entry p {
   -webkit-line-clamp: 4;
-  overflow-wrap: anywhere;
-  word-break: break-word;
 }
 
 .log-entry ul {
