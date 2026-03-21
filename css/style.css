@@ -856,6 +856,8 @@ h6 {
 
 .uniform-log-grid .log-entry p {
   -webkit-line-clamp: 4;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .log-entry ul {
