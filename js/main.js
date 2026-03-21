@@ -64,16 +64,29 @@ async function loadPosts() {
   if (!newsList) return;
 
   try {
-    // Use data-json if set (e.g. math_posts.json on math.html), else posts.json
-    const jsonFile = newsList.dataset.json || 'posts.json';
-    const isPostPage = window.location.pathname.includes('/posts/') || window.location.pathname.includes('/math-posts/');
-    const jsonPath = isPostPage ? `../${jsonFile}` : jsonFile;
-
-    const response = await fetch(jsonPath, { cache: 'no-store' });
-    if (!response.ok) return;
-    const posts = await response.json();
-
+    const isPostPage = window.location.pathname.includes('/posts/') ||
+      window.location.pathname.includes('/math-posts/') ||
+      window.location.pathname.includes('/english_posts/');
     const isHomePage = document.querySelector('.home-name-section') !== null;
+    const jsonFiles = isHomePage && newsList.dataset.jsonSources
+      ? newsList.dataset.jsonSources.split(',').map(file => file.trim()).filter(Boolean)
+      : [newsList.dataset.json || 'posts.json'];
+
+    const postsFromSources = await Promise.all(
+      jsonFiles.map(async (jsonFile) => {
+        const jsonPath = isPostPage ? `../${jsonFile}` : jsonFile;
+        const response = await fetch(jsonPath, { cache: 'no-store' });
+        if (!response.ok) return [];
+
+        const posts = await response.json();
+        return posts.map(post => ({ ...post, _jsonFile: jsonFile }));
+      })
+    );
+
+    const posts = postsFromSources
+      .flat()
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
     const layout = newsList.dataset.layout || (isHomePage ? 'home' : 'news');
     let postsToDisplay = posts;
 
@@ -91,10 +104,12 @@ async function loadPosts() {
       'Algebra': 'bg-algebra',
       'Linear Algebra': 'bg-linear',
       'Statistics': 'bg-stats',
-      'Discrete Math': 'bg-discrete'
+      'Discrete Math': 'bg-discrete',
+      'Reading': 'bg-reading',
+      'Writing': 'bg-writing',
+      'Speaking': 'bg-speaking',
+      'Listening': 'bg-listening'
     };
-
-    const isMathPosts = jsonFile.includes('math_posts');
 
     postsToDisplay.forEach(post => {
       // Date formatting logic
@@ -112,7 +127,7 @@ async function loadPosts() {
 
       const tag = post.tag || '';
       const tagClass = tagToClass[tag] || 'bg-algebra';
-      const tagHtml = (isMathPosts && tag) ? `<div class="post-tags"><span class="post-tag ${tagClass}">${tag}</span></div>` : '';
+      const tagHtml = tag ? `<div class="post-tags"><span class="post-tag ${tagClass}">${tag}</span></div>` : '';
 
       if (layout === 'learning-log') {
         article.innerHTML = `

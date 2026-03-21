@@ -1,61 +1,44 @@
 """
-convert.py — Markdown → HTML Blog Post Converter
+convert_english.py — Markdown → HTML English Post Converter
 
-Scans blog/markdown_posts/ for subfolders containing blog.md,
-converts them to HTML post pages, and generates blog/posts.json.
+Scans english/markdown_posts_english/ for subfolders containing blog.md,
+converts them to HTML post pages, and generates english/english_posts.json.
 
-Usage: python scripts/convert.py
+Usage: python scripts/convert_english.py
 """
 
+import json
 import os
 import re
-import json
 from datetime import datetime
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-BLOG_ROOT = os.path.join(ROOT, 'blog')
-MARKDOWN_DIR = os.path.join(BLOG_ROOT, 'markdown_posts')
-POSTS_DIR = os.path.join(BLOG_ROOT, 'posts')
-POSTS_JSON = os.path.join(BLOG_ROOT, 'posts.json')
+ENGLISH_ROOT = os.path.join(ROOT, 'english')
+MARKDOWN_DIR = os.path.join(ENGLISH_ROOT, 'markdown_posts_english')
+POSTS_DIR = os.path.join(ENGLISH_ROOT, 'english_posts')
+POSTS_JSON = os.path.join(ENGLISH_ROOT, 'english_posts.json')
 
 os.makedirs(POSTS_DIR, exist_ok=True)
 
 
-# ──────────────────────────────────────────────
-# Markdown → HTML Converter
-# ──────────────────────────────────────────────
-
 def convert_markdown(md, folder_name):
     html = md
 
-    # ── Headings ──
     html = re.sub(r'^### (.+)$', r'<h3 class="blog-post-h3">\1</h3>', html, flags=re.MULTILINE)
     html = re.sub(r'^## (.+)$', r'<h2 class="blog-post-h2">\1</h2>', html, flags=re.MULTILINE)
     html = re.sub(r'^# (.+)$', r'<h1 class="blog-post-h1">\1</h1>', html, flags=re.MULTILINE)
 
-    # ── Horizontal rules ──
     html = re.sub(r'^---+$', r'<hr class="blog-post-hr">', html, flags=re.MULTILINE)
-
-    # ── Bold + Italic combined ──
     html = re.sub(r'\*\*\*(.*?)\*\*\*', r'<strong><em>\1</em></strong>', html)
-
-    # ── Bold ──
     html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', html)
-
-    # ── Italic (single *) ──
     html = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<em>\1</em>', html)
-
-    # ── Strikethrough ──
     html = re.sub(r'~~(.*?)~~', r'<del>\1</del>', html)
-
-    # ── Inline code ──
     html = re.sub(r'`([^`]+)`', r'<code class="blog-post-code">\1</code>', html)
 
-    # ── Images ![alt](path){optional style} — MUST come before links ──
     def img_repl(m):
         alt, img_path, style = m.group(1), m.group(2), m.group(3)
         normalized = img_path.replace('\\', '/')
-        final_path = f"../markdown_posts/{folder_name}/{normalized}"
+        final_path = f"../markdown_posts_english/{folder_name}/{normalized}"
         inline_style = f' style="{style}"' if style else ''
         return (
             f'<figure class="blog-post-figure">\n'
@@ -64,11 +47,8 @@ def convert_markdown(md, folder_name):
         )
 
     html = re.sub(r'!\[([^\]]*)\]\(([^)]+)\)(?:\{([^}]*)\})?', img_repl, html)
-
-    # ── Links [text](url) — after images ──
     html = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2" target="_blank" rel="noopener">\1</a>', html)
 
-    # ── Unordered lists ──
     lines = html.split('\n')
     processed = []
     in_list = False
@@ -93,14 +73,12 @@ def convert_markdown(md, folder_name):
 
     html = '\n'.join(processed)
 
-    # ── Image captions: lines starting with * or <em> after a figure (allows blank lines) ──
     html = re.sub(
         r'</figure>\s*(?:\*|<em>)\s*([^\n]+)',
         lambda m: f'<figcaption class="blog-post-caption">{m.group(1).replace("</em>", "").strip("* ").strip()}</figcaption>\n</figure>',
         html
     )
 
-    # ── Paragraphs: wrap plain text lines ──
     final_lines = html.split('\n')
     output = []
 
@@ -120,15 +98,7 @@ def convert_markdown(md, folder_name):
     return '\n'.join(output)
 
 
-# ──────────────────────────────────────────────
-# Extract Metadata from HTML Comment Frontmatter
-# ──────────────────────────────────────────────
-
 def _parse_simple_kv(block: str):
-    """
-    Parse a loose 'key: value' block (one pair per line).
-    Keeps values as raw strings; ignores empty lines.
-    """
     data = {}
     for raw_line in block.splitlines():
         line = raw_line.strip()
@@ -143,14 +113,6 @@ def _parse_simple_kv(block: str):
 
 
 def _extract_yaml_frontmatter(md: str):
-    """
-    Extract YAML-like frontmatter from the top of the file:
-    ---
-    key: value
-    ---
-    Returns (data_dict, start_idx, end_idx) where indices refer to md slice to remove,
-    or ({}, None, None) if not present.
-    """
     if not md.startswith('---'):
         return {}, None, None
     m = re.match(r'^---\s*\n([\s\S]*?)\n---\s*(?:\n|$)', md)
@@ -171,9 +133,8 @@ def _parse_date_flexible(date_str: str):
 
 
 def extract_metadata(md):
-    meta = {'date': '2026-01-01', 'description': '', 'title': 'Untitled', 'subtitle': ''}
+    meta = {'date': '2026-01-01', 'description': '', 'title': 'Untitled', 'subtitle': '', 'tag': ''}
 
-    # 1) YAML frontmatter at file start (preferred if present)
     yaml_data, _, _ = _extract_yaml_frontmatter(md)
     if yaml_data:
         if 'date' in yaml_data:
@@ -182,8 +143,9 @@ def extract_metadata(md):
             meta['description'] = yaml_data.get('description', '').strip()
         if 'subtitle' in yaml_data:
             meta['subtitle'] = yaml_data.get('subtitle', '').strip()
+        if 'tag' in yaml_data:
+            meta['tag'] = yaml_data.get('tag', '').strip()
 
-    # 2) HTML comment frontmatter anywhere in file
     comment_match = re.search(r'<!--([\s\S]*?)-->', md)
     if comment_match:
         block = comment_match.group(1)
@@ -194,6 +156,8 @@ def extract_metadata(md):
             meta['description'] = data.get('description', '').strip()
         if 'subtitle' in data:
             meta['subtitle'] = data.get('subtitle', '').strip()
+        if 'tag' in data:
+            meta['tag'] = data.get('tag', '').strip()
 
     title_match = re.search(r'^# (.+)$', md, re.MULTILINE)
     if title_match:
@@ -201,10 +165,6 @@ def extract_metadata(md):
 
     return meta
 
-
-# ──────────────────────────────────────────────
-# HTML Template for a Blog Post Page
-# ──────────────────────────────────────────────
 
 def build_post_html(meta, body_html):
     d = _parse_date_flexible(meta.get('date', ''))
@@ -217,7 +177,7 @@ def build_post_html(meta, body_html):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{meta['title']} — Hung's Blog</title>
+    <title>{meta['title']} — Hung's English Notes</title>
     <meta name="description" content="{meta['description']}">
     <meta name="date" content="{meta['date']}">
     <link rel="stylesheet" href="../../css/style.css">
@@ -226,7 +186,6 @@ def build_post_html(meta, body_html):
 </head>
 
 <body>
-    <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="../../index.html" class="nav-logo"><span class="logo-icon">H</span> Hung</a>
@@ -234,14 +193,14 @@ def build_post_html(meta, body_html):
                 <li><a href="../../index.html">Profile</a></li>
                 <li><a href="../../road.html">My Road</a></li>
                 <li class="nav-dropdown">
-                    <a href="#">Study ▾</a>
+                    <a href="#" class="active">Study ▾</a>
                     <div class="dropdown-menu">
                         <a href="../../math.html">Math</a>
-                        <a href="../../english.html">English</a>
+                        <a href="../../english.html" class="active">English</a>
                         <a href="../../coding.html">Coding</a>
                     </div>
                 </li>
-                <li><a href="../../blog.html" class="active">Blog</a></li>
+                <li><a href="../../blog.html">Blog</a></li>
             </ul>
             <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
                 <span></span><span></span><span></span>
@@ -262,7 +221,7 @@ def build_post_html(meta, body_html):
             </div>
 
             <div class="blog-post-footer">
-                <a href="../../blog.html" class="btn btn-secondary">← Back to Blog</a>
+                <a href="../../english.html" class="btn btn-secondary">← Back to English Notes</a>
             </div>
         </article>
     </main>
@@ -278,12 +237,12 @@ def build_post_html(meta, body_html):
 """
 
 
-# ──────────────────────────────────────────────
-# Main: Scan, Convert, Write
-# ──────────────────────────────────────────────
-
 def main():
     posts_index = []
+
+    if not os.path.isdir(MARKDOWN_DIR):
+        print(f"[SKIP] Directory '{MARKDOWN_DIR}' not found. Create it and add subfolders with blog.md")
+        return
 
     folders = sorted([
         f for f in os.listdir(MARKDOWN_DIR)
@@ -303,12 +262,8 @@ def main():
 
         meta = extract_metadata(raw)
 
-        # Remove metadata comment and first H1 from body
-        # Strip YAML frontmatter at top (if present)
-        _, fm_start, fm_end = _extract_yaml_frontmatter(raw)
+        _, _, fm_end = _extract_yaml_frontmatter(raw)
         body_src = raw[fm_end:] if fm_end is not None else raw
-
-        # Strip first HTML comment block (if used for metadata)
         body = re.sub(r'<!--[\s\S]*?-->', '', body_src, count=1).strip()
         body = re.sub(r'^# .+$', '', body, count=1, flags=re.MULTILINE).strip()
 
@@ -318,22 +273,22 @@ def main():
         out_file = os.path.join(POSTS_DIR, f'{folder}.html')
         with open(out_file, 'w', encoding='utf-8') as f:
             f.write(post_html)
-        print(f"[OK] Generated: blog/posts/{folder}.html")
+        print(f"[OK] Generated: english/english_posts/{folder}.html")
 
         posts_index.append({
             'title': meta['title'],
             'date': meta['date'],
             'description': meta['description'],
             'subtitle': meta.get('subtitle', ''),
-            'url': f'blog/posts/{folder}.html',
+            'tag': meta.get('tag', ''),
+            'url': f'english/english_posts/{folder}.html',
         })
 
-    # Sort newest first
     posts_index.sort(key=lambda p: p['date'], reverse=True)
 
     with open(POSTS_JSON, 'w', encoding='utf-8') as f:
         json.dump(posts_index, f, indent=2, ensure_ascii=False)
-    print(f"[OK] Generated: blog/posts.json with {len(posts_index)} post(s).")
+    print(f"[OK] Generated: english/english_posts.json with {len(posts_index)} post(s).")
 
 
 if __name__ == '__main__':

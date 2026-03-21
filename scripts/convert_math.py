@@ -1,9 +1,9 @@
 """
 convert_math.py — Markdown → HTML Math Blog Post Converter
 
-Scans markdown_posts_math/ for subfolders containing blog.md,
+Scans math/markdown_posts_math/ for subfolders containing blog.md,
 converts them to HTML with math equation support (KaTeX).
-Outputs to math-posts/ and generates math_posts.json.
+Outputs to math/math-posts/ and generates math/math_posts.json.
 
 Usage: python scripts/convert_math.py
 
@@ -18,9 +18,10 @@ import json
 from datetime import datetime
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-MARKDOWN_DIR = os.path.join(ROOT, 'markdown_posts_math')
-POSTS_DIR = os.path.join(ROOT, 'math-posts')
-POSTS_JSON = os.path.join(ROOT, 'math_posts.json')
+MATH_ROOT = os.path.join(ROOT, 'math')
+MARKDOWN_DIR = os.path.join(MATH_ROOT, 'markdown_posts_math')
+POSTS_DIR = os.path.join(MATH_ROOT, 'math-posts')
+POSTS_JSON = os.path.join(MATH_ROOT, 'math_posts.json')
 
 os.makedirs(POSTS_DIR, exist_ok=True)
 
@@ -283,7 +284,7 @@ def build_post_html(meta, body_html):
     <title>{meta['title']} — Hung's Math Blog</title>
     <meta name="description" content="{meta['description']}">
     <meta name="date" content="{meta['date']}">
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../../css/style.css">
 {KATEX_HEAD}
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
@@ -292,19 +293,19 @@ def build_post_html(meta, body_html):
 <body>
     <nav class="navbar" id="navbar">
         <div class="nav-container">
-            <a href="../index.html" class="nav-logo"><span class="logo-icon">H</span> Hung</a>
+            <a href="../../index.html" class="nav-logo"><span class="logo-icon">H</span> Hung</a>
             <ul class="nav-links" id="navLinks">
-                <li><a href="../index.html">Profile</a></li>
-                <li><a href="../road.html">My Road</a></li>
+                <li><a href="../../index.html">Profile</a></li>
+                <li><a href="../../road.html">My Road</a></li>
                 <li class="nav-dropdown">
                     <a href="#">Study ▾</a>
                     <div class="dropdown-menu">
-                        <a href="../math.html" class="active">Math</a>
-                        <a href="../english.html">English</a>
-                        <a href="../coding.html">Coding</a>
+                        <a href="../../math.html" class="active">Math</a>
+                        <a href="../../english.html">English</a>
+                        <a href="../../coding.html">Coding</a>
                     </div>
                 </li>
-                <li><a href="../blog.html">Blog</a></li>
+                <li><a href="../../blog.html">Blog</a></li>
             </ul>
             <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
                 <span></span><span></span><span></span>
@@ -325,7 +326,7 @@ def build_post_html(meta, body_html):
             </div>
 
             <div class="blog-post-footer">
-                <a href="../math.html" class="btn btn-secondary">← Back to Math Notes</a>
+                <a href="../../math.html" class="btn btn-secondary">← Back to Math Notes</a>
             </div>
         </article>
     </main>
@@ -334,7 +335,7 @@ def build_post_html(meta, body_html):
         <p>© 2026 Nguyen Gia Hung — Built with 💙 for self-study. Hosted on <a href="https://pages.github.com"
                 target="_blank">GitHub Pages</a>.</p>
     </footer>
-    <script src="../js/main.js"></script>
+    <script src="../../js/main.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {{
             document.querySelectorAll(".math-inline").forEach(function(el) {{
@@ -397,7 +398,7 @@ def main():
         out_file = os.path.join(POSTS_DIR, f'{folder}.html')
         with open(out_file, 'w', encoding='utf-8') as f:
             f.write(post_html)
-        print(f"[OK] Generated: math-posts/{folder}.html")
+        print(f"[OK] Generated: math/math-posts/{folder}.html")
 
         posts_index.append({
             'title': meta['title'],
@@ -405,14 +406,14 @@ def main():
             'description': meta['description'],
             'subtitle': meta.get('subtitle', ''),
             'tag': meta.get('tag', ''),
-            'url': f'math-posts/{folder}.html',
+            'url': f'math/math-posts/{folder}.html',
         })
 
     posts_index.sort(key=lambda p: p['date'], reverse=True)
 
     with open(POSTS_JSON, 'w', encoding='utf-8') as f:
         json.dump(posts_index, f, indent=2, ensure_ascii=False)
-    print(f"[OK] Generated: math_posts.json with {len(posts_index)} post(s).")
+    print(f"[OK] Generated: math/math_posts.json with {len(posts_index)} post(s).")
 
 
 if __name__ == '__main__':
