@@ -69,7 +69,7 @@ async function loadPosts() {
     const isPostPage = window.location.pathname.includes('/posts/') || window.location.pathname.includes('/math-posts/');
     const jsonPath = isPostPage ? `../${jsonFile}` : jsonFile;
 
-    const response = await fetch(jsonPath);
+    const response = await fetch(jsonPath, { cache: 'no-store' });
     if (!response.ok) return;
     const posts = await response.json();
 
