@@ -36,10 +36,17 @@ def convert_markdown(md, folder_name):
     html = re.sub(r'`([^`]+)`', r'<code class="blog-post-code">\1</code>', html)
 
     def img_repl(m):
-        alt, img_path, style = m.group(1), m.group(2), m.group(3)
+        alt, img_path, attrs = m.group(1), m.group(2), m.group(3)
         normalized = img_path.replace('\\', '/')
         final_path = f"../markdown_posts_english/{folder_name}/{normalized}"
-        inline_style = f' style="{style}"' if style else ''
+        inline_style = ''
+        if attrs:
+            # Parse Pandoc-style attributes like width=50% into CSS: width: 50%
+            css_parts = []
+            for pair in re.findall(r'([\w-]+)\s*=\s*(\S+)', attrs):
+                css_parts.append(f'{pair[0]}: {pair[1]}')
+            if css_parts:
+                inline_style = f' style="{"; ".join(css_parts)}"'
         return (
             f'<figure class="blog-post-figure">\n'
             f'  <img src="{final_path}" alt="{alt}" class="blog-post-img"{inline_style}>\n'
