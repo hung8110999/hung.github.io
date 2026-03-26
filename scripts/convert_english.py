@@ -40,15 +40,27 @@ def convert_markdown(md, folder_name):
         normalized = img_path.replace('\\', '/')
         final_path = f"../markdown_posts_english/{folder_name}/{normalized}"
         inline_style = ''
+        fig_class = 'blog-post-figure'
+        position_map = {
+            'left': 'fig-left',
+            'right': 'fig-right',
+            'inline': 'fig-inline',
+            'behind': 'fig-behind',
+            'front': 'fig-front',
+        }
         if attrs:
             # Parse Pandoc-style attributes like width=50% into CSS: width: 50%
             css_parts = []
             for pair in re.findall(r'([\w-]+)\s*=\s*(\S+)', attrs):
-                css_parts.append(f'{pair[0]}: {pair[1]}')
+                key, val = pair
+                if key == 'position' and val in position_map:
+                    fig_class += f' {position_map[val]}'
+                else:
+                    css_parts.append(f'{key}: {val}')
             if css_parts:
                 inline_style = f' style="{"; ".join(css_parts)}"'
         return (
-            f'<figure class="blog-post-figure">\n'
+            f'<figure class="{fig_class}">\n'
             f'  <img src="{final_path}" alt="{alt}" class="blog-post-img"{inline_style}>\n'
             f'</figure>'
         )

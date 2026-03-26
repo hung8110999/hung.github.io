@@ -1751,7 +1751,7 @@ pre code {
 }
 
 .blog-post-figure {
-  margin: var(--space-xl) auto;
+  margin: var(--space-sm) auto;
   text-align: center;
 }
 
@@ -1765,6 +1765,56 @@ pre code {
 
 .blog-post-img:hover {
   transform: scale(1.01);
+}
+
+/* --- Image Position Variants --- */
+
+/* Float left — text wraps on the right */
+.blog-post-figure.fig-left {
+  float: left;
+  margin: var(--space-xs) var(--space-md) var(--space-xs) 0;
+  text-align: left;
+  max-width: 50%;
+}
+
+/* Float right — text wraps on the left */
+.blog-post-figure.fig-right {
+  float: right;
+  margin: var(--space-xs) 0 var(--space-xs) var(--space-md);
+  text-align: right;
+  max-width: 50%;
+}
+
+/* Inline — sits in the text flow, not centered */
+.blog-post-figure.fig-inline {
+  display: inline-block;
+  vertical-align: middle;
+  margin: var(--space-xs) var(--space-sm);
+  text-align: left;
+}
+
+/* Behind text — watermark / background style */
+.blog-post-figure.fig-behind {
+  position: absolute;
+  z-index: -1;
+  opacity: 0.12;
+  pointer-events: none;
+  margin: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* In front of text — overlay style */
+.blog-post-figure.fig-front {
+  position: relative;
+  z-index: 10;
+}
+
+/* Clearfix for floated images */
+.blog-post-body::after {
+  content: "";
+  display: table;
+  clear: both;
 }
 
 .blog-post-caption {
