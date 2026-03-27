@@ -8,7 +8,7 @@ tag: Reading
 Since this is my first academic paper, I thought it would be easier to start with an article I've already researched and found quite impressive. Besides, I think that because I'll be encountering many international concepts, I'll use English in my academic writing.
 ![paper](image/proteus.png){width=50%}
 *Paper we read today*
-## 1. Basic Concepts
+## 1. Protein
 ### 1.1 What made protein ?
 **Amino Acids**
 
@@ -40,8 +40,24 @@ The protein folding is the process by which a protein folds into its 3D structur
 ![protein_folding](image/folding.png){width=60%}
 *Protein folding. Cre: [Linkedin](https://www.linkedin.com/pulse/why-protein-folding-big-deal-balasundararaman-sundar-/)*
 
-### 1.2 Some former model and its story
+### 1.2 CASP 
+CASP(Critical Assessment of protein Structure Prediction) is an Sciencetific Internationnal Competition held every 2 years to evaluate methods for predicting the 3D structure of proteins from amino acid sequences.
+
+Teams have to predict the structure of unpublished proteins, then compare it with real experimental results (X-ray, cryo-EM, etc.). 
+![AlphaFold2](image/af2.png){width=50% position=right}
+*Median Free-Modelling accuracy over years*
+This competition is nothing special until 2018 (CASP 13) with the appearance of AplhaFold, the accuracy increase dramatically since this. 2 years later, AlphaFold2 was released in CASP 14 with the highest accuracy in the history, nearly two times higher than the former champion (AlphaFold) with the value of nearly 90%, which is considered as the experimental accuracy. This result is widely remarked that the protein folding problem was largely solved and the later CASP competitions focused on dealing with solving the complex systems instead of a single protein.
+
+![af3](image/af3.png)
+*The dominant metrics of AlphaFold3*
+
+In recent years, CASP 15 with RoseTTAFold and AlphaFold2 updated or CASP 16 with the dominant of AlphaFold3 have increased a lot. But it seems to reach a limit in such a “post-AlphaFold era”. Now scientists are turning to another problem such that "Complex system" above is related to the aspects that AlphaFold not good at.
+
+
+### 1.3 Some former model and its story
 **AlphaFold series and AlphaFold2**
+
+AlphaFold first appear
 
 **RoseTTAFold**
 ## 2. Computer side
