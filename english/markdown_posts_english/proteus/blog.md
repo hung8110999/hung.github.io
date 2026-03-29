@@ -22,7 +22,7 @@ So what is the amino acids, for those who studied in Vietnam, you may know this 
 Amino acids are the molecules that contain both an amino group (-NH2) and a carboxyl group (-COOH). In the center of the molecule, there is a carbon atom called the alpha-carbon, which is bonded to the amino group, the carboxyl group, a hydrogen atom, and a side chain (R-group), that are making the different between amino acids.
 
 We have 22 different amino acids, and they are making the different between proteins. Once again, if you are (or were) a Vietnamese student, you may remember the nam GLY, ALA, or VAL, that is the abbreviation of amino acids. 
-![types](image/aminoacid_types.png){width=80%}
+![types](image/aminoacid_types.png){width=60%}
 *22 types of amino acids. Cre:[JPT](https://www.jpt.com/support-contact/resources/amino-acids/?srsltid=AfmBOop7xZYwPVHzS3WKGWbyR-3O0MFi922hlCleeX-WMBDGccPSVVNQ) *
 
 **Protein**
@@ -37,18 +37,19 @@ The protein folding is the process by which a protein folds into its 3D structur
 2. Secondary structure: The local folding of the protein, such as alpha-helices and beta-sheets.
 3. Tertiary structure: The overall 3D structure of the protein.
 4. Quaternary structure: The structure of the protein when it is composed of multiple polypeptide chains.
-![protein_folding](image/folding.png){width=60%}
+![protein_folding](image/folding.png){width=50%}
 *Protein folding. Cre: [Linkedin](https://www.linkedin.com/pulse/why-protein-folding-big-deal-balasundararaman-sundar-/)*
 
 ### 1.2 CASP 
 CASP(Critical Assessment of protein Structure Prediction) is an Sciencetific Internationnal Competition held every 2 years to evaluate methods for predicting the 3D structure of proteins from amino acid sequences.
 
 Teams have to predict the structure of unpublished proteins, then compare it with real experimental results (X-ray, cryo-EM, etc.). 
+
 ![AlphaFold2](image/af2.png){width=63% position=right}
 *Median Free-Modelling accuracy over years*
 This competition is nothing special until 2018 (CASP 13) with the appearance of AplhaFold, the accuracy increase dramatically since this. 2 years later, AlphaFold2 was released in CASP 14 with the highest accuracy in the history, nearly two times higher than the former champion (AlphaFold) with the value of nearly 90%, which is considered as the experimental accuracy. This result is widely remarked that the protein folding problem was largely solved and the later CASP competitions focused on dealing with solving the complex systems instead of a single protein.
 
-![af3](image/af3.png)
+![af3](image/af3.png){width=60%}
 *The dominant metrics of AlphaFold3*
 
 In recent years, CASP 15 with RoseTTAFold and AlphaFold2 updated or CASP 16 with the dominant of AlphaFold3 have increased a lot. But it seems to reach a limit in such a “post-AlphaFold era”. Now scientists are turning to another problem such that "Complex system" above is related to the aspects that AlphaFold not good at.
