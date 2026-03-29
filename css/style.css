@@ -1756,6 +1756,8 @@ pre code {
   font-size: var(--fs-lg);
   line-height: 1.9;
   color: var(--text-primary);
+  /* How far left/right floats may hang past the text column into article padding */
+  --blog-float-bleed: clamp(0.75rem, 2.5vw, 2rem);
 }
 
 .blog-post-h1 {
@@ -1815,20 +1817,24 @@ pre code {
 
 /* --- Image Position Variants --- */
 
-/* Float left — text wraps on the right */
+/* Float left — text wraps on the right; slight outward bleed saves column width for text */
 .blog-post-figure.fig-left {
   float: left;
+  clear: left;
   margin: var(--space-xs) var(--space-md) var(--space-xs) 0;
+  margin-left: calc(-1 * var(--blog-float-bleed));
   text-align: left;
-  max-width: 50%;
+  max-width: calc(50% + var(--blog-float-bleed));
 }
 
 /* Float right — text wraps on the left */
 .blog-post-figure.fig-right {
   float: right;
+  clear: right;
   margin: var(--space-xs) 0 var(--space-xs) var(--space-md);
+  margin-right: calc(-1 * var(--blog-float-bleed));
   text-align: right;
-  max-width: 50%;
+  max-width: calc(50% + var(--blog-float-bleed));
 }
 
 /* Inline — sits in the text flow, not centered */
@@ -1956,6 +1962,7 @@ pre code {
 
   .blog-post-body {
     font-size: var(--fs-base);
+    --blog-float-bleed: 0px;
   }
 
   .blog-post-h1 {
