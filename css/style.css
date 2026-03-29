@@ -526,7 +526,27 @@ h6 {
   border: 1px solid transparent;
   transition: all var(--transition-fast);
   user-select: none;
-  gap: var(--space-sm);
+  gap: 0;
+}
+
+.topic-tag::before,
+.topic-tag::after {
+  content: none;
+}
+
+@media (min-width: 769px) {
+  .topic-tags {
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+  }
+
+  .topic-tag {
+    width: 96px;
+    height: 96px;
+    font-size: var(--fs-xs);
+    padding: var(--space-sm);
+    line-height: 1.35;
+  }
 }
 
 /* 1. Algebra */
