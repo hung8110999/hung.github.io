@@ -27,7 +27,7 @@ We have 22 different amino acids, and they are making the different between prot
 
 **Protein**
 From the basic concept of amino acids above, we continue to Protein, which basically is the chain of amino acids. 
-![protein](image/protein.png){width=70% position=right}
+![protein](image/protein.png){width=80% position=right}
 *Protein is the chain of amino acids. Cre: [Technologynetwork](https://www.technologynetworks.com/applied-sciences/articles/essential-amino-acids-chart-abbreviations-and-structure-324357)*
 Yeah, it is that simple. But the problem is that the protein is not just a straight chain of amino acids. It is a 3D structure that is folded in a specific way. So the next question is, how does the protein fold into a 3D structure?
 
