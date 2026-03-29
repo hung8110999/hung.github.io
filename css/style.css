@@ -227,10 +227,12 @@ h6 {
   flex-direction: column;
 }
 
-.nav-dropdown:hover .dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
+@media (min-width: 769px) {
+  .nav-dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
 }
 
 .dropdown-menu a {
@@ -527,17 +529,6 @@ h6 {
   gap: var(--space-sm);
 }
 
-.topic-tag::after {
-  content: '▾';
-  font-size: 1.2em;
-  transition: transform var(--transition-fast);
-  margin-top: auto;
-}
-
-.topic-tag-wrapper:hover .topic-tag::after {
-  transform: rotate(180deg);
-}
-
 /* 1. Algebra */
 .bg-algebra {
   background: #fee2e2;
@@ -715,7 +706,13 @@ h6 {
   line-height: 1.6;
 }
 
-.topic-tag-wrapper:hover .tag-explanation {
+@media (hover: hover) and (pointer: fine) {
+  .topic-tag-wrapper:hover .tag-explanation {
+    display: block;
+  }
+}
+
+.topic-tag-wrapper.is-expanded .tag-explanation {
   display: block;
 }
 
@@ -1515,6 +1512,25 @@ pre code {
   .nav-toggle {
     display: flex;
     z-index: 1001;
+  }
+
+  .nav-dropdown .dropdown-menu {
+    position: static;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    display: none;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+    padding-left: var(--space-lg);
+    padding-top: var(--space-xs);
+    margin-top: 0;
+    min-width: 0;
+  }
+
+  .nav-dropdown.dropdown-open .dropdown-menu {
+    display: flex;
   }
 
   .home-name-section h1 {

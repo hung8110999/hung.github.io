@@ -10,6 +10,9 @@ Usage: python scripts/convert_math.py
 Math syntax in markdown:
   - Inline:  $E = mc^2$  or  \(E = mc^2\)
   - Block:   $$...$$    or  \[...\]
+
+YAML front matter: use `tag: Topic` or multiple labels via
+  `tags: Algebra, Calculus` or `tags: [Algebra, Calculus]`.
 """
 
 import os
@@ -226,9 +229,51 @@ def _parse_date_flexible(date_str: str):
     return None
 
 
-def extract_metadata(md):
-    meta = {'date': '2026-01-01', 'description': '', 'title': 'Untitled', 'subtitle': '', 'tag': ''}
+def _parse_tags_value(val):
+    """Parse a `tags` front-matter value: comma-separated and/or [a, b] brackets."""
+    if val is None:
+        return []
+    s = str(val).strip()
+    if not s:
+        return []
+    if s.startswith('[') and s.endswith(']'):
+        s = s[1:-1]
+    return [p.strip() for p in re.split(r'\s*,\s*', s) if p.strip()]
 
+
+def _tags_from_kv(data: dict):
+    if not data:
+        return []
+    out = []
+    if data.get('tags') is not None:
+        out.extend(_parse_tags_value(data.get('tags')))
+    if data.get('tag'):
+        out.append(str(data['tag']).strip())
+    return out
+
+
+def _dedupe_tags(seq):
+    seen = set()
+    out = []
+    for t in seq:
+        t = (t or '').strip()
+        if t and t not in seen:
+            seen.add(t)
+            out.append(t)
+    return out
+
+
+def extract_metadata(md):
+    meta = {
+        'date': '2026-01-01',
+        'description': '',
+        'title': 'Untitled',
+        'subtitle': '',
+        'tag': '',
+        'tags': [],
+    }
+
+    collected = []
     yaml_data, _, _ = _extract_yaml_frontmatter(md)
     if yaml_data:
         if 'date' in yaml_data:
@@ -237,8 +282,7 @@ def extract_metadata(md):
             meta['description'] = yaml_data.get('description', '').strip()
         if 'subtitle' in yaml_data:
             meta['subtitle'] = yaml_data.get('subtitle', '').strip()
-        if 'tag' in yaml_data:
-            meta['tag'] = yaml_data.get('tag', '').strip()
+        collected.extend(_tags_from_kv(yaml_data))
 
     comment_match = re.search(r'<!--([\s\S]*?)-->', md)
     if comment_match:
@@ -250,8 +294,11 @@ def extract_metadata(md):
             meta['description'] = data.get('description', '').strip()
         if 'subtitle' in data:
             meta['subtitle'] = data.get('subtitle', '').strip()
-        if 'tag' in data:
-            meta['tag'] = data.get('tag', '').strip()
+        collected.extend(_tags_from_kv(data))
+
+    tags = _dedupe_tags(collected)
+    meta['tags'] = tags
+    meta['tag'] = tags[0] if tags else ''
 
     title_match = re.search(r'^# (.+)$', md, re.MULTILINE)
     if title_match:
@@ -406,6 +453,7 @@ def main():
             'description': meta['description'],
             'subtitle': meta.get('subtitle', ''),
             'tag': meta.get('tag', ''),
+            'tags': meta.get('tags', []),
             'url': f'math/math-posts/{folder}.html',
         })
 

@@ -5,14 +5,20 @@
     "description": "Example math post with equations",
     "subtitle": "Integration and quadratic formula",
     "tag": "Calculus",
+    "tags": [
+      "Calculus"
+    ],
     "url": "math/math-posts/example.html"
   },
   {
     "title": "Test 2",
     "date": "2024-01-1",
-    "description": "jaskdjfaklaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaasdjflasjdfla",
-    "subtitle": "",
+    "description": "test test test",
+    "subtitle": "hahaha",
     "tag": "Statistics",
+    "tags": [
+      "Statistics"
+    ],
     "url": "math/math-posts/test2.html"
   }
 ]

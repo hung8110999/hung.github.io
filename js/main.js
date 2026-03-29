@@ -3,33 +3,87 @@
 // Minimalist Light Blue Theme
 // ===================================
 
-document.addEventListener('DOMContentLoaded', () => {
-  initNavbar();
-  initTopicToggles();
-});
-
 // ---------- Navbar ----------
 function initNavbar() {
   const toggle = document.querySelector('.nav-toggle');
   const navLinks = document.querySelector('.nav-links');
+
+  const closeMobileDropdowns = () => {
+    document.querySelectorAll('.nav-dropdown.dropdown-open').forEach((dd) =>
+      dd.classList.remove('dropdown-open')
+    );
+  };
+
+  const isMobileNav = () => window.matchMedia('(max-width: 768px)').matches;
 
   // Mobile toggle
   if (toggle && navLinks) {
     toggle.addEventListener('click', () => {
       toggle.classList.toggle('open');
       navLinks.classList.toggle('open');
+      if (!navLinks.classList.contains('open')) closeMobileDropdowns();
     });
 
-    // Close menu on link click (excluding dropdown toggles)
-    navLinks.querySelectorAll('a').forEach(link => {
-      if (!link.parentElement.classList.contains('nav-dropdown')) {
-        link.addEventListener('click', () => {
-          toggle.classList.remove('open');
-          navLinks.classList.remove('open');
+    // Close menu on link click (excluding dropdown trigger; submenu links close below)
+    navLinks.querySelectorAll('a').forEach((link) => {
+      const parent = link.parentElement;
+      if (parent && parent.classList.contains('nav-dropdown') && link.nextElementSibling?.classList?.contains('dropdown-menu')) {
+        link.addEventListener('click', (e) => {
+          if (!isMobileNav()) return;
+          e.preventDefault();
+          const dd = parent;
+          const willOpen = !dd.classList.contains('dropdown-open');
+          closeMobileDropdowns();
+          if (willOpen) dd.classList.add('dropdown-open');
         });
+        return;
       }
+      link.addEventListener('click', () => {
+        toggle.classList.remove('open');
+        navLinks.classList.remove('open');
+        closeMobileDropdowns();
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!isMobileNav()) return;
+      if (e.target.closest('.nav-dropdown')) return;
+      closeMobileDropdowns();
     });
   }
+}
+
+function initTopicTagTooltips() {
+  const mq = window.matchMedia('(hover: none), (pointer: coarse)');
+
+  const bind = () => {
+    if (!mq.matches) return;
+    document.querySelectorAll('.topic-tag-wrapper .topic-tag').forEach((tag) => {
+      if (tag.dataset.touchTipBound === '1') return;
+      tag.dataset.touchTipBound = '1';
+      tag.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const wrap = tag.closest('.topic-tag-wrapper');
+        const open = wrap.classList.contains('is-expanded');
+        document.querySelectorAll('.topic-tag-wrapper.is-expanded').forEach((w) =>
+          w.classList.remove('is-expanded')
+        );
+        if (!open) wrap.classList.add('is-expanded');
+      });
+    });
+  };
+
+  bind();
+  mq.addEventListener('change', bind);
+
+  document.addEventListener('click', (e) => {
+    if (!mq.matches) return;
+    if (e.target.closest('.topic-tag-wrapper')) return;
+    document.querySelectorAll('.topic-tag-wrapper.is-expanded').forEach((w) =>
+      w.classList.remove('is-expanded')
+    );
+  });
 }
 
 // ---------- Topic Toggles (Study Pages) ----------
@@ -108,7 +162,35 @@ async function loadPosts() {
       'Reading': 'bg-reading',
       'Writing': 'bg-writing',
       'Speaking': 'bg-speaking',
-      'Listening': 'bg-listening'
+      'Listening': 'bg-listening',
+      'Grammar': 'bg-grammar',
+      'Vocabulary': 'bg-vocab',
+      'Algorithms': 'bg-algo',
+      'Web': 'bg-web',
+      'Web Dev': 'bg-web',
+      'AI': 'bg-ai',
+      'AI & ML': 'bg-ai',
+      'Systems': 'bg-sys'
+    };
+
+    const postTagsList = (post) => {
+      if (Array.isArray(post.tags) && post.tags.length) {
+        return post.tags.map((t) => String(t).trim()).filter(Boolean);
+      }
+      if (post.tag) return [String(post.tag).trim()].filter(Boolean);
+      return [];
+    };
+
+    const buildTagHtml = (post) => {
+      const tags = postTagsList(post);
+      if (!tags.length) return '';
+      const inner = tags
+        .map((t) => {
+          const cls = tagToClass[t] || 'bg-algebra';
+          return `<span class="post-tag ${cls}">${t}</span>`;
+        })
+        .join('');
+      return `<div class="post-tags">${inner}</div>`;
     };
 
     postsToDisplay.forEach(post => {
@@ -125,9 +207,7 @@ async function loadPosts() {
         article.href = post.url;
       }
 
-      const tag = post.tag || '';
-      const tagClass = tagToClass[tag] || 'bg-algebra';
-      const tagHtml = tag ? `<div class="post-tags"><span class="post-tag ${tagClass}">${tag}</span></div>` : '';
+      const tagHtml = buildTagHtml(post);
 
       if (layout === 'learning-log') {
         article.innerHTML = `
@@ -166,6 +246,7 @@ async function loadPosts() {
 document.addEventListener('DOMContentLoaded', () => {
   initNavbar();
   initTopicToggles();
+  initTopicTagTooltips();
   alignTimelineDots();
   loadPosts();
 });
