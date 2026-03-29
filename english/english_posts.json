@@ -5,6 +5,9 @@
     "description": "Read and analyze paper on protein structure generation. Building upon the advancements of AlphaFold2, the 2024 Nobel Prize in Chemistry.",
     "subtitle": "Paper about protein structure generation. Building upon the advancements of AlphaFold2, the 2024 Nobel Prize in Chemistry. Accepted in PMLR 2024.",
     "tag": "Reading",
+    "tags": [
+      "Reading"
+    ],
     "url": "english/english_posts/proteus.html"
   }
 ]
