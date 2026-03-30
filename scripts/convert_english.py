@@ -12,6 +12,7 @@ YAML: `tag: Topic` or `tags: Reading, Writing` (comma-separated or [bracket, lis
 import json
 import os
 import re
+import html as html_lib
 from datetime import datetime
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -25,6 +26,29 @@ os.makedirs(POSTS_DIR, exist_ok=True)
 
 def convert_markdown(md, folder_name):
     html = md
+    block_store = {}
+    block_index = 0
+
+    def stash_block(content):
+        nonlocal block_index
+        token = f"@@BLOCK_{block_index}@@"
+        block_store[token] = content
+        block_index += 1
+        return token
+
+    def fenced_block_repl(m):
+        lang = (m.group(1) or '').strip().lower()
+        code = (m.group(2) or '').rstrip()
+        if lang == 'mermaid':
+            return stash_block(f'<div class="mermaid">\n{code}\n</div>')
+        escaped = html_lib.escape(code)
+        class_attr = f' language-{lang}' if lang else ''
+        return stash_block(
+            f'<pre class="blog-post-pre"><code class="blog-post-code{class_attr}">{escaped}</code></pre>'
+        )
+
+    # Fenced code blocks (including mermaid) must be handled before inline backticks.
+    html = re.sub(r'```([a-zA-Z0-9_-]*)\n([\s\S]*?)\n```', fenced_block_repl, html)
 
     # Math blocks: $$ ... $$ (keep LaTeX untouched for MathJax)
     html = re.sub(
@@ -132,13 +156,16 @@ def convert_markdown(md, folder_name):
             t.startswith('<') or
             t.startswith('<!--') or
             t == '</ul>' or
-            t == '</figure>'
+            t == '</figure>' or
+            re.match(r'^@@BLOCK_\d+@@$', t)
         ):
             output.append(line)
         else:
             output.append(f'<p class="blog-post-p">{t}</p>')
-
-    return '\n'.join(output)
+    rendered = '\n'.join(output)
+    for token, content in block_store.items():
+        rendered = rendered.replace(token, content)
+    return rendered
 
 
 def _parse_simple_kv(block: str):
@@ -279,6 +306,14 @@ def build_post_html(meta, body_html):
         }};
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {{
+            if (window.mermaid) {{
+                mermaid.initialize({{ startOnLoad: true, securityLevel: 'loose' }});
+            }}
+        }});
+    </script>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
 </head>

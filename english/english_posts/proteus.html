@@ -20,6 +20,14 @@
         };
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            if (window.mermaid) {
+                mermaid.initialize({ startOnLoad: true, securityLevel: 'loose' });
+            }
+        });
+    </script>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
 </head>
@@ -150,15 +158,15 @@
 <div class="blog-post-math-block">\[x_{\text{global}} = R_i x + t_i\]</div>
 <p class="blog-post-p">This is a very nice representation because a rigid transformation preserves distances and angles. In other words, it changes the pose of the residue, but not its internal geometry.</p>
 
-<p class="blog-post-p">``<code class="blog-post-code">mermaid</p>
-<p class="blog-post-p">flowchart LR</p>
-<p class="blog-post-p">A["Residue i"] --> B["Backbone atoms: N, Cα, C"]</p>
-<p class="blog-post-p">B --> C["Build local frame"]</p>
-<p class="blog-post-p">C --> D["Rotation R_i"]</p>
-<p class="blog-post-p">C --> E["Translation t_i"]</p>
-<p class="blog-post-p">D --> F["Rigid transform T_i = (R_i, t_i)"]</p>
-<p class="blog-post-p">E --> F</p>
-</code>`<code class="blog-post-code">
+<div class="mermaid">
+flowchart LR
+    A["Residue i"] --> B["Backbone atoms: N, Cα, C"]
+    B --> C["Build local frame"]
+    C --> D["Rotation R_i"]
+    C --> E["Translation t_i"]
+    D --> F["Rigid transform T_i = (R_i, t_i)"]
+    E --> F
+</div>
 
 <p class="blog-post-p">If I explain it in a more intuitive way, each amino acid is given its own little coordinate system. This helps the model reason about local geometry much better than using only raw coordinates. It is also easier to update one residue independently during generation.</p>
 
@@ -189,7 +197,7 @@
 <div class="blog-post-math-block">\[\nabla \log p_{t|0}(x_t|x_0)=\frac{e^{-t/2}x_0-x_t}{1-e^{-t}}\]</div>
 <p class="blog-post-p">For rotation, the paper defines diffusion directly on <span class="blog-post-math">\(SO(3)\)</span>. The reverse process then denoises both orientation and translation.</p>
 
-<p class="blog-post-p">So the training target of Proteus is essentially: given a noisy backbone frame at some timestep </code>t<code class="blog-post-code">, predict how to move it back toward the clean protein structure.</p>
+<p class="blog-post-p">So the training target of Proteus is essentially: given a noisy backbone frame at some timestep <code class="blog-post-code">t</code>, predict how to move it back toward the clean protein structure.</p>
 
 <h3 class="blog-post-h3">2.3 Deep learning network architectures for protein structure modeling</h3>
 <p class="blog-post-p">The architecture in this paper is inspired by AlphaFold2 and RosettaFold, then redesigned for diffusion-based backbone generation.</p>
@@ -205,7 +213,7 @@
 <p class="blog-post-p">Proteus then improves efficiency and designability with local graph neighborhoods and structure bias in the graph triangle block.</p>
 
 <h3 class="blog-post-h3">2.4 Model architecture</h3>
-<p class="blog-post-p">The architecture of Proteus is inspired by AlphaFold2 and RoseTTAFold, but the paper tries to be more efficient and more design-oriented. The whole network is composed of </code>L<code class="blog-post-code"> folding blocks, and these blocks do <strong>not</strong> share weights.</p>
+<p class="blog-post-p">The architecture of Proteus is inspired by AlphaFold2 and RoseTTAFold, but the paper tries to be more efficient and more design-oriented. The whole network is composed of <code class="blog-post-code">L</code> folding blocks, and these blocks do <strong>not</strong> share weights.</p>
 
 <p class="blog-post-p">Each folding block has three main components:</p>
 
@@ -231,16 +239,16 @@
 
 <p class="blog-post-p">The note I wrote for this part is quite important: the network predicts rotational and translational updates, often parameterized through quaternion-related values and translation vectors, and then converts them into a valid rigid transform.</p>
 
-<p class="blog-post-p">If a quaternion is written in plain form as </code>q = a + bi + cj + dk<code class="blog-post-code">, then it must be normalized to represent a valid rotation. In other words, the squared values of </code>a<code class="blog-post-code">, </code>b<code class="blog-post-code">, </code>c<code class="blog-post-code">, and </code>d<code class="blog-post-code"> must add up to 1. After normalization, it can be converted into a rotation matrix and used to update the current residue frame.</p>
+<p class="blog-post-p">If a quaternion is written in plain form as <code class="blog-post-code">q = a + bi + cj + dk</code>, then it must be normalized to represent a valid rotation. In other words, the squared values of <code class="blog-post-code">a</code>, <code class="blog-post-code">b</code>, <code class="blog-post-code">c</code>, and <code class="blog-post-code">d</code> must add up to 1. After normalization, it can be converted into a rotation matrix and used to update the current residue frame.</p>
 
 <p class="blog-post-p">So this layer is where the model really says: "based on what I currently understand about this residue, I should rotate it a bit like this, and translate it a bit like that."</p>
 
 <p class="blog-post-p">#### Graph triangle block</p>
 <p class="blog-post-p">This is probably the most distinctive component of Proteus. The authors even emphasize that this block is a major source of improvement in <strong>designability</strong> and <strong>efficiency</strong>.</p>
 
-<p class="blog-post-p">The problem they want to solve is that full triangle attention, like the one in AlphaFold2, can be very expensive. A naive version has complexity roughly </code>O(n^3)<code class="blog-post-code">, which becomes painful for long proteins.</p>
+<p class="blog-post-p">The problem they want to solve is that full triangle attention, like the one in AlphaFold2, can be very expensive. A naive version has complexity roughly <code class="blog-post-code">O(n^3)</code>, which becomes painful for long proteins.</p>
 
-<p class="blog-post-p">Proteus replaces that with a graph-based local strategy. For each residue, it looks at only the </code>K<code class="blog-post-code"> nearest neighbors in 3D space, usually based on distances between C-alpha atoms. This reduces the effective complexity to approximately </code>O(NK^2)<code class="blog-post-code">, which is much more manageable.</p>
+<p class="blog-post-p">Proteus replaces that with a graph-based local strategy. For each residue, it looks at only the <code class="blog-post-code">K</code> nearest neighbors in 3D space, usually based on distances between C-alpha atoms. This reduces the effective complexity to approximately <code class="blog-post-code">O(NK^2)</code>, which is much more manageable.</p>
 
 <p class="blog-post-p">There are two ideas here that I found very interesting:</p>
 
@@ -295,12 +303,12 @@
 <p class="blog-post-p">For me, the most memorable points of the paper are:</p>
 
 <p class="blog-post-p">1. representing each residue as a rigid frame,</p>
-<p class="blog-post-p">2. running diffusion on the combined rotation-and-translation space </code>SO(3) x R^3<code class="blog-post-code">,</p>
+<p class="blog-post-p">2. running diffusion on the combined rotation-and-translation space <code class="blog-post-code">SO(3) x R^3</code>,</p>
 <p class="blog-post-p">3. using a graph triangle block to keep the model both geometric and efficient.</p>
 
 <p class="blog-post-p">I think this paper is also a good bridge paper for beginners. It connects ideas from biology, geometry, stochastic processes, and deep learning architecture in a way that is hard at first, but very rewarding once the big picture becomes clear.</p>
 
-<p class="blog-post-p">If I continue this topic in another post, I would probably write more carefully about three things: the exact definition of the rotational score on </code>SO(3)`, the difference between Proteus and RFdiffusion in practice, and why designability is a better target than visual quality alone.</p>
+<p class="blog-post-p">If I continue this topic in another post, I would probably write more carefully about three things: the exact definition of the rotational score on <code class="blog-post-code">SO(3)</code>, the difference between Proteus and RFdiffusion in practice, and why designability is a better target than visual quality alone.</p>
             </div>
 
             <div class="blog-post-footer">
