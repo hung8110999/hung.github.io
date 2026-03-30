@@ -58,78 +58,37 @@ In recent years, CASP 15 with RoseTTAFold and AlphaFold2 updated or CASP 16 with
 ### 1.3 Some former model and its story
 **AlphaFold series and AlphaFold2**
 
-Before talking about Proteus, I think it is useful to stop for a moment and look at the models that changed the whole field. In my opinion, Proteus only makes sense if we see it as a model that comes after AlphaFold and after the first big wave of deep-learning-based structure modeling.
-
-The reason is simple: for many years, protein structure prediction was one of the most difficult problems in computational biology. Scientists already knew that the amino acid sequence contains enough information to determine the final structure, but predicting that structure accurately was extremely hard. The search space is huge, the interactions are complicated, and even small local errors can destroy the whole global fold.
-
-So when AlphaFold appeared, it was not just "another model". It changed the expectations of the field.
+AlphaFold is the turning point of modern protein structure prediction. The first version (CASP13, 2018) showed that deep learning could strongly improve geometric prediction, and AlphaFold2 (CASP14, 2020) pushed performance close to experimental accuracy with end-to-end geometric modeling.
 
 **AlphaFold first appearance**
 
-The first AlphaFold from DeepMind became widely known after CASP13 in 2018. At that time, it was already much stronger than many previous approaches, but it was still different from the AlphaFold2 that most people talk about today.
-
-The first version relied heavily on predicting geometric constraints between residues, especially pairwise distances. In other words, instead of directly generating the final 3D structure in one elegant end-to-end way, it first tried to estimate relationships such as "how far should residue i be from residue j?" Then these predicted constraints were used to build the final structure.
-
-That was already a very important step. It showed that deep learning could capture long-range dependencies in proteins much better than traditional handcrafted pipelines. However, the pipeline was still relatively complex, and the final jump to experimental-level accuracy had not happened yet.
-
-Then AlphaFold2 came in CASP14 in 2020 and changed everything.
-
-AlphaFold2 introduced a much more complete architecture. Instead of treating structure as a later reconstruction step, it made structure reasoning a central part of the model. Two famous components are especially worth mentioning:
-
-1. **Evoformer**, which processes multiple sequence alignment information and pairwise residue information.
-2. **Structure Module**, which directly reasons in 3D space and updates residue frames.
-
-One of the most beautiful ideas in AlphaFold2 is that the model keeps exchanging information between sequence-level and structure-level representations. It does not only ask "which residues may be related?", but also "given the current geometry, how should the structure be refined further?"
-
-Another key point is the use of **Invariant Point Attention**. This lets the model work with 3D geometry while still respecting the fact that rotating or translating the entire protein should not change its meaning. That idea later influenced many other protein models, including Proteus.
-
-So if I want to summarize the AlphaFold story in one sentence, I would say:
-
-The first AlphaFold proved that deep learning could seriously improve protein structure prediction, while AlphaFold2 showed that a carefully designed geometric deep-learning architecture could push the problem close to experimental accuracy.
-
-This is why many later papers, even when they are not doing prediction exactly like AlphaFold2, still borrow its language, its representations, or its modules.
+At first appearance, AlphaFold mainly predicted geometric constraints (especially pairwise residue distances) and reconstructed 3D from them. It was a major breakthrough, but still pipeline-heavy. AlphaFold2 made the decisive jump by jointly refining sequence, pair, and 3D representations; this is the key reason later generation models (including Proteus) inherit many of its ideas.
 
 **RoseTTAFold**
-After AlphaFold2, another very important model is RoseTTAFold from the Baker lab. If AlphaFold2 was the giant breakthrough from one side, RoseTTAFold was a very strong and elegant answer from another side of the community.
-
-The central idea of RoseTTAFold is often described as a **three-track network**. These three tracks correspond to:
-
-1. 1D information: the amino acid sequence,
-2. 2D information: pairwise relationships between residues,
-3. 3D information: the current spatial structure.
-
-What makes this design interesting is that information flows between all three tracks repeatedly. So the model does not wait until the end to think about structure. It keeps updating sequence, pair, and 3D representations together.
-
-This is conceptually similar to the spirit of AlphaFold2, even though the detailed architecture is different. Both models recognize that protein modeling is not only a sequence problem and not only a geometry problem. It is the interaction between the two.
-
-RoseTTAFold was also important for another reason: it showed that the field was not dependent on a single winning idea from one company or one team. Different groups could build powerful architectures for structural biology, and that quickly accelerated progress in the whole area.
-
-For this Proteus paper, RoseTTAFold matters because it is one of the architectural ancestors of modern protein generation models. The idea of exchanging information across multiple representation levels, especially with strong 3D reasoning, appears again and again in later work.
-
-So when the Proteus paper says it is inspired by AlphaFold2 and RoseTTAFold, I think that means two things:
-
-1. It inherits the geometric way of thinking about protein structure.
-2. It tries to keep the useful multi-level interaction pattern, but adapt it for diffusion-based generation instead of only structure prediction.
-
-That is why I think Proteus belongs to a larger story. It is not an isolated model. It comes after AlphaFold, AlphaFold2, and RoseTTAFold, and it pushes the field from prediction toward controllable generation and design.
+RoseTTAFold is used because its 3-track design (1D sequence, 2D pair, 3D structure) exchanges information effectively and gives strong structure reasoning.  
+The drawback in the Proteus paper context is that triangle-attention-heavy computation is expensive (\(O(n^3)\)) and is less direct in injecting backbone geometry at that stage. Proteus addresses this with local graph neighborhoods (\(O(NK^2)\)) and explicit structure bias.
 ## 2. Computer side
-### 2.1 How can we present protein structure in Computer ?
+### 2.1 Protein backbone representation
 To let a model understand a protein, we first need a representation that is stable under rotation and translation. If we only store the absolute coordinates of all atoms, then two identical proteins placed in two different positions in 3D space would look different to the model. That is inconvenient.
 
 Proteus follows the same general idea as AlphaFold2: each residue is represented by a **rigid frame** attached to its backbone. In practice, this frame is built from the backbone atoms N, C-alpha, and C. So instead of saying "here are only three points in space", we say "here is a local coordinate system for this residue".
 
-In simple notation, one residue can be written as:
+One residue frame is written as:
 
-`T_i = (R_i, t_i)`
+$$
+T_i = (R_i, t_i)
+$$
 
 where:
 
-1. `R_i` is the rotation matrix, describing the orientation of residue `i`.
-2. `t_i` is the translation vector, describing the position of residue `i`.
+1. \(R_i \in SO(3)\) is the rotation matrix, describing the orientation of residue \(i\).
+2. \(t_i \in \mathbb{R}^3\) is the translation vector, describing the position of residue \(i\).
 
-And if a point `x` is expressed in the local frame of that residue, then the corresponding global point can be described as:
+If a point \(x\) is in the local frame, the global point is:
 
-`x_global = R_i * x + t_i`
+$$
+x_{\text{global}} = R_i x + t_i
+$$
 
 This is a very nice representation because a rigid transformation preserves distances and angles. In other words, it changes the pose of the residue, but not its internal geometry.
 
@@ -148,58 +107,53 @@ If I explain it in a more intuitive way, each amino acid is given its own little
 ### 2.2 Diffusion modeling on protein backbone
 The central idea of Proteus is to apply diffusion modeling, but not in the usual image space. Instead of adding noise to pixels, it adds noise to the **translation** and **rotation** of backbone frames.
 
-The general forward process of diffusion can be written, in plain notation, as a stochastic differential equation:
+The general forward process is a stochastic differential equation:
 
-`dY_t = f(Y_t, t) * dt + g(Y_t, t) * dW_t`
+$$
+dY_t = f(Y_t, t)\,dt + g(Y_t, t)\,dW_t
+$$
 
 where:
 
-1. `Y_t` is the random state at time `t`.
-2. `f(Y_t, t)` is the drift term, which captures the systematic tendency of the system.
-3. `g(Y_t, t) * dW_t` is the diffusion term, which injects randomness.
+1. \(Y_t\) is the random state at time \(t\).
+2. \(f(Y_t, t)\) is the drift term.
+3. \(g(Y_t, t)\,dW_t\) is the diffusion term.
 
-For normal diffusion models, this often happens in ordinary Euclidean space. But for protein backbone generation, the state is no longer only a 3D position. Since each residue has both a position and an orientation, the state lives on a combined space of rotations and translations, often written as `SO(3) x R^3`.
+For protein backbone generation, the state is on \(SO(3)\times\mathbb{R}^3\), not just \(\mathbb{R}^3\), because each residue has both orientation and position.
 
 This is one of the most important ideas in the paper. The model must denoise both:
 
 1. where the residue is,
 2. and how the residue is rotated.
 
-For the translation part, the paper defines a Gaussian noising process. I will avoid writing the full formula here because my converter cannot render mathematical equations well, but the intuition is very simple: when `t` becomes larger, the influence of the original structure becomes weaker, and the random noise becomes stronger.
+For translation, the forward distribution is:
 
-From that noising process, the model can derive a score function for denoising translation. For the rotation part, the paper defines a similar diffusion process on rotation space `SO(3)`. The exact formula is more complicated because rotation space is not flat like normal 3D coordinate space, but the intuition is similar: early in reverse diffusion, the orientation is very noisy; later, the model gradually recovers the correct backbone orientation.
+$$
+p_{t|0}(x_t|x_0)=\mathcal{N}(x_t; e^{-t/2}x_0,\,(1-e^{-t})I_3)
+$$
+
+and the score function is:
+
+$$
+\nabla \log p_{t|0}(x_t|x_0)=\frac{e^{-t/2}x_0-x_t}{1-e^{-t}}
+$$
+
+For rotation, the paper defines diffusion directly on \(SO(3)\). The reverse process then denoises both orientation and translation.
 
 So the training target of Proteus is essentially: given a noisy backbone frame at some timestep `t`, predict how to move it back toward the clean protein structure.
 
-### 2.3 Reverse process and feature initialization
-At sampling time, Proteus starts from a highly noisy backbone. That means each residue is initialized with random translations and random rotations. Then the model runs the reverse process step by step until a meaningful protein structure appears.
+### 2.3 Deep learning network architectures for protein structure modeling
+The architecture in this paper is inspired by AlphaFold2 and RosettaFold, then redesigned for diffusion-based backbone generation.
 
-The initialization can be summarized like this:
+#### rosettafold
+Why it is used: RosettaFold introduces strong 3-track interaction (1D sequence, 2D pair, 3D structure), so information is exchanged continuously across representation levels.
 
-```mermaid
-flowchart TD
-    A["Random backbone frames at t = 1"] --> B["Initialize node features"]
-    A --> C["Initialize pair features"]
-    B --> D["Folding Block 1"]
-    C --> D
-    D --> E["Folding Block 2"]
-    E --> F["..."]
-    F --> G["Predicted clean backbone"]
-```
+Drawbacks mentioned in the Proteus context: triangle-attention-heavy computation is expensive (\(O(n^3)\)), and backbone-geometry guidance is less explicit in that stage.
 
-For the **node representation**, the model uses:
+#### AlphaFold 2
+Why it is used: AlphaFold2 contributes key geometric ideas used here, especially frame-based residue representation and IPA-style geometry-aware attention.
 
-1. the timestep embedding `t`,
-2. the residue identity embedding.
-
-For the **pair representation**, the model uses:
-
-1. embeddings of the two residues,
-2. relative sequence position encoding.
-
-This means the model does not only know "which residue is this?", but also "how far are these two residues in the sequence?" That is very useful because many geometric patterns in proteins are strongly related to sequence distance.
-
-The reverse diffusion steps are solved numerically. In the notes, I wrote that the paper uses an Euler-Maruyama style discretization, which is a standard way to simulate and reverse SDE-based processes.
+Proteus then improves efficiency and designability with local graph neighborhoods and structure bias in the graph triangle block.
 
 ### 2.4 Model architecture
 The architecture of Proteus is inspired by AlphaFold2 and RoseTTAFold, but the paper tries to be more efficient and more design-oriented. The whole network is composed of `L` folding blocks, and these blocks do **not** share weights.

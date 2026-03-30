@@ -26,6 +26,28 @@ os.makedirs(POSTS_DIR, exist_ok=True)
 def convert_markdown(md, folder_name):
     html = md
 
+    # Math blocks: $$ ... $$ (keep LaTeX untouched for MathJax)
+    html = re.sub(
+        r'^\$\$\s*\n([\s\S]*?)\n\$\$\s*$',
+        lambda m: f'<div class="blog-post-math-block">\\[{m.group(1).strip()}\\]</div>',
+        html,
+        flags=re.MULTILINE
+    )
+
+    # Inline math: \( ... \)
+    html = re.sub(
+        r'\\\((.+?)\\\)',
+        lambda m: f'<span class="blog-post-math">\\({m.group(1).strip()}\\)</span>',
+        html
+    )
+
+    # Inline math: $ ... $ (avoid $$ blocks via lookarounds)
+    html = re.sub(
+        r'(?<!\$)\$([^\$\n]+)\$(?!\$)',
+        lambda m: f'<span class="blog-post-math">\\({m.group(1).strip()}\\)</span>',
+        html
+    )
+
     html = re.sub(r'^### (.+)$', r'<h3 class="blog-post-h3">\1</h3>', html, flags=re.MULTILINE)
     html = re.sub(r'^## (.+)$', r'<h2 class="blog-post-h2">\1</h2>', html, flags=re.MULTILINE)
     html = re.sub(r'^# (.+)$', r'<h1 class="blog-post-h1">\1</h1>', html, flags=re.MULTILINE)
@@ -245,6 +267,18 @@ def build_post_html(meta, body_html):
     <meta name="description" content="{meta['description']}">
     <meta name="date" content="{meta['date']}">
     <link rel="stylesheet" href="../../css/style.css">
+    <script>
+        window.MathJax = {{
+            tex: {{
+                inlineMath: [['\\\\(', '\\\\)'], ['$', '$']],
+                displayMath: [['\\\\[', '\\\\]'], ['$$', '$$']]
+            }},
+            svg: {{
+                fontCache: 'global'
+            }}
+        }};
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
 </head>
