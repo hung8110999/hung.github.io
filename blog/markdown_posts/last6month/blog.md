@@ -101,7 +101,7 @@ Hiện tại thì Hiroto đang vừa làm nghiên cứu 1 topic PhD ở Nhật v
 *Ryota và mình*
 
 Trường Keio thì top server rồi nên trình của ông này khỏi bàn. Ngoài ngành đang học là Vật lý lượng tử (gớm vc ) thì Ryota còn nghiên cứu Astro Physics nữa, dù không hiểu nhiều nhưng lúc ngắm sao trước khách sạn mình có nói chuyện với Huy với Ryota về đủ thứ khoa học, Nobel 2016, sóng ánh sáng, hạt nhân, $E=mc^2$,... Cảm giác đây là 1 trong số ít người có cùng gu khoa học với mình hahahha (dù bro ở tận Tokyo T_T)
-![Star gazing](image\star.png){width: 120%}
+![Star gazing](image\star.png){width: 70%}
 *Ngắm sao trước khách sạn với Ryota và Huy Cre : Điện thoại của Ryota*
 
 À quên nói, Ryota còn là người thích nghệ thuật, đúng cái vibe của ae Tokyo cả nhạc cả thời trang và gu ảnh, cái nào cũng nghệ.
