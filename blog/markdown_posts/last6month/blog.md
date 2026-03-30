@@ -14,14 +14,14 @@ Tất cả mục tiêu học thuật và **giấc mơ khoa học** của mình t
 
 Mới đầu 2 thằng chỉ chọn chủ đề này ( Unlearning GAN ) tại vì nó nghe lạ lạ hay hay với cái mechanism 2 module đấu nhau của nó(:DD??). Rồi tới chuỗi ngày thằng Huy đi summer school bên Đài (~~đi date với Huy Phú~~) với bị viêm não (solo trong 2 tháng đầu luôn). Tiếp đó là chuỗi ngày chả hiểu mình đang làm cái gì, báo cáo thầy Thái thì cứ "sắp adapt được model rồi thầy ơi" rồi vẫn stuck tiếp (cảm ơn thầy vì đã không đấm tụi em :DD). 
 
-![paper](image\paper.png){width: 50%}
+![paper](image\paper.png){width: 20%}
 *Paper đầu tay, tuy có nhiều tiếc nuối nhưng mà vẫn vui vì lần đầu được "làm khoa học" :DD
 Mà hay ở chỗ 2 thằng vẫn cho ra được nhiều ý tưởng để tiếp tục chủ đề này, cứ như vậy vẫn lê lết cho đến lúc hoàn thành base, lit review, chốt ý tưởng. Đùng 1 cái đến 1 ngày đi họp với thầy Thái, thầy kêu là "2 đứa viết báo nha, nộp cái hội nghị này nè" ( khúc này là còn 2 tháng nữa là bảo vệ,1 tháng nữa là nộp paper ), cả 2 thằng ai cũng vui tại cuối cùng cũng được nộp conf, cũng chả nhưng mà cũng cóng tay tại cái gì cũng sắp tới rồi mà codebase với paper chưa viết. 
 
 Và thời gian còn lại là quả bán sống bán chết của 2 thằng, train server (kẹt xe dữ dằn do nhóm nào cũng cần train), eval trên kaggle, viết paper, sửa hyperparam, lặp lại..
 
 Cuối cùng cũng tới ngày bảo vệ, chả hiểu sao cái công trình nghiên cứu 2 thằng nắm trong lòng bàn tay nhưng mà tới ngày bảo vệ thằng nào cũng run, đêm trước ngày bảo vệ còn không ngủ được :DD??. Lúc bảo vệ bị mấy thầy đấm sml nhưng cuối cùng vẫn 10 ( mấy em khóa sau mà đọc được cái này thì +1 kinh nghiệm nha)
-![Chụp hình sau buổi bảo vệ](image\grad.png){width: 70%}
+![Chụp hình sau buổi bảo vệ](image\grad.png){width: 40%}
 
 *Chụp hình kỷ niệm sau buổi bảo vệ với "đồng chí" Huy — chung team cả quân sự, KLTN và Taiwan2025 sau này.*
 Cuối cùng thì vẫn là cảm ơn thầy Thái hehe.
@@ -39,19 +39,19 @@ Chị Kim đang là Master student ở Taipei Medical University, nghiên cứu 
 Thực ra những cái mình kể chỉ là bể nổi của 2 anh chị này thôi, chứ profile thật còn giỏi hơn nữa. Đến tận bây giờ (tháng 3 năm 2026), mình vẫn còn thấy may mắn vì được 2 anh chị giúp đỡ. 
 
 Thật tiếc vì chưa có 1 bữa ăn đầy đủ cuối kì intern cùng nhau và cả 1 tấm hình chung, nhưng và chắc vì vậy nên mới có lí do gặp lại ha. Nếu anh chị đang đọc cái này, em thật lòng mong 2 anh chị sẽ đạt được những nguyện vọng và thành công trên con đường của mình.
-![AK-CK](image\AK-CK.png){width: 70%}
+![AK-CK](image\AK-CK.png){width: 40%}
 *nhờ GPT gen ra tấm hình này, chưa thật lắm :)))*
 ## 2.2 Huy Tống - Huy Phú
 2 thằng này bằng 1 cách nào đó đã gặp và quen biết nhau trước. Sau đó thì mình biết được và làm quen mỗi thằng do công việc và hoàn cảnh không liên quan gì tới nhau, xong sau này cả 3 thằng mới vỡ lẽ ra là biết nhau :DD
  Ảo vcl.
 
 Huy Tống (cựu HCMUS) thì biết nó từ lúc quân sự năm nhất lựn. Vô random nên không ai quen ai, chọn giường tầng random luôn và nó thì chọn giường với mình (mình trên nó dưới). Hồi đó ngủ cái giường thì lỏng lẻo nên mỗi lần con vợ này trở mình là cái giường lắc như động đất luôn. Sau quân sự thì tới tận Khóa luận tốt nghiệp mới liên lạc lại và làm việc với nhau. Từ đó tiếp tục với chuyến đi Đài. À, thằng này Wjbu chúa.
-![Huy Tống đang ngủ](image\huytong.jpg){width: 70%}
+![Huy Tống đang ngủ](image\huytong.jpg){width: 40%}
 
 *Huy Tống ở Quy Nhơn . Cre : Huy Tống*
 Vô tình quen biết Huy Phú (Cựu USTH-Hanoi và giờ là EM student) là do mình tham gia cái Erasmus Mundus Mentorship Program 2025. Lúc đó là không biết nó là ai luôn, chỉ biết là trước đó Huy Tống có nói là quen 1 thằng bạn EM, tự nhiên nộp hồ sơ xong Huy Tong kêu là "thằng bạn" nó nhắn là biết thằng nào tên Gia Hưng không, xong 2 thằng mới vỡ lẽ ra là biết nhau :DD. Rồi từ đó mới nói chuyện dần rồi quen dần như bây giờ. Hiện thằng này đang ở Ý, thỉnh thoảng thì ghé mấy chỗ gần Iran coi ~~tên lửa~~ 
 
-![Huy Phú đang ngủ](image\huyphu.jpg){width: 70%}
+![Huy Phú đang ngủ](image\huyphu.jpg){width: 40%}
 
 *Huy Phú ở Quy Nhơn . Cre : Huy Tống*
 
@@ -62,12 +62,12 @@ Tùng là cựu hs chuyên tin Lương Thế Vinh (Đồng Nai), giờ đang h�
 Có thể nói ngắn gọn là GOAT máy tính trong tất cả các ae ( Nhì QG Nhì QG Nhì QG) ( Đọ tay với Thanh Hoa Bắc Đại ). Chơi với nhau từ hồi lớp 2 nhưng mà được đúng năm lớp 2 đó xong không chơi với nhau nữa do khác lớp khác trường. Xong đùng cái tới lớp 12 học IELTS chung nên có practice chung nhóm, xong từ đó mới nói chuyện lại. Tính xuôi tính ngược gì thằng này cũng học bá, giỏi mọi thứ luôn (từ toán đến lập trình thi đấu xong research nữa) nên khá là muốn học hỏi từ nó nhiều.
 
 Mặc dù học giỏi nhưng mà thằng này lâu lâu vẫn điên theo chu kì, nên là lâu lâu vẫn chả hiểu nó đang làm/hay đang nói cái gì :DD??
-![GOAT Comp Science](image\duytung.jpg){width: 50%}
+![GOAT Comp Science](image\duytung.jpg){width: 40%}
 
 *Đi nhậu bữa cuối với em Vinh xong chụp được quả ảnh này*
 
 ## 2.4 Huang Lab
-![alt text](image\huanglab.jpg){width: 70%}
+![alt text](image\huanglab.jpg){width: 40%}
 *Bữa ăn tối cuối cùng của mình với mọi người trong lab trước khi về Việt Nam*
 Thật là khó để nói hết về HuangLab trong 1 đoạn ngắn như thế này, vì vậy nên mình sẽ cố gắng miêu tả mỗi người trong 1 câu :DD
 Từ trái qua phải lần lượt là:
@@ -81,15 +81,15 @@ Từ trái qua phải lần lượt là:
 - Frank : (không rõ role nữa tại Frank nói mình là mới tốt nghiệp Bs nên sinh hoạt ở Lab 1 thời gian) cảm giác em út của Lab, tuy nhiên học giỏi và nói tiếng Anh cực tốt (mới có offer ở John Hopkins, chúc mừng bro :DD)
 ## 2.5 International friend
 
-![Naufal Ryota](image\noLea.jpg){width: 70%} 
+![Naufal Ryota](image\noLea.jpg){width: 40%} 
 *Gặp Naufal và Ryota (mới qua) lần đầu ở chợ đêm*
-![Naoki Ryota](image\jpbros.jpg){width: 70%} 
+![Naoki Ryota](image\jpbros.jpg){width: 40%} 
 *Đi chơi với Naoki và Ryota ở Hehuanshan*
 ### 2.5.1 Hiroto
 Hiện tại là researcher về Astro tại UTokyo, hồi mới gặp Hiroto do quá ấn tượng với profile của cha này nên toàn gọi là GOAT Hiroto :DD
 
 Hồi mới gặp thì chỉ chào hỏi xã giao, cứ nghĩ Hiroto hướng nội ít nói, nhưng mà trên bus từ Gaomei Wetlands về lại trung tâm Taichung thì mình với Hiroto nói chuyện về khoa học như 2 thằng bạn thân. Từ đó mới biết Hiroto học Vật lý, sau đó do có thành tích học tập quá pro nên được chọn chuyên ngành (chứ không cần phải xét), ổng cũng muốn nộp MIT với mấy trường top bên Mỹ với châu Âu nữa nhưng mà cuối cùng chọn ở lại Nhật và chọn UTokyo (nghe đến đây ù tai luôn). Cũng khá là khó để hiểu hết mấy cái Hiroto nói do mình không nghiên cứu Vật lý, Hiroto giống mình ở chỗ khá là hứng thú với kiến thức Toán dùng nó để làm Vật lý, việc lấy Toán làm gốc để từ đó nghiên cứu khoa học là điều mà mình luôn ngưỡng mộ từ lâu (mình vẫn luôn đi theo phương pháp này (dù học toán ngu)).
-![Doraemon Hiroto](image\doraemonHiroto.jpg){width: 70%}
+![Doraemon Hiroto](image\doraemonHiroto.jpg){width: 40%}
 *Hát Intro Doraemon với Hiroto bằng tiếng Việt và Nhật ở Đài Trung. Cre:Huy Tong*
 Hiện tại thì Hiroto đang vừa làm nghiên cứu 1 topic PhD ở Nhật và vừa colab nghiên cứu với Đài để xây dựng 1 kính thiên văn để theo dõi 1 loại sóng gì đó. 
 
@@ -97,7 +97,7 @@ Hiện tại thì Hiroto đang vừa làm nghiên cứu 1 topic PhD ở Nhật v
 
 ### 2.5.2 Ryota
 Được Hiroto giới thiệu tới Đài và hướng dẫn đề tài, Master năm 2 ở Keio Uni. Mới đầu hơi qua thì đúng kiểu siêu rụt rè (Why brooo) nhưng mà 1 thời gian thì cũng điên điên hehehe. 
-![Ryota](image\Ryota.jpg){width: 50%} 
+![Ryota](image\Ryota.jpg){width: 30%} 
 *Ryota và mình*
 
 Trường Keio thì top server rồi nên trình của ông này khỏi bàn. Ngoài ngành đang học là Vật lý lượng tử (gớm vc ) thì Ryota còn nghiên cứu Astro Physics nữa, dù không hiểu nhiều nhưng lúc ngắm sao trước khách sạn mình có nói chuyện với Huy với Ryota về đủ thứ khoa học, Nobel 2016, sóng ánh sáng, hạt nhân, $E=mc^2$,... Cảm giác đây là 1 trong số ít người có cùng gu khoa học với mình hahahha (dù bro ở tận Tokyo T_T)
@@ -109,21 +109,21 @@ Trường Keio thì top server rồi nên trình của ông này khỏi bàn. Ng
 Nhớ ăn nhiều rau vào và qua đường nhớ nhìn kỹ nha bro :DD
 ### 2.5.3 Naoki
 1 học bá khác nữa, PhD năm 1 ở Tohoku University, topic của Naoki theo lời Huy Tống là active galactic nuclei, Naoki cũng cố gắng để giải thích cho mình hiểu nhưng mà khó quá ~~. 
-![Naoki and peach](image\Naoki2.jpg){width: 70%}
+![Naoki and peach](image\Naoki2.jpg){width: 40%}
 *Naoki và quả đào khổng lồ chụp ở bữa sáng ngày cuối trip Hehuanshan. Cre: Huy Tong*
 Chuyến đi tới Taichung và Hehuanshan cũng là lần đầu gặp Naoki, vậy mà nói chuyện hợp điên :DD Thế là thân luôn. 1 fact nữa là quê của Naoki ở Fukushima, nơi từng bị ảnh hưởng bởi thảm họa hạt nhân năm 2011, vì vậy nên mình cũng có hỏi về tình trạng ở đó, thì Naoki bảo là giờ mọi thứ đã ổn rồi, người dân cũng đã quay trở lại sinh sống bình thường, chỉ là phần trung tâm vẫn bị ảnh hưởng nặng bởi phóng xạ nên bị cấm luôn rồi.
 
 P/s : Cảm ơn Naoki vì quả áo khoác cứu mình trên đỉnh Hehuanshan. Xin lỗi vì đã không chuẩn bị đầy đủ.
 ### 2.5.4 Lea
 1 học sinh trao đổi đến từ Đức, học ngành kĩ thuật. Năng lượng của Lea đúng kiểu của các bạn phương Tây, cực kì vui vẻ và thoải mái, kiểu tích cực nhiều năng lượng. Cảm giác như Lea cực kì thích thiên nhiên và đi du lịch. 
-![LeaCoffee](image\LeaCoffee.jpg){width: 70%}
+![LeaCoffee](image\LeaCoffee.jpg){width: 40%}
 *Lea Coffee trong buổi sáng cuối ở Taichung *
 Quê của Lea ở Stuttgart, Đức. Tiếc là hơi xa chỗ của họ hàng mình (Berlin) nên qua chơi hơi bị khó. Nhưng mà khi biết vậy thì Lea cũng bảo là khi nào có dịp thì cứ qua nha Lea lead all kèo :DD
 
 ### 2.5.5 Naufal
 GOAT Indonesia, cựu học giả MEXT, hiện tại là Postdoc tại Đài. Naufal nói chuyện rất thân thiện và giới thiệu cho mình các món ăn của Indo, Nasi Goreng, Nasi Lemak, Rendang. Đồng thời cũng bất ngờ vì mình nói rằng ở Đài Bắc có nhà hàng Indo (xui là ngày hôm sau cái nhà hàng đó đóng vửa vĩnh viễn luôn :D?)
-![naufal](image/naufal.jpg){width: 70%}
-*Naufal ăn tối cùng ae Sinica. Cre: Huy Tong*
+![naufal](image/naufal.jpg){width: 40%}
+*Naufal ăn tối cùng ae Sinica.Che mắt theo nguyện vọng của Naufal cho giống đang truy nã :DD ??? .Cre: Huy Tong*
 Hơi tiếc vì chưa có cơ hội nói chuyện nhiều với Naufal. 
 
 # 3. Kết
