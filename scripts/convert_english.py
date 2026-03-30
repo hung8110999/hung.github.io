@@ -50,10 +50,10 @@ def convert_markdown(md, folder_name):
     # Fenced code blocks (including mermaid) must be handled before inline backticks.
     html = re.sub(r'```([a-zA-Z0-9_-]*)\n([\s\S]*?)\n```', fenced_block_repl, html)
 
-    # Math blocks: $$ ... $$ (keep LaTeX untouched for MathJax)
+    # Math blocks: $$ ... $$ (stash to avoid paragraph/list post-processing)
     html = re.sub(
         r'^\$\$\s*\n([\s\S]*?)\n\$\$\s*$',
-        lambda m: f'<div class="blog-post-math-block">\\[{m.group(1).strip()}\\]</div>',
+        lambda m: stash_block(f'<div class="blog-post-math-block">\\[{m.group(1).strip()}\\]</div>'),
         html,
         flags=re.MULTILINE
     )

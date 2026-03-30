@@ -255,20 +255,20 @@ flowchart LR
 
 <div class="blog-post-math-block">\[\Delta R_i = R(\hat{q}_i)\]</div>
 <div class="blog-post-math-block">\[\Delta R_i =
-<p class="blog-post-p">\begin{bmatrix}</p>
-<p class="blog-post-p">1 - 2(c_i^2 + d_i^2) & 2(b_ic_i - a_id_i) & 2(b_id_i + a_ic_i) \\</p>
-<p class="blog-post-p">2(b_ic_i + a_id_i) & 1 - 2(b_i^2 + d_i^2) & 2(c_id_i - a_ib_i) \\</p>
-<p class="blog-post-p">2(b_id_i - a_ic_i) & 2(c_id_i + a_ib_i) & 1 - 2(b_i^2 + c_i^2)</p>
-<p class="blog-post-p">\end{bmatrix}\]</div></p>
+\begin{bmatrix}
+1 - 2(c_i^2 + d_i^2) & 2(b_ic_i - a_id_i) & 2(b_id_i + a_ic_i) \\
+2(b_ic_i + a_id_i) & 1 - 2(b_i^2 + d_i^2) & 2(c_id_i - a_ib_i) \\
+2(b_id_i - a_ic_i) & 2(c_id_i + a_ib_i) & 1 - 2(b_i^2 + c_i^2)
+\end{bmatrix}\]</div>
 <p class="blog-post-p">Backbone frame update is a rigid-transform composition. If <span class="blog-post-math">\(T_i^l=(R_i^l,t_i^l)\)</span>, then:</p>
 
 <div class="blog-post-math-block">\[T_i^{l+1} = (\Delta R_i,\ x_i)\circ T_i^l\]</div>
 <p class="blog-post-p">equivalently:</p>
 
 <div class="blog-post-math-block">\[\begin{aligned}
-<p class="blog-post-p">R_i^{l+1} &= \Delta R_i R_i^l, \\</p>
-<p class="blog-post-p">t_i^{l+1} &= \Delta R_i t_i^l + x_i</p>
-<p class="blog-post-p">\end{aligned}\]</div></p>
+R_i^{l+1} &= \Delta R_i R_i^l, \\
+t_i^{l+1} &= \Delta R_i t_i^l + x_i
+\end{aligned}\]</div>
 <p class="blog-post-p">So this layer is where the model really says: "based on what I currently understand about this residue, I should rotate it a bit like this, and translate it a bit like that."</p>
 
 <strong>Graph triangle block</strong>
