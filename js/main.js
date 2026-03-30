@@ -114,43 +114,14 @@ function alignTimelineDots() {
 
 // ---------- Dynamic Posts Loading ----------
 async function loadPosts() {
-  const newsList = document.querySelector('[data-json]') || document.querySelector('.news-list');
-  if (!newsList) return;
+  const targets = Array.from(document.querySelectorAll('[data-json], [data-json-sources]'));
+  if (!targets.length) return;
 
   try {
     const isPostPage = window.location.pathname.includes('/posts/') ||
       window.location.pathname.includes('/math-posts/') ||
-      window.location.pathname.includes('/english_posts/');
-    const isHomePage = document.querySelector('.home-name-section') !== null;
-    const jsonFiles = isHomePage && newsList.dataset.jsonSources
-      ? newsList.dataset.jsonSources.split(',').map(file => file.trim()).filter(Boolean)
-      : [newsList.dataset.json || 'posts.json'];
-
-    const postsFromSources = await Promise.all(
-      jsonFiles.map(async (jsonFile) => {
-        const jsonPath = isPostPage ? `../${jsonFile}` : jsonFile;
-        const response = await fetch(jsonPath, { cache: 'no-store' });
-        if (!response.ok) return [];
-
-        const posts = await response.json();
-        return posts.map(post => ({ ...post, _jsonFile: jsonFile }));
-      })
-    );
-
-    const posts = postsFromSources
-      .flat()
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    const layout = newsList.dataset.layout || (isHomePage ? 'home' : 'news');
-    let postsToDisplay = posts;
-
-    // Filter to latest 3 for home page
-    if (isHomePage) {
-      postsToDisplay = posts.slice(0, 3);
-    }
-
-    // Clear static fallback items
-    newsList.innerHTML = '';
+      window.location.pathname.includes('/english_posts/') ||
+      window.location.pathname.includes('/coding_posts/');
 
     // Tag-to-CSS-class mapping for math posts (English display names)
     const tagToClass = {
@@ -193,55 +164,104 @@ async function loadPosts() {
       return `<div class="post-tags">${inner}</div>`;
     };
 
-    postsToDisplay.forEach(post => {
-      // Date formatting logic
-      const dateObj = new Date(post.date);
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      const formattedDate = dateObj.toLocaleDateString('en-US', options) !== 'Invalid Date' ?
-                            dateObj.toLocaleDateString('en-US', options) :
-                            post.date;
+    const loadForTarget = async (target) => {
+      const isHomeTarget = target.classList.contains('news-list') && !!target.dataset.jsonSources;
+      const jsonFiles = isHomeTarget && target.dataset.jsonSources
+        ? target.dataset.jsonSources.split(',').map(file => file.trim()).filter(Boolean)
+        : [target.dataset.json || 'posts.json'];
 
-      const article = document.createElement(layout === 'learning-log' ? 'a' : isHomePage ? 'div' : 'article');
-      article.className = layout === 'learning-log' ? 'log-entry' : isHomePage ? 'home-news-item' : 'news-item';
-      if (layout === 'learning-log') {
-        article.href = post.url;
+      const postsFromSources = await Promise.all(
+        jsonFiles.map(async (jsonFile) => {
+          const jsonPath = isPostPage ? `../${jsonFile}` : jsonFile;
+          const response = await fetch(jsonPath, { cache: 'no-store' });
+          if (!response.ok) return [];
+
+          const posts = await response.json();
+          return posts.map(post => ({ ...post, _jsonFile: jsonFile }));
+        })
+      );
+
+      const posts = postsFromSources
+        .flat()
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      const layout = target.dataset.layout || (isHomeTarget ? 'home' : 'news');
+      let postsToDisplay = isHomeTarget ? posts.slice(0, 3) : posts;
+      if (layout === 'repo') {
+        postsToDisplay = posts.filter((post) => post.repo);
       }
 
-      const tagHtml = buildTagHtml(post);
+      target.innerHTML = '';
+      if (!postsToDisplay.length) return;
 
-      const repoHtml = post.repo
-        ? `<p><a href="${post.repo}" class="card-link" target="_blank" rel="noopener">Repository</a></p>`
-        : '';
+      postsToDisplay.forEach((post) => {
+        const dateObj = new Date(post.date);
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = dateObj.toLocaleDateString('en-US', options) !== 'Invalid Date'
+          ? dateObj.toLocaleDateString('en-US', options)
+          : post.date;
 
-      if (layout === 'learning-log') {
-        article.innerHTML = `
-          <div class="log-date">${formattedDate}</div>
-          ${tagHtml}
-          <h3>${post.title}</h3>
-          <p>${post.description}</p>
-          ${repoHtml}
-        `;
-      } else if (!isHomePage) {
-        article.style.transition = 'transform 0.2s, box-shadow 0.2s';
-        article.innerHTML = `
-          <div class="news-date">${formattedDate}</div>
-          ${tagHtml}
-          <h3 style="font-size: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
-              <a href="${post.url}" style="color: var(--text-heading);">${post.title}</a>
-          </h3>
-          <p style="margin-bottom: 1rem;">${post.description}</p>
-          <a href="${post.url}" class="card-link">Read more →</a>
-        `;
-      } else {
-        article.innerHTML = `
-          <div class="news-date">${formattedDate}</div>
-          <h3><a href="${post.url}" style="color: inherit; text-decoration: none;">${post.title}</a></h3>
-          <p>${post.description}</p>
-        `;
-      }
+        const tagHtml = buildTagHtml(post);
 
-      newsList.appendChild(article);
-    });
+        if (layout === 'repo') {
+          const tags = postTagsList(post);
+          const repoMetaLeft = tags.length
+            ? tags.map((t) => `<span>${t}</span>`).join('')
+            : '<span>Repository</span>';
+          const repoCard = document.createElement('a');
+          repoCard.className = 'repo-card';
+          repoCard.href = post.repo;
+          repoCard.target = '_blank';
+          repoCard.rel = 'noopener';
+          repoCard.innerHTML = `
+            <div class="repo-name">🔗 ${post.title}</div>
+            <p class="repo-desc">${post.description || ''}</p>
+            <div class="repo-meta">
+              ${repoMetaLeft}
+              <span>${formattedDate}</span>
+            </div>
+          `;
+          target.appendChild(repoCard);
+          return;
+        }
+
+        const article = document.createElement(layout === 'learning-log' ? 'a' : isHomeTarget ? 'div' : 'article');
+        article.className = layout === 'learning-log' ? 'log-entry' : isHomeTarget ? 'home-news-item' : 'news-item';
+        if (layout === 'learning-log') {
+          article.href = post.url;
+        }
+
+        if (layout === 'learning-log') {
+          article.innerHTML = `
+            <div class="log-date">${formattedDate}</div>
+            ${tagHtml}
+            <h3>${post.title}</h3>
+            <p>${post.description}</p>
+          `;
+        } else if (!isHomeTarget) {
+          article.style.transition = 'transform 0.2s, box-shadow 0.2s';
+          article.innerHTML = `
+            <div class="news-date">${formattedDate}</div>
+            ${tagHtml}
+            <h3 style="font-size: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                <a href="${post.url}" style="color: var(--text-heading);">${post.title}</a>
+            </h3>
+            <p style="margin-bottom: 1rem;">${post.description}</p>
+            <a href="${post.url}" class="card-link">Read more →</a>
+          `;
+        } else {
+          article.innerHTML = `
+            <div class="news-date">${formattedDate}</div>
+            <h3><a href="${post.url}" style="color: inherit; text-decoration: none;">${post.title}</a></h3>
+            <p>${post.description}</p>
+          `;
+        }
+
+        target.appendChild(article);
+      });
+    };
+
+    await Promise.all(targets.map((target) => loadForTarget(target)));
   } catch (err) {
     console.error("Failed to load posts:", err);
   }
