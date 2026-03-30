@@ -202,12 +202,12 @@ flowchart LR
 <h3 class="blog-post-h3">2.3 Deep learning network architectures for protein structure modeling</h3>
 <p class="blog-post-p">The architecture in this paper is inspired by AlphaFold2 and RosettaFold, then redesigned for diffusion-based backbone generation.</p>
 
-<p class="blog-post-p">#### rosettafold</p>
+<strong>rosettafold</strong>
 <p class="blog-post-p">Why it is used: RosettaFold introduces strong 3-track interaction (1D sequence, 2D pair, 3D structure), so information is exchanged continuously across representation levels.</p>
 
 <p class="blog-post-p">Drawbacks mentioned in the Proteus context: triangle-attention-heavy computation is expensive (<span class="blog-post-math">\(O(n^3)\)</span>), and backbone-geometry guidance is less explicit in that stage.</p>
 
-<p class="blog-post-p">#### AlphaFold 2</p>
+<strong>AlphaFold 2</strong>
 <p class="blog-post-p">Why it is used: AlphaFold2 contributes key geometric ideas used here, especially frame-based residue representation and IPA-style geometry-aware attention.</p>
 
 <p class="blog-post-p">Proteus then improves efficiency and designability with local graph neighborhoods and structure bias in the graph triangle block.</p>
@@ -221,7 +221,7 @@ flowchart LR
 <p class="blog-post-p">2. Backbone update layer</p>
 <p class="blog-post-p">3. Graph triangle block</p>
 
-<p class="blog-post-p">#### IPA-Transformer block</p>
+<strong>IPA-Transformer block</strong>
 <p class="blog-post-p">This block updates the <strong>single / node representation</strong> of each residue.</p>
 
 <p class="blog-post-p">The IPA part stands for <strong>Invariant Point Attention</strong>, which was one of the most important ideas from AlphaFold2. The reason it is powerful is that attention is performed in a way that respects 3D geometry. If we rotate or translate the whole protein, the meaningful relationships between residues should stay the same.</p>
@@ -234,16 +234,41 @@ flowchart LR
 
 <p class="blog-post-p">In a simpler sentence, IPA helps the model ask: "which residues should pay attention to each other, given both sequence context and current 3D arrangement?"</p>
 
-<p class="blog-post-p">#### Backbone update layer</p>
+<strong>Backbone update layer</strong>
 <p class="blog-post-p">After the node features are updated, Proteus updates the backbone itself. This layer predicts how each residue frame should move.</p>
 
-<p class="blog-post-p">The note I wrote for this part is quite important: the network predicts rotational and translational updates, often parameterized through quaternion-related values and translation vectors, and then converts them into a valid rigid transform.</p>
+<p class="blog-post-p">Mathematically, from updated single representation <span class="blog-post-math">\(s_i^{l+1}\)</span>, a linear head predicts:</p>
 
-<p class="blog-post-p">If a quaternion is written in plain form as <code class="blog-post-code">q = a + bi + cj + dk</code>, then it must be normalized to represent a valid rotation. In other words, the squared values of <code class="blog-post-code">a</code>, <code class="blog-post-code">b</code>, <code class="blog-post-code">c</code>, and <code class="blog-post-code">d</code> must add up to 1. After normalization, it can be converted into a rotation matrix and used to update the current residue frame.</p>
+<div class="blog-post-math-block">\[[b_i,\ c_i,\ d_i,\ x_i] = \mathrm{Linear}(s_i^{l+1})\]</div>
+<p class="blog-post-p">where <span class="blog-post-math">\(x_i \in \mathbb{R}^3\)</span> is translation update and <span class="blog-post-math">\((b_i,c_i,d_i)\)</span> parameterize quaternion components.</p>
 
+<p class="blog-post-p">The quaternion is written in equation form as:</p>
+
+<div class="blog-post-math-block">\[q_i = a_i + b_i\mathbf{i} + c_i\mathbf{j} + d_i\mathbf{k}\]</div>
+<p class="blog-post-p">and must satisfy:</p>
+
+<div class="blog-post-math-block">\[a_i^2 + b_i^2 + c_i^2 + d_i^2 = 1\]</div>
+<p class="blog-post-p">So we normalize:</p>
+
+<div class="blog-post-math-block">\[\hat{q}_i = \frac{(a_i,b_i,c_i,d_i)}{\sqrt{a_i^2+b_i^2+c_i^2+d_i^2}}\]</div>
+<p class="blog-post-p">Then convert quaternion to rotation matrix <span class="blog-post-math">\(\Delta R_i = R(\hat{q}_i)\)</span>:</p>
+
+<div class="blog-post-math-block">\[\Delta R_i =
+<p class="blog-post-p">\begin{bmatrix}</p>
+<p class="blog-post-p">1-2(c_i^2+d_i^2) & 2(b_ic_i-a_id_i) & 2(b_id_i+a_ic_i)\\</p>
+<p class="blog-post-p">2(b_ic_i+a_id_i) & 1-2(b_i^2+d_i^2) & 2(c_id_i-a_ib_i)\\</p>
+<p class="blog-post-p">2(b_id_i-a_ic_i) & 2(c_id_i+a_ib_i) & 1-2(b_i^2+c_i^2)</p>
+<p class="blog-post-p">\end{bmatrix}\]</div></p>
+<p class="blog-post-p">Backbone frame update is a rigid-transform composition. If <span class="blog-post-math">\(T_i^l=(R_i^l,t_i^l)\)</span>, then:</p>
+
+<div class="blog-post-math-block">\[T_i^{l+1} = (\Delta R_i,\ x_i)\circ T_i^l\]</div>
+<p class="blog-post-p">equivalently:</p>
+
+<div class="blog-post-math-block">\[R_i^{l+1}=\Delta R_i R_i^l,\qquad
+<p class="blog-post-p">t_i^{l+1}=\Delta R_i t_i^l + x_i\]</div></p>
 <p class="blog-post-p">So this layer is where the model really says: "based on what I currently understand about this residue, I should rotate it a bit like this, and translate it a bit like that."</p>
 
-<p class="blog-post-p">#### Graph triangle block</p>
+<strong>Graph triangle block</strong>
 <p class="blog-post-p">This is probably the most distinctive component of Proteus. The authors even emphasize that this block is a major source of improvement in <strong>designability</strong> and <strong>efficiency</strong>.</p>
 
 <p class="blog-post-p">The problem they want to solve is that full triangle attention, like the one in AlphaFold2, can be very expensive. A naive version has complexity roughly <code class="blog-post-code">O(n^3)</code>, which becomes painful for long proteins.</p>

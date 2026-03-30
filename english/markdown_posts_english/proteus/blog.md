@@ -145,12 +145,12 @@ So the training target of Proteus is essentially: given a noisy backbone frame a
 ### 2.3 Deep learning network architectures for protein structure modeling
 The architecture in this paper is inspired by AlphaFold2 and RosettaFold, then redesigned for diffusion-based backbone generation.
 
-#### rosettafold
+**rosettafold**
 Why it is used: RosettaFold introduces strong 3-track interaction (1D sequence, 2D pair, 3D structure), so information is exchanged continuously across representation levels.
 
 Drawbacks mentioned in the Proteus context: triangle-attention-heavy computation is expensive (\(O(n^3)\)), and backbone-geometry guidance is less explicit in that stage.
 
-#### AlphaFold 2
+**AlphaFold 2**
 Why it is used: AlphaFold2 contributes key geometric ideas used here, especially frame-based residue representation and IPA-style geometry-aware attention.
 
 Proteus then improves efficiency and designability with local graph neighborhoods and structure bias in the graph triangle block.
@@ -164,7 +164,7 @@ Each folding block has three main components:
 2. Backbone update layer
 3. Graph triangle block
 
-#### IPA-Transformer block
+**IPA-Transformer block**
 This block updates the **single / node representation** of each residue.
 
 The IPA part stands for **Invariant Point Attention**, which was one of the most important ideas from AlphaFold2. The reason it is powerful is that attention is performed in a way that respects 3D geometry. If we rotate or translate the whole protein, the meaningful relationships between residues should stay the same.
@@ -177,16 +177,62 @@ So IPA lets the model mix:
 
 In a simpler sentence, IPA helps the model ask: "which residues should pay attention to each other, given both sequence context and current 3D arrangement?"
 
-#### Backbone update layer
+**Backbone update layer**
 After the node features are updated, Proteus updates the backbone itself. This layer predicts how each residue frame should move.
 
-The note I wrote for this part is quite important: the network predicts rotational and translational updates, often parameterized through quaternion-related values and translation vectors, and then converts them into a valid rigid transform.
+Mathematically, from updated single representation \(s_i^{l+1}\), a linear head predicts:
 
-If a quaternion is written in plain form as `q = a + bi + cj + dk`, then it must be normalized to represent a valid rotation. In other words, the squared values of `a`, `b`, `c`, and `d` must add up to 1. After normalization, it can be converted into a rotation matrix and used to update the current residue frame.
+$$
+[b_i,\ c_i,\ d_i,\ x_i] = \mathrm{Linear}(s_i^{l+1})
+$$
+
+where \(x_i \in \mathbb{R}^3\) is translation update and \((b_i,c_i,d_i)\) parameterize quaternion components.
+
+The quaternion is written in equation form as:
+
+$$
+q_i = a_i + b_i\mathbf{i} + c_i\mathbf{j} + d_i\mathbf{k}
+$$
+
+and must satisfy:
+
+$$
+a_i^2 + b_i^2 + c_i^2 + d_i^2 = 1
+$$
+
+So we normalize:
+
+$$
+\hat{q}_i = \frac{(a_i,b_i,c_i,d_i)}{\sqrt{a_i^2+b_i^2+c_i^2+d_i^2}}
+$$
+
+Then convert quaternion to rotation matrix \(\Delta R_i = R(\hat{q}_i)\):
+
+$$
+\Delta R_i =
+\begin{bmatrix}
+1-2(c_i^2+d_i^2) & 2(b_ic_i-a_id_i) & 2(b_id_i+a_ic_i)\\
+2(b_ic_i+a_id_i) & 1-2(b_i^2+d_i^2) & 2(c_id_i-a_ib_i)\\
+2(b_id_i-a_ic_i) & 2(c_id_i+a_ib_i) & 1-2(b_i^2+c_i^2)
+\end{bmatrix}
+$$
+
+Backbone frame update is a rigid-transform composition. If \(T_i^l=(R_i^l,t_i^l)\), then:
+
+$$
+T_i^{l+1} = (\Delta R_i,\ x_i)\circ T_i^l
+$$
+
+equivalently:
+
+$$
+R_i^{l+1}=\Delta R_i R_i^l,\qquad
+t_i^{l+1}=\Delta R_i t_i^l + x_i
+$$
 
 So this layer is where the model really says: "based on what I currently understand about this residue, I should rotate it a bit like this, and translate it a bit like that."
 
-#### Graph triangle block
+**Graph triangle block**
 This is probably the most distinctive component of Proteus. The authors even emphasize that this block is a major source of improvement in **designability** and **efficiency**.
 
 The problem they want to solve is that full triangle attention, like the one in AlphaFold2, can be very expensive. A naive version has complexity roughly `O(n^3)`, which becomes painful for long proteins.
