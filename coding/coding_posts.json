@@ -1,0 +1,15 @@
+[
+  {
+    "title": "Polyp Segmentation",
+    "date": "2026-03-30",
+    "description": "First coding post about my polyp segmentation project and implementation notes.",
+    "subtitle": "UNet-based experiments for medical image segmentation.",
+    "tag": "AI & ML",
+    "tags": [
+      "AI & ML",
+      "Systems"
+    ],
+    "repo": "https://github.com/hung8110999/NeoPolyp",
+    "url": "coding/coding_posts/polyp-segmentation.html"
+  }
+]

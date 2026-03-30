@@ -87,89 +87,11 @@
             </div>
         </div>
 
-        <!-- Code Repositories -->
-        <section class="section" style="padding-top: var(--space-xl);">
-            <h2>📂 My Code Repositories</h2>
-            <div class="repo-grid">
-
-                <a href="#" class="repo-card" target="_blank">
-                    <div class="repo-name">
-                        🚀 Medical-AI-Segmentation
-                    </div>
-                    <p class="repo-desc">A PyTorch implementation of UNet++ for segmenting medical imagery with high
-                        precision using custom transforms.</p>
-                    <div class="repo-meta">
-                        <span>🔴 Python</span>
-                        <span>⭐ 14</span>
-                    </div>
-                </a>
-
-                <a href="#" class="repo-card" target="_blank">
-                    <div class="repo-name">
-                        ⚡ Algo-Arena
-                    </div>
-                    <p class="repo-desc">My personal collection of solved LeetCode and Codeforces algorithms focusing on
-                        dynamic programming and graphs.</p>
-                    <div class="repo-meta">
-                        <span>🔵 C++</span>
-                        <span>⭐ 8</span>
-                    </div>
-                </a>
-
-                <a href="#" class="repo-card" target="_blank">
-                    <div class="repo-name">
-                        🌐 Hung-Blog
-                    </div>
-                    <p class="repo-desc">The source code for this minimalist, light-blue profile portfolio and study
-                        notes site crafted without frameworks.</p>
-                    <div class="repo-meta">
-                        <span>🟡 HTML/CSS</span>
-                        <span>⭐ 3</span>
-                    </div>
-                </a>
-
-            </div>
-        </section>
-
         <!-- Daily Learning Log -->
         <section class="learning-log">
             <h2>📝 Daily Learning Log</h2>
-            <div class="log-entries">
-
-                <a href="coding-logs/custom-datasets.html" class="log-entry">
-                    <div class="log-date">March 1, 2026</div>
-                    <div class="post-tags">
-                        <span class="post-tag bg-ai">AI & ML</span>
-                    </div>
-                    <h3>PyTorch Custom Datasets</h3>
-                    <p>Learned how to create a custom Dataset class in PyTorch for loading medical imaging data.</p>
-                    <ul>
-                        <li>Implemented <code>__len__</code> and <code>__getitem__</code> methods</li>
-                        <li>Used <code>torchvision.transforms</code> for data augmentation</li>
-                    </ul>
-                    <pre><code>class MedicalDataset(Dataset):
-    def __len__(self):
-        return len(self.images)</code></pre>
-                </a>
-
-                <a href="coding-logs/dynamic-programming.html" class="log-entry">
-                    <div class="log-date">February 28, 2026</div>
-                    <div class="post-tags">
-                        <span class="post-tag bg-algo">Algorithms</span>
-                    </div>
-                    <h3>Algorithms: Dynamic Programming</h3>
-                    <p>Practiced solving grid-based dynamic programming problems on LeetCode.</p>
-                    <ul>
-                        <li>Solved "Unique Paths" and "Minimum Path Sum"</li>
-                        <li>Optimized space complexity from <code>O(M*N)</code> to <code>O(N)</code></li>
-                    </ul>
-                    <pre><code>for i in range(1, m):
-    for j in range(1, n):
-        dp[j] += dp[j-1]</code></pre>
-                </a>
-
-                <!-- Add more entries here as you learn -->
-
+            <div class="log-entries uniform-log-grid" data-json="coding/coding_posts.json" data-layout="learning-log">
+                <!-- Javascript injects posts from coding/coding_posts.json -->
             </div>
         </section>
 

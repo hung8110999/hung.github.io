@@ -209,12 +209,17 @@ async function loadPosts() {
 
       const tagHtml = buildTagHtml(post);
 
+      const repoHtml = post.repo
+        ? `<p><a href="${post.repo}" class="card-link" target="_blank" rel="noopener">Repository</a></p>`
+        : '';
+
       if (layout === 'learning-log') {
         article.innerHTML = `
           <div class="log-date">${formattedDate}</div>
           ${tagHtml}
           <h3>${post.title}</h3>
           <p>${post.description}</p>
+          ${repoHtml}
         `;
       } else if (!isHomePage) {
         article.style.transition = 'transform 0.2s, box-shadow 0.2s';
