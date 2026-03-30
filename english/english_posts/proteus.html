@@ -251,29 +251,32 @@ flowchart LR
 <p class="blog-post-p">So we normalize:</p>
 
 <div class="blog-post-math-block">\[\hat{q}_i = \frac{(a_i,b_i,c_i,d_i)}{\sqrt{a_i^2+b_i^2+c_i^2+d_i^2}}\]</div>
-<p class="blog-post-p">Then convert quaternion to rotation matrix <span class="blog-post-math">\(\Delta R_i = R(\hat{q}_i)\)</span>:</p>
+<p class="blog-post-p">Then convert quaternion to rotation matrix:</p>
 
+<div class="blog-post-math-block">\[\Delta R_i = R(\hat{q}_i)\]</div>
 <div class="blog-post-math-block">\[\Delta R_i =
 <p class="blog-post-p">\begin{bmatrix}</p>
-<p class="blog-post-p">1-2(c_i^2+d_i^2) & 2(b_ic_i-a_id_i) & 2(b_id_i+a_ic_i)\\</p>
-<p class="blog-post-p">2(b_ic_i+a_id_i) & 1-2(b_i^2+d_i^2) & 2(c_id_i-a_ib_i)\\</p>
-<p class="blog-post-p">2(b_id_i-a_ic_i) & 2(c_id_i+a_ib_i) & 1-2(b_i^2+c_i^2)</p>
+<p class="blog-post-p">1 - 2(c_i^2 + d_i^2) & 2(b_ic_i - a_id_i) & 2(b_id_i + a_ic_i) \\</p>
+<p class="blog-post-p">2(b_ic_i + a_id_i) & 1 - 2(b_i^2 + d_i^2) & 2(c_id_i - a_ib_i) \\</p>
+<p class="blog-post-p">2(b_id_i - a_ic_i) & 2(c_id_i + a_ib_i) & 1 - 2(b_i^2 + c_i^2)</p>
 <p class="blog-post-p">\end{bmatrix}\]</div></p>
 <p class="blog-post-p">Backbone frame update is a rigid-transform composition. If <span class="blog-post-math">\(T_i^l=(R_i^l,t_i^l)\)</span>, then:</p>
 
 <div class="blog-post-math-block">\[T_i^{l+1} = (\Delta R_i,\ x_i)\circ T_i^l\]</div>
 <p class="blog-post-p">equivalently:</p>
 
-<div class="blog-post-math-block">\[R_i^{l+1}=\Delta R_i R_i^l,\qquad
-<p class="blog-post-p">t_i^{l+1}=\Delta R_i t_i^l + x_i\]</div></p>
+<div class="blog-post-math-block">\[\begin{aligned}
+<p class="blog-post-p">R_i^{l+1} &= \Delta R_i R_i^l, \\</p>
+<p class="blog-post-p">t_i^{l+1} &= \Delta R_i t_i^l + x_i</p>
+<p class="blog-post-p">\end{aligned}\]</div></p>
 <p class="blog-post-p">So this layer is where the model really says: "based on what I currently understand about this residue, I should rotate it a bit like this, and translate it a bit like that."</p>
 
 <strong>Graph triangle block</strong>
 <p class="blog-post-p">This is probably the most distinctive component of Proteus. The authors even emphasize that this block is a major source of improvement in <strong>designability</strong> and <strong>efficiency</strong>.</p>
 
-<p class="blog-post-p">The problem they want to solve is that full triangle attention, like the one in AlphaFold2, can be very expensive. A naive version has complexity roughly <code class="blog-post-code">O(n^3)</code>, which becomes painful for long proteins.</p>
+<p class="blog-post-p">The problem they want to solve is that full triangle attention, like the one in AlphaFold2, can be very expensive. A naive version has complexity roughly <span class="blog-post-math">\(O(n^3)\)</span>, which becomes painful for long proteins.</p>
 
-<p class="blog-post-p">Proteus replaces that with a graph-based local strategy. For each residue, it looks at only the <code class="blog-post-code">K</code> nearest neighbors in 3D space, usually based on distances between C-alpha atoms. This reduces the effective complexity to approximately <code class="blog-post-code">O(NK^2)</code>, which is much more manageable.</p>
+<p class="blog-post-p">Proteus replaces that with a graph-based local strategy. For each residue, it looks at only the <span class="blog-post-math">\(K\)</span> nearest neighbors in 3D space, usually based on distances between C-alpha atoms. This reduces the effective complexity to approximately <span class="blog-post-math">\(O(NK^2)\)</span>, which is much more manageable.</p>
 
 <p class="blog-post-p">There are two ideas here that I found very interesting:</p>
 
@@ -328,12 +331,12 @@ flowchart LR
 <p class="blog-post-p">For me, the most memorable points of the paper are:</p>
 
 <p class="blog-post-p">1. representing each residue as a rigid frame,</p>
-<p class="blog-post-p">2. running diffusion on the combined rotation-and-translation space <code class="blog-post-code">SO(3) x R^3</code>,</p>
+<p class="blog-post-p">2. running diffusion on the combined rotation-and-translation space <span class="blog-post-math">\(SO(3)\times\mathbb{R}^3\)</span>,</p>
 <p class="blog-post-p">3. using a graph triangle block to keep the model both geometric and efficient.</p>
 
 <p class="blog-post-p">I think this paper is also a good bridge paper for beginners. It connects ideas from biology, geometry, stochastic processes, and deep learning architecture in a way that is hard at first, but very rewarding once the big picture becomes clear.</p>
 
-<p class="blog-post-p">If I continue this topic in another post, I would probably write more carefully about three things: the exact definition of the rotational score on <code class="blog-post-code">SO(3)</code>, the difference between Proteus and RFdiffusion in practice, and why designability is a better target than visual quality alone.</p>
+<p class="blog-post-p">If I continue this topic in another post, I would probably write more carefully about three things: the exact definition of the rotational score on <span class="blog-post-math">\(SO(3)\)</span>, the difference between Proteus and RFdiffusion in practice, and why designability is a better target than visual quality alone.</p>
             </div>
 
             <div class="blog-post-footer">

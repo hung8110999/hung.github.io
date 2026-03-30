@@ -206,14 +206,18 @@ $$
 \hat{q}_i = \frac{(a_i,b_i,c_i,d_i)}{\sqrt{a_i^2+b_i^2+c_i^2+d_i^2}}
 $$
 
-Then convert quaternion to rotation matrix \(\Delta R_i = R(\hat{q}_i)\):
+Then convert quaternion to rotation matrix:
+
+$$
+\Delta R_i = R(\hat{q}_i)
+$$
 
 $$
 \Delta R_i =
 \begin{bmatrix}
-1-2(c_i^2+d_i^2) & 2(b_ic_i-a_id_i) & 2(b_id_i+a_ic_i)\\
-2(b_ic_i+a_id_i) & 1-2(b_i^2+d_i^2) & 2(c_id_i-a_ib_i)\\
-2(b_id_i-a_ic_i) & 2(c_id_i+a_ib_i) & 1-2(b_i^2+c_i^2)
+1 - 2(c_i^2 + d_i^2) & 2(b_ic_i - a_id_i) & 2(b_id_i + a_ic_i) \\
+2(b_ic_i + a_id_i) & 1 - 2(b_i^2 + d_i^2) & 2(c_id_i - a_ib_i) \\
+2(b_id_i - a_ic_i) & 2(c_id_i + a_ib_i) & 1 - 2(b_i^2 + c_i^2)
 \end{bmatrix}
 $$
 
@@ -226,8 +230,10 @@ $$
 equivalently:
 
 $$
-R_i^{l+1}=\Delta R_i R_i^l,\qquad
-t_i^{l+1}=\Delta R_i t_i^l + x_i
+\begin{aligned}
+R_i^{l+1} &= \Delta R_i R_i^l, \\
+t_i^{l+1} &= \Delta R_i t_i^l + x_i
+\end{aligned}
 $$
 
 So this layer is where the model really says: "based on what I currently understand about this residue, I should rotate it a bit like this, and translate it a bit like that."
@@ -235,9 +241,9 @@ So this layer is where the model really says: "based on what I currently underst
 **Graph triangle block**
 This is probably the most distinctive component of Proteus. The authors even emphasize that this block is a major source of improvement in **designability** and **efficiency**.
 
-The problem they want to solve is that full triangle attention, like the one in AlphaFold2, can be very expensive. A naive version has complexity roughly `O(n^3)`, which becomes painful for long proteins.
+The problem they want to solve is that full triangle attention, like the one in AlphaFold2, can be very expensive. A naive version has complexity roughly \(O(n^3)\), which becomes painful for long proteins.
 
-Proteus replaces that with a graph-based local strategy. For each residue, it looks at only the `K` nearest neighbors in 3D space, usually based on distances between C-alpha atoms. This reduces the effective complexity to approximately `O(NK^2)`, which is much more manageable.
+Proteus replaces that with a graph-based local strategy. For each residue, it looks at only the \(K\) nearest neighbors in 3D space, usually based on distances between C-alpha atoms. This reduces the effective complexity to approximately \(O(NK^2)\), which is much more manageable.
 
 There are two ideas here that I found very interesting:
 
@@ -292,9 +298,9 @@ AlphaFold2 more or less changed the question from "can we predict a structure?" 
 For me, the most memorable points of the paper are:
 
 1. representing each residue as a rigid frame,
-2. running diffusion on the combined rotation-and-translation space `SO(3) x R^3`,
+2. running diffusion on the combined rotation-and-translation space \(SO(3)\times\mathbb{R}^3\),
 3. using a graph triangle block to keep the model both geometric and efficient.
 
 I think this paper is also a good bridge paper for beginners. It connects ideas from biology, geometry, stochastic processes, and deep learning architecture in a way that is hard at first, but very rewarding once the big picture becomes clear.
 
-If I continue this topic in another post, I would probably write more carefully about three things: the exact definition of the rotational score on `SO(3)`, the difference between Proteus and RFdiffusion in practice, and why designability is a better target than visual quality alone.
+If I continue this topic in another post, I would probably write more carefully about three things: the exact definition of the rotational score on \(SO(3)\), the difference between Proteus and RFdiffusion in practice, and why designability is a better target than visual quality alone.
