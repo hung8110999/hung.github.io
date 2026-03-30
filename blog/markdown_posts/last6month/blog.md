@@ -80,8 +80,7 @@ Từ trái qua phải lần lượt là:
 - De-Fong : Research assistant, pha trộn giữa Joy Lee và Chang-Yu, hay ngại nhưng nói chuyện rất vui và dễ gần.
 - Frank : (không rõ role nữa tại Frank nói mình là mới tốt nghiệp Bs nên sinh hoạt ở Lab 1 thời gian) cảm giác em út của Lab, tuy nhiên học giỏi và nói tiếng Anh cực tốt (mới có offer ở John Hopkins, chúc mừng bro :DD)
 ## 2.5 International friend
-![Lea Hiroto](image\withLea.jpg){width: 70%}
-*Gặp Lea và Hiroto lần đầu trong chuyến đi tới Taichung*
+
 ![Naufal Ryota](image\noLea.jpg){width: 70%} 
 *Gặp Naufal và Ryota (mới qua) lần đầu ở chợ đêm*
 ![Naoki Ryota](image\jpbros.jpg){width: 70%} 
