@@ -133,13 +133,24 @@
 
 <p class="blog-post-p">AlphaFold is the turning point of modern protein structure prediction. The first version (CASP13, 2018) showed that deep learning could strongly improve geometric prediction, and AlphaFold2 (CASP14, 2020) pushed performance close to experimental accuracy with end-to-end geometric modeling.</p>
 
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/af22.png" alt="af22" class="blog-post-img" style="width: 60%">
+<figcaption class="blog-post-caption">AlphaFold2 architecture</figcaption>
+</figure>
+
 <strong>AlphaFold first appearance</strong>
 
 <p class="blog-post-p">At first appearance, AlphaFold mainly predicted geometric constraints (especially pairwise residue distances) and reconstructed 3D from them. It was a major breakthrough, but still pipeline-heavy. AlphaFold2 made the decisive jump by jointly refining sequence, pair, and 3D representations; this is the key reason later generation models (including Proteus) inherit many of its ideas.</p>
 
 <strong>RoseTTAFold</strong>
 <p class="blog-post-p">RoseTTAFold is used because its 3-track design (1D sequence, 2D pair, 3D structure) exchanges information effectively and gives strong structure reasoning.</p>
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/rstfold.png" alt="rstfold" class="blog-post-img" style="width: 60%">
+<figcaption class="blog-post-caption">RoseTTAFold architecture</figcaption>
+</figure>
+
 <p class="blog-post-p">The drawback in the Proteus paper context is that triangle-attention-heavy computation is expensive (<span class="blog-post-math">\(O(N^3)\)</span>) and is less direct in injecting backbone geometry at that stage. Proteus addresses this with local graph neighborhoods (<span class="blog-post-math">\(O(NK^2)\)</span>) and explicit structure bias.</p>
+
 <h2 class="blog-post-h2">2. Computer side</h2>
 <h3 class="blog-post-h3">2.1 Protein backbone representation</h3>
 <p class="blog-post-p">To let a model understand a protein, we first need a representation that is stable under rotation and translation. If we only store the absolute coordinates of all atoms, then two identical proteins placed in two different positions in 3D space would look different to the model. That is inconvenient.</p>
@@ -159,6 +170,10 @@
 <strong>Why not only global <span class="blog-post-math">\([N, Cα, C]\)</span> coordinates?</strong> A protein has many residues at different absolute positions. Raw 3D coordinates of backbone atoms only give absolute placements; exploiting local geometric relationships across the chain is awkward if every residue is expressed only in a single global coordinate system. So each residue is embedded in its own 3D coordinate system (its frame): <span class="blog-post-math">\(R\)</span> rotates that system so the residue is represented in a sensible local pose (with Cα playing the role of the frame origin in the usual construction), and <span class="blog-post-math">\(t\)</span> places that frame in space.
 
 <p class="blog-post-p">Instead of describing the backbone only by listing atom coordinates in global 3D, the model uses a rigid transform per residue to describe the state of each amino acid. That is convenient when you want to update one residue’s pose independently during generation, instead of having to adjust the entire backbone in an unconstrained way.</p>
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/backbone.png" alt="backbone" class="blog-post-img" style="width: 60%">
+<figcaption class="blog-post-caption">Backbone representation of a residue</figcaption>
+</figure>
 
 <p class="blog-post-p">One residue frame is written as:</p>
 
@@ -182,6 +197,11 @@ flowchart LR
 <p class="blog-post-p">The central idea of Proteus is to use the forward process of a diffusion model, but not to add noise to pixels. The same forward corruption and reverse denoising story applies to the protein backbone: translations and rotations of the frames are noised in diffusion time <span class="blog-post-math">\(t\)</span>, and a network learns to invert that process.</p>
 
 <p class="blog-post-p">Below: (1) the general forward representation in diffusion modeling—the SDE written explicitly, with each symbol explained; (2) the SDE for the protein backbone, i.e. the same template when the state is on <span class="blog-post-math">\(SO(3) \times \mathbb{R}^3\)</span> per residue.</p>
+
+<figure class="blog-post-figure fig-left">
+  <img src="../markdown_posts_english/proteus/image/dfs.png" alt="dfs" class="blog-post-img" style="width: 60%">
+<figcaption class="blog-post-caption">Diffusion process</figcaption>
+</figure>
 
 <h3 class="blog-post-h3"><strong>(1) General forward representation in diffusion modeling</strong></h3>
 
@@ -225,7 +245,7 @@ flowchart LR
 <div class="blog-post-math-block">\[\mathcal{Y}_t = \bigl\{(R_t^{(i)}, X_t^{(i)})\bigr\}_{i=1}^{N}.\]</div>
 <p class="blog-post-p">The state space is not a single flat <span class="blog-post-math">\(\mathbb{R}^d\)</span>: each residue lives in <span class="blog-post-math">\(SO(3) \times \mathbb{R}^3\)</span> (rotation <span class="blog-post-math">\(\times\)</span> translation), and the chain is the product over residues.</p>
 
-<p class="blog-post-p">Compact forward SDE (block form, as in the notes). The forward motion on <span class="blog-post-math">\(SO(3) \times \mathbb{R}^3\)</span> can be written in one stroke for the backbone state at diffusion time <span class="blog-post-math">\(t\)</span>. Let <span class="blog-post-math">\(\mathbf{T}^{(t)}\)</span> denote that state (rotations and translations stacked for the whole structure). To avoid confusion with §2.1, <span class="blog-post-math">\(\mathbf{T}^{(t)}\)</span> here is not a single residue’s rigid map <span class="blog-post-math">\(T_i=(R_i,t_i)\)</span>; it is the time-<span class="blog-post-math">\(t\)</span> argument of the diffusion. In bracket form:</p>
+<p class="blog-post-p">Compact forward SDE (block form, as in the notes). The forward motion on <span class="blog-post-math">\(SO(3) \times \mathbb{R}^3\)</span> can be written in one stroke for the backbone state at diffusion time <span class="blog-post-math">\(t\)</span>. Let <span class="blog-post-math">\(\mathbf{T}^{(t)}\)</span> denote that state (rotations and translations stacked for the whole structure). To avoid confusion with section 2.1, <span class="blog-post-math">\(\mathbf{T}^{(t)}\)</span> here is not a single residue’s rigid map <span class="blog-post-math">\(T_i=(R_i,t_i)\)</span>; it is the time-<span class="blog-post-math">\(t\)</span> argument of the diffusion. In bracket form:</p>
 
 <div class="blog-post-math-block">\[d\mathbf{T}^{(t)} = \left[ 0,\; -\frac{1}{2}\mathbf{X}^{(t)} \right] dt + \left[ d\mathbf{B}_{SO(3)}^{(t)},\; d\mathbf{B}_{\mathbb{R}^3}^{(t)} \right].\]</div>
 <p class="blog-post-p">Read this as two coupled blocks (rotation block first, translation block second):</p>
@@ -290,7 +310,7 @@ flowchart LR
 <p class="blog-post-p">Goal. Recover the clean backbone <span class="blog-post-math">\(\mathcal{Y}_0\)</span> from any forward time <span class="blog-post-math">\(t\)</span>; same objective as image diffusion, with state space <span class="blog-post-math">\(\prod_i \bigl(SO(3)\times\mathbb{R}^3\bigr)\)</span> instead of a pixel vector in <span class="blog-post-math">\(\mathbb{R}^d\)</span>.</p>
 
 <h3 class="blog-post-h3">2.3 Deep learning network architectures for protein structure modeling</h3>
-<p class="blog-post-p">The architecture in Proteus is explicitly <strong>inspired by AlphaFold2 and RoseTTAFold</strong>, then adapted for <strong>diffusion-based backbone generation</strong>. The subsections below follow that split: what each predecessor contributes conceptually, before Proteus-specific changes (local graph triangles, structure bias) appear again in §2.4.</p>
+<p class="blog-post-p">The architecture in Proteus is explicitly <strong>inspired by AlphaFold2 and RoseTTAFold</strong>, then adapted for <strong>diffusion-based backbone generation</strong>. The subsections below follow that split: what each predecessor contributes conceptually, before Proteus-specific changes (local graph triangles, structure bias) appear again in section 2.4.</p>
 
 <strong>RoseTTAFold (3-track design).</strong> RoseTTAFold merges information from <strong>three levels</strong>:
 
@@ -300,7 +320,7 @@ flowchart LR
 
 <strong>How the tracks interact.</strong> Each track uses <strong>attention</strong> to pull out salient patterns. <strong>Information is exchanged back and forth continuously</strong> between tracks rather than staying isolated. In the <strong>3D</strong> track specifically, RoseTTAFold relies on an <strong>SE(3)-equivariant Transformer</strong>—a transformer architecture tailored to 3D data so that predictions change consistently under Euclidean transforms. Training uses <strong>structure losses</strong> such as <strong>RMSD</strong> and <strong>lDDT</strong>.
 
-<strong>Why Proteus still references it, and what it avoids.</strong> RoseTTAFold’s rich <strong>triangle</strong> and pair machinery is powerful but <strong>heavy</strong>: full <strong>triangle attention</strong> scales roughly like <strong><span class="blog-post-math">\(O(N^3)\)</span></strong> in the number of residues, and injecting <strong>explicit backbone geometry</strong> at each stage is less direct than in Proteus’s graph-based design. Proteus responds with <strong>local neighborhoods</strong> (roughly <strong><span class="blog-post-math">\(O(NK^2)\)</span></strong>) and <strong>structure-aware biases</strong> (§2.4).
+<strong>Why Proteus still references it, and what it avoids.</strong> RoseTTAFold’s rich <strong>triangle</strong> and pair machinery is powerful but <strong>heavy</strong>: full <strong>triangle attention</strong> scales roughly like <strong><span class="blog-post-math">\(O(N^3)\)</span></strong> in the number of residues, and injecting <strong>explicit backbone geometry</strong> at each stage is less direct than in Proteus’s graph-based design. Proteus responds with <strong>local neighborhoods</strong> (roughly <strong><span class="blog-post-math">\(O(NK^2)\)</span></strong>) and <strong>structure-aware biases</strong> (section 2.4).
 
 <strong>AlphaFold2 (pipeline and geometric core).</strong> AlphaFold2 is the other major inspiration. At a high level its processing can be read as:
 
@@ -319,88 +339,92 @@ flowchart LR
 <strong>Link to Proteus.</strong> AlphaFold2 supplies the mental toolkit Proteus reuses most directly: <strong>per-residue frames</strong>, <strong>pair tracks</strong>, and <strong>IPA-style</strong> geometry-aware attention. Proteus then trades some global triangle cost for <strong>graph-local triangles</strong> and explicit <strong>structure bias</strong>, targeting <strong>speed</strong> and <strong>designable</strong> backbones under diffusion—developed in the next section.
 
 <h3 class="blog-post-h3">2.4 Model architecture</h3>
-<p class="blog-post-p">The architecture of Proteus is inspired by AlphaFold2 and RoseTTAFold, but the paper tries to be more efficient and more design-oriented. The whole network is composed of <code class="blog-post-code">L</code> folding blocks, and these blocks do <strong>not</strong> share weights.</p>
+<p class="blog-post-p">This section follows my own notes on how Proteus is wired end to end.</p>
 
-<p class="blog-post-p">Each folding block has three main components:</p>
+<strong>Overall layout.</strong> The model is a stack of <strong><span class="blog-post-math">\(L\)</span></strong> folding blocks connected in series. The blocks <strong>do not share weights</strong>—each block has its own parameters. Every block consumes and updates the same three tensors:
 
-<p class="blog-post-p">1. IPA-Transformer block</p>
-<p class="blog-post-p">2. Backbone update layer</p>
-<p class="blog-post-p">3. Graph triangle block</p>
+<p class="blog-post-p">1. <strong>Node (single) representation</strong> — one feature vector per residue.</p>
+<p class="blog-post-p">2. <strong>Pair representation</strong> — one feature block per ordered residue pair (or “edge” in graph language).</p>
+<p class="blog-post-p">3. <strong>Structural frames (backbone)</strong> — the rigid transforms <span class="blog-post-math">\(T_i^l = (R_i^l, t_i^l)\)</span> for each residue at block <span class="blog-post-math">\(l\)</span>.</p>
 
-<strong>IPA-Transformer block</strong>
-<p class="blog-post-p">This block updates the <strong>single / node representation</strong> of each residue.</p>
+<p class="blog-post-p">Inside one block, the order is fixed: <strong>IPA–Transformer → backbone update → graph triangle block</strong>. The graph triangle stage reads the <strong>already updated</strong> node features <span class="blog-post-math">\(s^{l+1}\)</span> and backbone <span class="blog-post-math">\(T^{l+1}\)</span>, and the <strong>previous</strong> pair state <span class="blog-post-math">\(z^l\)</span>, and writes an updated pair state <span class="blog-post-math">\(z^{l+1}\)</span>. That matches the idea that geometry is refreshed in the middle of the block before pair edges are refined.</p>
 
-<p class="blog-post-p">The IPA part stands for <strong>Invariant Point Attention</strong>, which was one of the most important ideas from AlphaFold2. The reason it is powerful is that attention is performed in a way that respects 3D geometry. If we rotate or translate the whole protein, the meaningful relationships between residues should stay the same.</p>
+<strong>IPA–Transformer block</strong>
 
-<p class="blog-post-p">So IPA lets the model mix:</p>
+<ul class="blog-post-list">
+  <li><strong>Role.</strong> Refresh the <strong>node / single representation</strong> only; it does not, by itself, move the backbone in space the way the next layer does.</li>
+  <li><strong>Inputs.</strong> The three representations above (single, pair, current frames).</li>
+  <li><strong>Output.</strong> Updated per-residue features <span class="blog-post-math">\(s^{l+1}\)</span>.</li>
+</ul>
 
-<p class="blog-post-p">1. sequence information,</p>
-<p class="blog-post-p">2. pairwise information,</p>
-<p class="blog-post-p">3. geometric information from the current backbone frames.</p>
+<p class="blog-post-p">Conceptually this block is <strong>IPA (Invariant Point Attention) from AlphaFold2</strong> plus a <strong>standard Transformer</strong> (as in the Proteus paper): IPA is the geometry-aware attention module; the Transformer stack is the usual sequence-of-tokens machinery built around it.</p>
 
-<p class="blog-post-p">In a simpler sentence, IPA helps the model ask: "which residues should pay attention to each other, given both sequence context and current 3D arrangement?"</p>
+<strong>IPA in plain language.</strong> IPA is designed so that <strong>global rigid motions</strong> (rotating or translating the whole structure) do not change the attention logic. Informally, the backbone frames define a <strong>global protein frame</strong>; each residue still carries its <strong>local</strong> geometry. The notes describe it like this: for each residue you form <strong>separate <span class="blog-post-math">\(Q, K, V\)</span></strong> in a local setting, <strong>project</strong> those quantities into the <strong>global</strong> frame induced by the backbone, let them <strong>interact</strong> there, then <strong>project back</strong> to local coordinates to obtain attention weights. That way the model keeps <strong>per-residue local detail</strong> while reasoning about <strong>global</strong> layout—exactly what you want when the fold can still move during generation.
 
 <strong>Backbone update layer</strong>
-<p class="blog-post-p">After the node features are updated, Proteus updates the backbone itself. This layer predicts how each residue frame should move.</p>
 
-<p class="blog-post-p">Mathematically, from updated single representation <span class="blog-post-math">\(s_i^{l+1}\)</span>, a linear head predicts:</p>
+<ul class="blog-post-list">
+  <li><strong>Inputs.</strong> (1) the updated node vector <span class="blog-post-math">\(s_i^{l+1}\)</span> from the IPA–Transformer block, and (2) the backbone <span class="blog-post-math">\(T_i^l = (R_i^l, t_i^l)\)</span> coming <strong>into</strong> this block.</li>
+  <li><strong>Output.</strong> Updated frames <span class="blog-post-math">\(T_i^{l+1}\)</span>.</li>
+</ul>
 
-<div class="blog-post-math-block">\[[b_i,\ c_i,\ d_i,\ x_i] = \mathrm{Linear}(s_i^{l+1})\]</div>
-<p class="blog-post-p">where <span class="blog-post-math">\(x_i \in \mathbb{R}^3\)</span> is translation update and <span class="blog-post-math">\((b_i,c_i,d_i)\)</span> parameterize quaternion components.</p>
+<p class="blog-post-p">Because the 3D backbone is <strong>defined by how residues relate in space</strong>, once residue-level features change, the model <strong>re-predicts</strong> small <strong>rotational and translational</strong> deltas. Following the notes: a <strong>linear map</strong> on the updated residue representation predicts a <strong>translation</strong> <span class="blog-post-math">\(x_i \in \mathbb{R}^3\)</span> and the <strong>imaginary parts</strong> <span class="blog-post-math">\((b_i, c_i, d_i)\)</span> of a <strong>unit quaternion</strong></p>
 
-<p class="blog-post-p">The quaternion is written in equation form as:</p>
+<div class="blog-post-math-block">\[q_i = a_i + b_i\mathbf{i} + c_i\mathbf{j} + d_i\mathbf{k}.\]</div>
+<p class="blog-post-p">Quaternions are a standard way to store 3D rotations; the <strong>real part</strong> <span class="blog-post-math">\(a_i\)</span> is fixed by the <strong>unit-norm constraint</strong></p>
 
-<div class="blog-post-math-block">\[q_i = a_i + b_i\mathbf{i} + c_i\mathbf{j} + d_i\mathbf{k}\]</div>
-<p class="blog-post-p">and must satisfy:</p>
+<div class="blog-post-math-block">\[a_i^2 + b_i^2 + c_i^2 + d_i^2 = 1,\]</div>
+<p class="blog-post-p">so the network’s linear output is tied to a <strong>valid</strong> rotation after <strong>normalization</strong> (the notes call this the step that “creates” <span class="blog-post-math">\(a_i\)</span> and enforces a proper quaternion before turning it into a matrix). In implementation, one common pattern is to predict <span class="blog-post-math">\((b_i,c_i,d_i)\)</span> (and possibly a raw <span class="blog-post-math">\(a_i\)</span>) and <strong>renormalize</strong> <span class="blog-post-math">\((a_i,b_i,c_i,d_i)\)</span> to the unit sphere, then map to a rotation matrix <span class="blog-post-math">\(\Delta R_i = R(\hat{q}_i)\)</span> with normalized components <span class="blog-post-math">\((\hat{a}_i,\hat{b}_i,\hat{c}_i,\hat{d}_i)\)</span>:</p>
 
-<div class="blog-post-math-block">\[a_i^2 + b_i^2 + c_i^2 + d_i^2 = 1\]</div>
-<p class="blog-post-p">So we normalize:</p>
-
-<div class="blog-post-math-block">\[\hat{q}_i = \frac{(a_i,b_i,c_i,d_i)}{\sqrt{a_i^2+b_i^2+c_i^2+d_i^2}}\]</div>
-<p class="blog-post-p">Then convert quaternion to rotation matrix:</p>
-
-<div class="blog-post-math-block">\[\Delta R_i = R(\hat{q}_i)\]</div>
 <div class="blog-post-math-block">\[\Delta R_i =
 \begin{bmatrix}
-1 - 2(c_i^2 + d_i^2) & 2(b_ic_i - a_id_i) & 2(b_id_i + a_ic_i) \\
-2(b_ic_i + a_id_i) & 1 - 2(b_i^2 + d_i^2) & 2(c_id_i - a_ib_i) \\
-2(b_id_i - a_ic_i) & 2(c_id_i + a_ib_i) & 1 - 2(b_i^2 + c_i^2)
-\end{bmatrix}\]</div>
-<p class="blog-post-p">Backbone frame update is a rigid-transform composition. If <span class="blog-post-math">\(T_i^l=(R_i^l,t_i^l)\)</span>, then:</p>
-
-<div class="blog-post-math-block">\[T_i^{l+1} = (\Delta R_i,\ x_i)\circ T_i^l\]</div>
-<p class="blog-post-p">equivalently:</p>
+1 - 2(\hat{c}_i^2 + \hat{d}_i^2) & 2(\hat{b}_i\hat{c}_i - \hat{a}_i\hat{d}_i) & 2(\hat{b}_i\hat{d}_i + \hat{a}_i\hat{c}_i) \\
+2(\hat{b}_i\hat{c}_i + \hat{a}_i\hat{d}_i) & 1 - 2(\hat{b}_i^2 + \hat{d}_i^2) & 2(\hat{c}_i\hat{d}_i - \hat{a}_i\hat{b}_i) \\
+2(\hat{b}_i\hat{d}_i - \hat{a}_i\hat{c}_i) & 2(\hat{c}_i\hat{d}_i + \hat{a}_i\hat{b}_i) & 1 - 2(\hat{b}_i^2 + \hat{c}_i^2)
+\end{bmatrix}.\]</div>
+<p class="blog-post-p">The frame is then <strong>composed</strong> with the increment <span class="blog-post-math">\((\Delta R_i, x_i)\)</span>:</p>
 
 <div class="blog-post-math-block">\[\begin{aligned}
 R_i^{l+1} &= \Delta R_i R_i^l, \\
-t_i^{l+1} &= \Delta R_i t_i^l + x_i
+t_i^{l+1} &= \Delta R_i t_i^l + x_i.
 \end{aligned}\]</div>
-<p class="blog-post-p">So this layer is where the model really says: "based on what I currently understand about this residue, I should rotate it a bit like this, and translate it a bit like that."</p>
+<p class="blog-post-p">So this layer is literally: “given what I believe about residue <span class="blog-post-math">\(i\)</span> after IPA–Transformer, rotate and translate its frame by a small rigid update.”</p>
 
 <strong>Graph triangle block</strong>
-<p class="blog-post-p">This is probably the most distinctive component of Proteus. The authors even emphasize that this block is a major source of improvement in <strong>designability</strong> and <strong>efficiency</strong>.</p>
 
-<p class="blog-post-p">The problem they want to solve is that full triangle attention, like the one in AlphaFold2, can be very expensive. A naive version has complexity roughly <span class="blog-post-math">\(O(n^3)\)</span>, which becomes painful for long proteins.</p>
+<p class="blog-post-p">The paper highlights this as the main lever for <strong>designability</strong> and <strong>efficiency</strong>—roughly: <em>“our primary emphasis is on elucidating the graph triangle block, which is the source of significant enhancements in designability and efficiency.”</em> It is a <strong>graph-based attention</strong> mechanism that operates primarily on <strong>edge / pair</strong> features <span class="blog-post-math">\(z\)</span>, not on replacing the whole Evoformer at full cost.</p>
 
-<p class="blog-post-p">Proteus replaces that with a graph-based local strategy. For each residue, it looks at only the <span class="blog-post-math">\(K\)</span> nearest neighbors in 3D space, usually based on distances between C-alpha atoms. This reduces the effective complexity to approximately <span class="blog-post-math">\(O(NK^2)\)</span>, which is much more manageable.</p>
+<strong>Motivation (from the notes).</strong> Classic <strong>triangle attention</strong> in AlphaFold2’s Evoformer is powerful but has two pains for a <strong>backbone–diffusion</strong> training setup: (1) <strong>complexity</strong> is on the order of <strong><span class="blog-post-math">\(O(N^3)\)</span></strong> over residues, and (2) in the original prediction setting, that module is dominated by <strong>MSA and pair correlation</strong>—<strong>backbone geometry</strong> is not in the loop the same way you want when you are <strong>generating</strong> and repeatedly updating frames. Proteus’s block is engineered to fix both.
 
-<p class="blog-post-p">There are two ideas here that I found very interesting:</p>
+<strong>(A) Local triangle attention.</strong> Triangle-style updates are applied only on a <strong>sparse edge set</strong>: for each residue, keep the <strong><span class="blog-post-math">\(K\)</span></strong> <strong>nearest</strong> neighbors in space (<strong>Cα distance</strong> in the notes). That yields on the order of <strong><span class="blog-post-math">\(N K\)</span></strong> active edges out of <span class="blog-post-math">\(N^2\)</span>. The notes give the resulting complexity as <strong><span class="blog-post-math">\(O(N K^2)\)</span></strong> for the triangle attention piece—linear in <span class="blog-post-math">\(N\)</span> with fixed local width <span class="blog-post-math">\(K\)</span>, instead of <strong><span class="blog-post-math">\(O(N^3)\)</span></strong> when all triples of residues are in play.
 
-<p class="blog-post-p">1. <strong>Triangle multiplicative update</strong> is used first to update pair information through triangular relationships.</p>
-<p class="blog-post-p">2. <strong>Structure-aware bias</strong> is injected into attention by using geometric distances, often converted with RBF-like features.</p>
+<strong>(B) Geometry into the logits: RBF bias and gate.</strong> To inject <strong>3D structure</strong>, the model uses distances that close each <strong>triangle</strong>—informally, the <strong>third edge</strong> in a residue triple. Those distances are turned into <strong>radial basis function (RBF)</strong> features that <strong>decay</strong> with distance; those features act as a <strong>structure bias</strong> in the attention logits. A <strong>gate</strong> implemented as a <strong>small feed-forward network</strong> scales that bias and controls how strongly it <strong>blends</strong> with the other tracks, instead of hard-coding a fixed geometric influence.
 
-<p class="blog-post-p">So compared with a purely sequence-based pair module, Proteus puts the current 3D geometry directly into the interaction update. This is very important for backbone generation.</p>
+<strong>(C) Order of operations.</strong> <strong>Before</strong> triangle <strong>attention</strong>, the block runs a <strong>triangle multiplicative update</strong> (the same family of ideas as in AlphaFold2’s Evoformer) to refresh edge features from <strong>triangular consistency</strong>—each edge in a triangle is informed by the <strong>other two</strong> edges, which propagates <strong>transitive</strong> constraints cheaply compared to relying on attention alone. The notes also cite RFdiffusion’s observation that triangle multiplicative updates help <strong>backbone diffusion</strong> training and can be <strong>more memory-friendly</strong> than attention-only variants; AlphaFold2’s authors similarly report that <strong>either</strong> multiplicative updates <strong>or</strong> triangle attention work reasonably, while <strong>both together</strong> work best—which is the recipe Proteus inherits, then <strong>localizes</strong> on the graph.
 
-<p class="blog-post-p">Another way to say it is: if three residues form a meaningful local geometric pattern, then the model should be able to pass information along that triangle. This is exactly the kind of inductive bias that protein structure models need.</p>
+<strong>Pipeline inside the block (as in the notes).</strong> Concretely, after the multiplicative triangle pass:
+
+<p class="blog-post-p">1. <strong>Neighbour collate</strong> — for each residue, gather its <strong><span class="blog-post-math">\(K\)</span></strong> spatial neighbors.</p>
+<p class="blog-post-p">2. <strong>Local pair representation</strong> — build edge features on that sparse neighbor graph.</p>
+<p class="blog-post-p">3. <strong>Distance matrix and bias featurization</strong> — compute pairwise distances needed for triangles and map them to RBF (and related) bias features.</p>
+<p class="blog-post-p">4. <strong>Local pair geometry bias</strong> — add the structure bias into the local pair stream.</p>
+<p class="blog-post-p">5. <strong>Gate</strong> — use <strong>sequence / single</strong> information to modulate how strong that bias is.</p>
+<p class="blog-post-p">6. <strong>Attention</strong> — linear projections, <strong>dot-product</strong> affinities, <strong>softmax</strong>, attention weights over <strong>local</strong> edges (triangle attention on the graph, not on the full <span class="blog-post-math">\(N^2\)</span> board).</p>
+<p class="blog-post-p">7. <strong>Pair update</strong> — write refined edge embeddings from the attention output.</p>
+<p class="blog-post-p">8. <strong>Scatter update</strong> — <strong>aggregate</strong> local edge updates back into the <strong>global</strong> pair tensor <span class="blog-post-math">\(z^{l+1}\)</span>.</p>
+
+<strong>Intuition for triangle attention on a graph.</strong> Each residue is a <strong>vertex</strong>; each pair feature is a <strong>directed edge</strong>. Triangle attention scores how strongly the <strong>three edges</strong> of a triangle <strong>co-constrain</strong> each other (AlphaFold2 discusses <strong>outgoing</strong> vs <strong>incoming</strong> edge messages; <strong>missing</strong> edges in the triangle can be filled with a <strong>logit bias</strong> built from the two visible edges). Proteus compresses that story onto <strong>local</strong> triangles only, but keeps the same spirit: <strong>triangular closure</strong> in the pair channel should respect <strong>current</strong> backbone distances.
+
+<strong>Why this architecture choice matters (notes summary).</strong> Compared with pipelines that lean heavily on <strong>pretrained</strong> denoisers, and compared with <strong>full</strong> <span class="blog-post-math">\(O(N^3)\)</span> Evoformer-style pair modules, this design aims to stay <strong>geometrically faithful</strong> (backbone in the triangle block), <strong>tractable</strong> (<span class="blog-post-math">\(O(N K^2)\)</span> local attention), and <strong>scalable</strong>—the notes mention handling on the order of <strong>1024 residues</strong> in settings where <strong>384</strong> was a practical ceiling for some earlier large-structure models (exact numbers should always be checked against the paper’s latest tables).
 
 <h3 class="blog-post-h3">2.5 A personal interpretation of which block helps which protein level</h3>
-<p class="blog-post-p">The paper itself mainly focuses on architecture and empirical performance, not on assigning each block to exactly one biological structure level. But from the notes, I think we can still form a reasonable intuition.</p>
+<p class="blog-post-p">The paper itself mainly focuses on architecture and empirical performance, not on assigning each folding-block stage to exactly one biological structure level. Still, it helps to map <strong>section 2.4’s three stages</strong>—<strong>IPA–Transformer</strong> (single / node <span class="blog-post-math">\(s\)</span>), <strong>backbone update</strong> (frames <span class="blog-post-math">\(T_i\)</span>), <strong>graph triangle block</strong> (pair / edge <span class="blog-post-math">\(z\)</span>)—onto folding hierarchy in a loose way.</p>
 
-<p class="blog-post-p">1. <strong>Secondary structure</strong>: the IPA-Transformer and backbone update layers are probably very important here, because they help form local geometric motifs such as alpha-helices and beta-sheets.</p>
-<p class="blog-post-p">2. <strong>Tertiary structure</strong>: the graph triangle block is especially important, because long- and mid-range geometric consistency is strongly related to how the full 3D fold is organized.</p>
-<p class="blog-post-p">3. <strong>Quaternary structure</strong>: chain positional encoding and local graph interactions help the model distinguish and coordinate multiple polypeptide chains in a complex.</p>
+<p class="blog-post-p">1. <strong>Secondary structure (local motifs).</strong> <strong>IPA–Transformer</strong> mixes sequence, pair, and <strong>current frames</strong> while keeping geometry in an <strong>SE(3)-sensible</strong> way; the <strong>backbone update</strong> then applies small rigid deltas <span class="blog-post-math">\((\Delta R_i, x_i)\)</span>. Together they are natural candidates for <strong>local</strong> regularity—helices, sheets, turns—because they directly reshape <strong>per-residue frames</strong> in 3D.</p>
+<p class="blog-post-p">2. <strong>Tertiary structure (global fold organization).</strong> The <strong>graph triangle block</strong> refines the <strong>pair representation</strong> using <strong>local <span class="blog-post-math">\(K\)</span>-neighbor graphs</strong>, <strong>triangle multiplicative updates</strong>, and <strong>RBF structure bias</strong> from <strong>current</strong> inter-residue distances. That is where <strong>mid- and longer-range consistency</strong> in the <strong>edge</strong> channel catches up with the <strong>single</strong> and <strong>frame</strong> tracks, which matters for the overall 3D packing of one chain.</p>
+<p class="blog-post-p">3. <strong>Quaternary structure (multi-chain complexes).</strong> Besides <strong>chain positional encodings</strong> (so the model knows which token belongs to which chain), <strong>spatial</strong> <strong>neighbor collate</strong> in the graph block can still link residues that are <strong>close in 3D</strong> even when they are <strong>far in sequence</strong>—including <strong>across chains</strong>—so <strong>local graph triangle</strong> updates remain relevant for assemblies.</p>
 
-<p class="blog-post-p">Of course, this is not a strict separation. In reality, all these modules interact with each other during generation.</p>
+<p class="blog-post-p">This is only a mental picture: <strong><span class="blog-post-math">\(s\)</span></strong>, <strong><span class="blog-post-math">\(T\)</span></strong>, and <strong><span class="blog-post-math">\(z\)</span></strong> are coupled every <strong>folding block</strong>, and diffusion time also mixes the roles above.</p>
 
 <h3 class="blog-post-h3">2.6 Training objective</h3>
 <p class="blog-post-p">Proteus is trained mainly with <strong>denoising score matching</strong> losses for both translation and rotation. This fits the diffusion viewpoint very well: the model learns a score field that tells it how to denoise a noisy structure.</p>
