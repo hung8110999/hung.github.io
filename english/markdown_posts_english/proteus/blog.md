@@ -295,91 +295,29 @@ The architecture in Proteus is explicitly **inspired by AlphaFold2 and RoseTTAFo
 **Link to Proteus.** AlphaFold2 supplies the mental toolkit Proteus reuses most directly: **per-residue frames**, **pair tracks**, and **IPA-style** geometry-aware attention. Proteus then trades some global triangle cost for **graph-local triangles** and explicit **structure bias**, targeting **speed** and **designable** backbones under diffusion—developed in the next section.
 
 ### 2.4 Model architecture
-This section follows my own notes on how Proteus is wired end to end.
 
-**Overall layout.** The model is a stack of **\(L\)** folding blocks connected in series. The blocks **do not share weights**—each block has its own parameters. Every block consumes and updates the same three tensors:
+Your SharePoint notebook link could not be opened from this environment (it requires signing in to the university tenant), so this subsection is written to match the official paper text in Wang et al. (2024), Section 3.1 and Figure 2, which is what those notes summarize.
 
-1. **Node (single) representation** — one feature vector per residue.  
-2. **Pair representation** — one feature block per ordered residue pair (or “edge” in graph language).  
-3. **Structural frames (backbone)** — the rigid transforms \(T_i^l = (R_i^l, t_i^l)\) for each residue at block \(l\).
+![Figure 2: Proteus model illustration (Wang et al., 2024)](image/model_architecture_figure2.png){width=85%}
+*Figure 2 in the paper: (A) protein backbone diffusion; (B) overall Proteus architecture; (C) graph triangle block. Source: PMLR proceedings PDF (ICML 2024).*
 
-Inside one block, the order is fixed: **IPA–Transformer → backbone update → graph triangle block**. The graph triangle stage reads the **already updated** node features \(s^{l+1}\) and backbone \(T^{l+1}\), and the **previous** pair state \(z^l\), and writes an updated pair state \(z^{l+1}\). That matches the idea that geometry is refreshed in the middle of the block before pair edges are refined.
+**Overview**
+
+Proteus iteratively updates structural frames through a sequence of \(L\) layers of folding blocks. Each layer receives three tracks: node representation, edge representation, and structural frames. A folding block has three parts: an IPA-Transformer block, a backbone update layer, and a graph triangle block. Each part is meant to model and refine one of those tracks while remaining aware of the others. The IPA-Transformer block combines Invariant Point Attention (IPA) with a traditional transformer. In the main paper, IPA carries out attention with a bias that depends on spatial distances between inter-residue atoms and on the edge representation. The backbone update layer, following AlphaFold2, uses a linear layer to predict translation and rotation updates for each residue’s frame from the updated sequence (node) representation. The graph triangle block updates the edge representation with a graph-based attention mechanism on edges, modulated by a sequence representation–gated structural bias. The full model stacks \(L\) such folding-block layers and does not share weights across layers. The node representation is initialized from the diffusion timestep, and the edge representation is initialized with a relative sequential distance map as in AlphaFold2. When self-conditioning is available, additional features (including the Cα distance map and relative rotational features from earlier predictions) are added; the paper gives details in Table 5. The authors stress that the graph triangle block is the main source of large gains in designability and efficiency.
 
 **IPA–Transformer block**
 
-- **Role.** Refresh the **node / single representation** only; it does not, by itself, move the backbone in space the way the next layer does.  
-- **Inputs.** The three representations above (single, pair, current frames).  
-- **Output.** Updated per-residue features \(s^{l+1}\).
+The paper adopts IPA from AlphaFold2 without changing its definition and adds a standard Transformer layer (as in FrameDiff). The appendix states the update pattern: apply IPA with residual connection and layer norm on \((s^\ell, z^\ell, T^\ell)\), concatenate with a linear projection of the initial node features \(s_0\), run a Transformer block, add another residual, then apply an MLP to produce the updated node representation \(s^{\ell+1}\).
 
-Conceptually this block is **IPA (Invariant Point Attention) from AlphaFold2** plus a **standard Transformer** (as in the Proteus paper): IPA is the geometry-aware attention module; the Transformer stack is the usual sequence-of-tokens machinery built around it.
+**Backbone update**
 
-**IPA in plain language.** IPA is designed so that **global rigid motions** (rotating or translating the whole structure) do not change the attention logic. Informally, the backbone frames define a **global protein frame**; each residue still carries its **local** geometry. The notes describe it like this: for each residue you form **separate \(Q, K, V\)** in a local setting, **project** those quantities into the **global** frame induced by the backbone, let them **interact** there, then **project back** to local coordinates to obtain attention weights. That way the model keeps **per-residue local detail** while reasoning about **global** layout—exactly what you want when the fold can still move during generation.
-
-**Backbone update layer**
-
-- **Inputs.** (1) the updated node vector \(s_i^{l+1}\) from the IPA–Transformer block, and (2) the backbone \(T_i^l = (R_i^l, t_i^l)\) coming **into** this block.  
-- **Output.** Updated frames \(T_i^{l+1}\).
-
-Because the 3D backbone is **defined by how residues relate in space**, once residue-level features change, the model **re-predicts** small **rotational and translational** deltas. Following the notes: a **linear map** on the updated residue representation predicts a **translation** \(x_i \in \mathbb{R}^3\) and the **imaginary parts** \((b_i, c_i, d_i)\) of a **unit quaternion** 
-
-$$
-q_i = a_i + b_i\mathbf{i} + c_i\mathbf{j} + d_i\mathbf{k}.
-$$
-
-Quaternions are a standard way to store 3D rotations; the **real part** \(a_i\) is fixed by the **unit-norm constraint**
-
-$$
-a_i^2 + b_i^2 + c_i^2 + d_i^2 = 1,
-$$
-
-so the network’s linear output is tied to a **valid** rotation after **normalization** (the notes call this the step that “creates” \(a_i\) and enforces a proper quaternion before turning it into a matrix). In implementation, one common pattern is to predict \((b_i,c_i,d_i)\) (and possibly a raw \(a_i\)) and **renormalize** \((a_i,b_i,c_i,d_i)\) to the unit sphere, then map to a rotation matrix \(\Delta R_i = R(\hat{q}_i)\) with normalized components \((\hat{a}_i,\hat{b}_i,\hat{c}_i,\hat{d}_i)\):
-
-$$
-\Delta R_i =
-\begin{bmatrix}
-1 - 2(\hat{c}_i^2 + \hat{d}_i^2) & 2(\hat{b}_i\hat{c}_i - \hat{a}_i\hat{d}_i) & 2(\hat{b}_i\hat{d}_i + \hat{a}_i\hat{c}_i) \\
-2(\hat{b}_i\hat{c}_i + \hat{a}_i\hat{d}_i) & 1 - 2(\hat{b}_i^2 + \hat{d}_i^2) & 2(\hat{c}_i\hat{d}_i - \hat{a}_i\hat{b}_i) \\
-2(\hat{b}_i\hat{d}_i - \hat{a}_i\hat{c}_i) & 2(\hat{c}_i\hat{d}_i + \hat{a}_i\hat{b}_i) & 1 - 2(\hat{b}_i^2 + \hat{c}_i^2)
-\end{bmatrix}.
-$$
-
-The frame is then **composed** with the increment \((\Delta R_i, x_i)\):
-
-$$
-\begin{aligned}
-R_i^{l+1} &= \Delta R_i R_i^l, \\
-t_i^{l+1} &= \Delta R_i t_i^l + x_i.
-\end{aligned}
-$$
-
-So this layer is literally: “given what I believe about residue \(i\) after IPA–Transformer, rotate and translate its frame by a small rigid update.”
+Frame updates follow AlphaFold2’s BackboneUpdate procedure. A linear map on \(s^{\ell+1}\) predicts \(b_i, c_i, d_i\) and the translation update \(\vec{x}^{\mathrm{update}}_i\). The quaternion is normalized as \((a_i, b_i, c_i, d_i) = (1, b_i, c_i, d_i) / \sqrt{1 + b_i^2 + c_i^2 + d_i^2}\), converted to a rotation matrix \(R^{\mathrm{update}}_i\), and composed with the current frame so that \(T^{\ell+1}_i = T^\ell_i \cdot (R^{\mathrm{update}}_i, \vec{x}^{\mathrm{update}}_i)\) in the paper’s notation.
 
 **Graph triangle block**
 
-The paper highlights this as the main lever for **designability** and **efficiency**—roughly: *“our primary emphasis is on elucidating the graph triangle block, which is the source of significant enhancements in designability and efficiency.”* It is a **graph-based attention** mechanism that operates primarily on **edge / pair** features \(z\), not on replacing the whole Evoformer at full cost.
+Triangle attention in AlphaFold2’s Evoformer encourages valid protein geometry by enforcing triangular consistency when updating edges, but it scales as \(O(N^3)\) and is memory-heavy (for example, the authors report that a single Evoformer layer on a 384-residue protein can exceed about 20GB in training). For diffusion, naively applying full triangle attention also couples poorly with the need to inject backbone geometry throughout denoising.
 
-**Motivation (from the notes).** Classic **triangle attention** in AlphaFold2’s Evoformer is powerful but has two pains for a **backbone–diffusion** training setup: (1) **complexity** is on the order of **\(O(N^3)\)** over residues, and (2) in the original prediction setting, that module is dominated by **MSA and pair correlation**—**backbone geometry** is not in the loop the same way you want when you are **generating** and repeatedly updating frames. Proteus’s block is engineered to fix both.
-
-**(A) Local triangle attention.** Triangle-style updates are applied only on a **sparse edge set**: for each residue, keep the **\(K\)** **nearest** neighbors in space (**Cα distance** in the notes). That yields on the order of **\(N K\)** active edges out of \(N^2\). The notes give the resulting complexity as **\(O(N K^2)\)** for the triangle attention piece—linear in \(N\) with fixed local width \(K\), instead of **\(O(N^3)\)** when all triples of residues are in play.
-
-**(B) Geometry into the logits: RBF bias and gate.** To inject **3D structure**, the model uses distances that close each **triangle**—informally, the **third edge** in a residue triple. Those distances are turned into **radial basis function (RBF)** features that **decay** with distance; those features act as a **structure bias** in the attention logits. A **gate** implemented as a **small feed-forward network** scales that bias and controls how strongly it **blends** with the other tracks, instead of hard-coding a fixed geometric influence.
-
-**(C) Order of operations.** **Before** triangle **attention**, the block runs a **triangle multiplicative update** (the same family of ideas as in AlphaFold2’s Evoformer) to refresh edge features from **triangular consistency**—each edge in a triangle is informed by the **other two** edges, which propagates **transitive** constraints cheaply compared to relying on attention alone. The notes also cite RFdiffusion’s observation that triangle multiplicative updates help **backbone diffusion** training and can be **more memory-friendly** than attention-only variants; AlphaFold2’s authors similarly report that **either** multiplicative updates **or** triangle attention work reasonably, while **both together** work best—which is the recipe Proteus inherits, then **localizes** on the graph.
-
-**Pipeline inside the block (as in the notes).** Concretely, after the multiplicative triangle pass:
-
-1. **Neighbour collate** — for each residue, gather its **\(K\)** spatial neighbors.  
-2. **Local pair representation** — build edge features on that sparse neighbor graph.  
-3. **Distance matrix and bias featurization** — compute pairwise distances needed for triangles and map them to RBF (and related) bias features.  
-4. **Local pair geometry bias** — add the structure bias into the local pair stream.  
-5. **Gate** — use **sequence / single** information to modulate how strong that bias is.  
-6. **Attention** — linear projections, **dot-product** affinities, **softmax**, attention weights over **local** edges (triangle attention on the graph, not on the full \(N^2\) board).  
-7. **Pair update** — write refined edge embeddings from the attention output.  
-8. **Scatter update** — **aggregate** local edge updates back into the **global** pair tensor \(z^{l+1}\).
-
-**Intuition for triangle attention on a graph.** Each residue is a **vertex**; each pair feature is a **directed edge**. Triangle attention scores how strongly the **three edges** of a triangle **co-constrain** each other (AlphaFold2 discusses **outgoing** vs **incoming** edge messages; **missing** edges in the triangle can be filled with a **logit bias** built from the two visible edges). Proteus compresses that story onto **local** triangles only, but keeps the same spirit: **triangular closure** in the pair channel should respect **current** backbone distances.
-
-**Why this architecture choice matters (notes summary).** Compared with pipelines that lean heavily on **pretrained** denoisers, and compared with **full** \(O(N^3)\) Evoformer-style pair modules, this design aims to stay **geometrically faithful** (backbone in the triangle block), **tractable** (\(O(N K^2)\) local attention), and **scalable**—the notes mention handling on the order of **1024 residues** in settings where **384** was a practical ceiling for some earlier large-structure models (exact numbers should always be checked against the paper’s latest tables).
+Proteus adapts the idea as follows. Triangle multiplicative updates (outgoing and incoming, as in Evoformer) are first applied to the full \(N \times N\) edge tensor. Then local triangle attention runs only on a sparse set of about \(N \times K\) edges: for each residue, the \(K\) nearest neighbors by current Cα distance define a dynamic graph that changes as the structure improves, which avoids fixing a wrong long-range graph when noise is large but keeps attention cost manageable. Attention logits add a structure bias built from RBF features of Cα–Cα distances (the algorithm in the paper uses 64 RBF centers from 0 Å to 32 Å). That bias is gated using node features so its strength can be controlled. Starting-node and ending-node variants of the structure-biased graph triangle attention run with scatter updates back to the global edge representation (Algorithms 2 and 3 in the paper). Compared with axial attention in RFdiffusion or lighter message passing in FrameDiff and Genie, the authors argue this design improves backbone diffusion modeling, cuts memory use, and allows training on longer chains—up to about 1024 residues on an A40 GPU in their setup, versus a 384-residue limit they cite for AlphaFold2 and RFdiffusion.
 
 ### 2.5 A personal interpretation of which block helps which protein level
 The paper itself mainly focuses on architecture and empirical performance, not on assigning each folding-block stage to exactly one biological structure level. Still, it helps to map **section 2.4’s three stages**—**IPA–Transformer** (single / node \(s\)), **backbone update** (frames \(T_i\)), **graph triangle block** (pair / edge \(z\))—onto folding hierarchy in a loose way.
