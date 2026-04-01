@@ -71,21 +71,21 @@ The drawback in the Proteus paper context is that triangle-attention-heavy compu
 ### 2.1 Protein backbone representation
 To let a model understand a protein, we first need a representation that is stable under rotation and translation. If we only store the absolute coordinates of all atoms, then two identical proteins placed in two different positions in 3D space would look different to the model. That is inconvenient.
 
-**Rigid frames, as in AlphaFold2.** Proteus follows the same idea: the backbone of each residue (each amino acid) is parameterized by a **rigid transformation**, also called a **frame**. Each frame is written as \(T = (R, t)\).
+Rigid frames, as in AlphaFold2. Proteus follows the same idea: the backbone of each residue (each amino acid) is parameterized by a rigid transformation, also called a "frame". Each frame is written as \(T = (R, t)\).
 
 Two notes that matter for the intuition:
 
-1. **Rigid means distance-preserving.** \(T = (R, t)\) is a rigid transformation: it does not change distances (or angles) within the object being moved—only its position and orientation in space.
-2. **What the backbone atoms are.** Each amino acid has an amino group (N) and a carboxyl group (C), with the **alpha-carbon (Cα)** sitting between them on the backbone. The local frame is built from these three backbone atoms (N, Cα, C), not from the whole side chain.
+1. Rigid means distance-preserving. \(T = (R, t)\) is a rigid transformation: it does not change distances (or angles) within the object being moved—only its position and orientation in space.
+2. What the backbone atoms are. Each amino acid has an amino group (N) and a carboxyl group (C), with the alpha-carbon (Cα) sitting between them on the backbone. The local frame is built from these three backbone atoms (N, Cα, C), not from the whole side chain.
 
 **What \(R\) and \(t\) mean in that local picture.**
 
-1. **\(R\) (rotation matrix in \(SO(3)\))** encodes 3D rotations. It describes the **relative orientation** of the residue in its own (local) frame: you can think of it as rotating the axes so the residue is described in a consistent local geometry.
-2. **\(t\) (translation vector in \(\mathbb{R}^3\))** encodes translation. It describes the **relative position** of the residue—where the origin of that local frame sits in space (in standard constructions, the origin is tied to the Cα / frame construction rather than using raw atom triples alone as the only description).
+1. \(R\) (rotation matrix in \(SO(3)\)) encodes 3D rotations. It describes the relative orientation of the residue in its own (local) frame: you can think of it as rotating the axes so the residue is described in a consistent local geometry.
+2. \(t\) (translation vector in \(\mathbb{R}^3\)) encodes translation. It describes the relative position of the residue—where the origin of that local frame sits in space (in standard constructions, the origin is tied to the Cα / frame construction rather than using raw atom triples alone as the only description).
 
-**Why not only global \([N, Cα, C]\) coordinates?** A protein has many residues at different absolute positions. Raw 3D coordinates of backbone atoms only give **absolute** placements; exploiting **local** geometric relationships across the chain is awkward if every residue is expressed only in a single global coordinate system. So **each residue is embedded in its own 3D coordinate system** (its frame): \(R\) rotates that system so the residue is represented in a sensible local pose (with Cα playing the role of the frame origin in the usual construction), and \(t\) places that frame in space.
+**Why not only global \([N, Cα, C]\) coordinates?** A protein has many residues at different absolute positions. Raw 3D coordinates of backbone atoms only give absolute placements; exploiting local geometric relationships across the chain is awkward if every residue is expressed only in a single global coordinate system. So each residue is embedded in its own 3D coordinate system (its frame): \(R\) rotates that system so the residue is represented in a sensible local pose (with Cα playing the role of the frame origin in the usual construction), and \(t\) places that frame in space.
 
-Instead of describing the backbone **only** by listing atom coordinates in global 3D, the model uses a **rigid transform per residue** to describe the state of each amino acid. That is convenient when you want to **update one residue’s pose independently** during generation, instead of having to adjust the entire backbone in an unconstrained way.
+Instead of describing the backbone only by listing atom coordinates in global 3D, the model uses a rigid transform per residue to describe the state of each amino acid. That is convenient when you want to update one residue’s pose independently during generation, instead of having to adjust the entire backbone in an unconstrained way.
 
 One residue frame is written as:
 
