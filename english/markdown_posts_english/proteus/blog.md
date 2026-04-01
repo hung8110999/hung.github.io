@@ -109,118 +109,118 @@ flowchart LR
     E --> F
 ```
 
-So in one sentence: each amino acid gets its own rigid frame; that makes local geometry and **independent** per-residue updates much more natural than using only absolute coordinates.
+So in one sentence: each amino acid gets its own rigid frame; that makes local geometry and independent per-residue updates much more natural than using only absolute coordinates.
 
 ### 2.2 Diffusion modeling on protein backbone
-The central idea of Proteus is to use the **forward process** of a diffusion model, but **not** to add noise to pixels. The same **forward corruption and reverse denoising** story applies to the **protein backbone**: translations and rotations of the frames are noised in **diffusion time** \(t\), and a network learns to invert that process.
+The central idea of Proteus is to use the forward process of a diffusion model, but not to add noise to pixels. The same forward corruption and reverse denoising story applies to the protein backbone: translations and rotations of the frames are noised in diffusion time \(t\), and a network learns to invert that process.
 
-Below: (**1**) the **general forward representation** in diffusion modeling—the SDE written explicitly, with **each symbol** explained; (**2**) the **SDE for the protein backbone**, i.e. the same template when the state is on **\(SO(3) \times \mathbb{R}^3\)** per residue.
+Below: (1) the general forward representation in diffusion modeling—the SDE written explicitly, with each symbol explained; (2) the SDE for the protein backbone, i.e. the same template when the state is on \(SO(3) \times \mathbb{R}^3\) per residue.
 
-#### (1) General forward representation in diffusion modeling
+### **(1) General forward representation in diffusion modeling**
 
-A **forward diffusion** process maps a clean random variable \(Y_0\) to increasingly noisy \(Y_t\) as \(t\) increases. In **continuous time**, the canonical **general forward SDE** (Itô form) is:
+A forward diffusion process maps a clean random variable \(Y_0\) to increasingly noisy \(Y_t\) as \(t\) increases. In continuous time, the canonical general forward SDE (Itô form) is:
 
 $$
 dY_t = f(Y_t, t)\,dt + g(Y_t, t)\,dW_t.
 $$
 
-**What each part of this equation means:**
+What each part of this equation means:
 
-1. **\(t\)** — **Diffusion time** (algorithmic time), not physical folding time. Larger \(t\) means **more forward corruption**; typically \(t \in [0, T]\) for some horizon \(T\).
-2. **\(Y_t\)** — The **state being noised** at time \(t\) (for images: pixels; here: the tuple of all frame rotations and translations). The collection \(\{Y_t\}_{t \ge 0}\) is a **stochastic process**.
-3. **\(dY_t\)** — The **infinitesimal change** of \(Y_t\) over an infinitesimal step of diffusion time (Itô calculus).
-4. **\(f(Y_t, t)\)** — The **drift coefficient**: the **deterministic** part of the dynamics. If randomness were switched off (\(g \equiv 0\)), you would have \(dY = f(Y,t)\,dt\). Drift encodes **systematic** motion such as **mean reversion** or damping.
-5. **\(dt\)** — An infinitesimal **time step** in diffusion time; it multiplies **only** the drift in this standard form.
-6. **\(g(Y_t, t)\)** — The **diffusion coefficient**: **how large** the random kicks are at state \(Y_t\) and time \(t\) (noise **scale** / volatility).
-7. **\(W_t\)** — A **standard Wiener process** (Brownian motion): continuous paths, **independent Gaussian increments** with mean zero and incremental variance proportional to \(dt\) in the usual formal sense.
-8. **\(dW_t\)** — The **Brownian increment** on the interval of length \(dt\). The product **\(g(Y_t,t)\,dW_t\)** is the **stochastic** term—it injects randomness so trajectories **diverge** even from identical \(Y_0\).
+1. \(t\) — Diffusion time (algorithmic time), not physical folding time. Larger \(t\) means more forward corruption; typically \(t \in [0, T]\) for some horizon \(T\).
+2. \(Y_t\) — The state being noised at time \(t\) (for images: pixels; here: the tuple of all frame rotations and translations). The collection \(\{Y_t\}_{t \ge 0}\) is a stochastic process.
+3. \(dY_t\) — The infinitesimal change of \(Y_t\) over an infinitesimal step of diffusion time (Itô calculus).
+4. \(f(Y_t, t)\) — The drift coefficient: the deterministic part of the dynamics. If randomness were switched off (\(g \equiv 0\)), you would have \(dY = f(Y,t)\,dt\). Drift encodes systematic motion such as mean reversion or damping.
+5. \(dt\) — An infinitesimal time step in diffusion time; it multiplies only the drift in this standard form.
+6. \(g(Y_t, t)\) — The diffusion coefficient: how large the random kicks are at state \(Y_t\) and time \(t\) (noise scale / volatility).
+7. \(W_t\) — A standard Wiener process (Brownian motion): continuous paths, independent Gaussian increments with mean zero and incremental variance proportional to \(dt\) in the usual formal sense.
+8. \(dW_t\) — The Brownian increment on the interval of length \(dt\). The product \(g(Y_t,t)\,dW_t\) is the stochastic term; it injects randomness so trajectories diverge even from identical \(Y_0\).
 
-**In one sentence:** **Drift** \(f\,dt\) tells you the **average, rule-based** motion; **diffusion** \(g\,dW\) adds **random** spreading. **Forward** diffusion means choosing \(f\) and \(g\) so that \(Y_t\) becomes **easy to sample from** at large \(t\).
+In one sentence: drift \(f\,dt\) tells you the average, rule-based motion; diffusion \(g\,dW\) adds random spreading. Forward diffusion means choosing \(f\) and \(g\) so that \(Y_t\) becomes easy to sample from at large \(t\).
 
-**Simplest discrete forward form.** In discrete time, the forward process is often written in one line as a **noisy linear update** from step \(t-1\) to step \(t\):
+Simplest discrete forward form. In discrete time, the forward process is often written in one line as a noisy linear update from step \(t-1\) to step \(t\):
 
 $$
 x_t = \sqrt{\alpha_t}\, x_{t-1} + \sqrt{1 - \alpha_t}\, \epsilon, \qquad \epsilon \sim \mathcal{N}(0, I).
 $$
 
-Here \(x_t\) is the **state** at step \(t\)—what you noised (for images, pixels; for Proteus-style models, the **protein backbone representation** you diffuse on). **Meaning of each piece:**
+Here \(x_t\) is the state at step \(t\) (what you noised). Meaning of each piece:
 
-1. **\(x_t\)** — The state after the **\(t\)**-th corruption step.
-2. **\(x_{t-1}\)** — The state **one step earlier** (slightly cleaner).
-3. **\(\alpha_t\)** — A scalar in the **noise schedule** (usually in \((0,1)\)). It fixes how much of **\(x_{t-1}\)** is **kept** versus how much **new noise** enters at this step.
-4. **\(\sqrt{\alpha_t}\, x_{t-1}\)** — **Scales down** the previous state. As the schedule is chosen so \(\alpha_t\) tends to shrink over the forward trajectory, this term **weakens** the signal from \(x_{t-1}\) and pushes the chain toward a **simple** (often nearly Gaussian) limit.
-5. **\(\sqrt{1 - \alpha_t}\, \epsilon\)** — **Fresh Gaussian noise** injected at step \(t\); the factor \(\sqrt{1-\alpha_t}\) sets the **noise strength** at that step.
-6. **\(\epsilon \sim \mathcal{N}(0, I)\)** — **Standard normal** noise: mean zero, identity covariance, so noise is **isotropic** across coordinates of \(x\).
+1. \(x_t\) — The state after the \(t\)-th corruption step.
+2. \(x_{t-1}\) — The state one step earlier (slightly cleaner).
+3. \(\alpha_t\) — A scalar in the noise schedule (usually in \((0,1)\)). It fixes how much of \(x_{t-1}\) is kept versus how much new noise enters at this step.
+4. \(\sqrt{\alpha_t}\, x_{t-1}\) — Scales down the previous state. As the schedule is chosen so \(\alpha_t\) tends to shrink over the forward trajectory, this term weakens the signal from \(x_{t-1}\) and pushes the chain toward a simple (often nearly Gaussian) limit.
+5. \(\sqrt{1 - \alpha_t}\, \epsilon\) — Fresh Gaussian noise injected at step \(t\); the factor \(\sqrt{1-\alpha_t}\) sets the noise strength at that step.
+6. \(\epsilon \sim \mathcal{N}(0, I)\) — Standard normal noise: mean zero, identity covariance, so noise is isotropic across coordinates of \(x\).
 
-**Relation to the \(\beta_t\) notation.** Many papers instead write the same Markov corruption as
+Relation to the \(\beta_t\) notation. Many papers instead write the same Markov corruption as
 
 $$
 q(Y_t \mid Y_{t-1}) = \mathcal{N}\bigl(Y_t;\, \sqrt{1-\beta_t}\, Y_{t-1},\, \beta_t I\bigr),
 $$
 
-i.e. \(Y_t = \sqrt{1-\beta_t}\, Y_{t-1} + \sqrt{\beta_t}\, \varepsilon_t\) with \(\varepsilon_t \sim \mathcal{N}(0,I)\). That is **the same update** if you identify **\(\alpha_t = 1 - \beta_t\)** (keep fraction \(\alpha_t\), noise fraction \(1-\alpha_t = \beta_t\)). **\(\beta_t\)** is then the **variance** of the new noise at step \(t\). Under standard scalings, long chains of such steps **converge** to an SDE of the form \(dY_t = f\,dt + g\,dW_t\) above.
+i.e. \(Y_t = \sqrt{1-\beta_t}\, Y_{t-1} + \sqrt{\beta_t}\, \varepsilon_t\) with \(\varepsilon_t \sim \mathcal{N}(0,I)\). That is the same update if you identify \(\alpha_t = 1 - \beta_t\) (keep fraction \(\alpha_t\), noise fraction \(1-\alpha_t = \beta_t\)). \(\beta_t\) is then the variance of the new noise at step \(t\). Under standard scalings, long chains of such steps converge to an SDE of the form \(dY_t = f\,dt + g\,dW_t\) above.
 
-#### (2) SDE of the protein backbone
+### **(2) SDE of the protein backbone**
 
-Let residue \(i\) have rotation \(R_t^{(i)} \in SO(3)\) and translation \(X_t^{(i)} \in \mathbb{R}^3\) in the model's coordinates. The **full backbone state** is
+Let residue \(i\) have rotation \(R_t^{(i)} \in SO(3)\) and translation \(X_t^{(i)} \in \mathbb{R}^3\) in the model's coordinates. The full backbone state is
 
 $$
 \mathcal{Y}_t = \bigl\{(R_t^{(i)}, X_t^{(i)})\bigr\}_{i=1}^{N}.
 $$
 
-The state space is **not** a single flat \(\mathbb{R}^d\): each residue lives in **\(SO(3) \times \mathbb{R}^3\)** (rotation \(\times\) translation), and the chain is the **product** over residues.
+The state space is not a single flat \(\mathbb{R}^d\): each residue lives in \(SO(3) \times \mathbb{R}^3\) (rotation \(\times\) translation), and the chain is the product over residues.
 
-**Compact forward SDE (block form, as in the notes).** The forward motion on **\(SO(3) \times \mathbb{R}^3\)** can be written in one stroke for the backbone state at diffusion time \(t\). Let **\(\mathbf{T}^{(t)}\)** denote that state (rotations and translations stacked for the whole structure). To avoid confusion with §2.1, **\(\mathbf{T}^{(t)}\)** here is **not** a single residue’s rigid map \(T_i=(R_i,t_i)\)—it is the **time-\(t\)** argument of the diffusion. In bracket form:
+Compact forward SDE (block form, as in the notes). The forward motion on \(SO(3) \times \mathbb{R}^3\) can be written in one stroke for the backbone state at diffusion time \(t\). Let \(\mathbf{T}^{(t)}\) denote that state (rotations and translations stacked for the whole structure). To avoid confusion with §2.1, \(\mathbf{T}^{(t)}\) here is not a single residue’s rigid map \(T_i=(R_i,t_i)\); it is the time-\(t\) argument of the diffusion. In bracket form:
 
 $$
 d\mathbf{T}^{(t)} = \left[ 0,\; -\frac{1}{2}\mathbf{X}^{(t)} \right] dt + \left[ d\mathbf{B}_{SO(3)}^{(t)},\; d\mathbf{B}_{\mathbb{R}^3}^{(t)} \right].
 $$
 
-Read this as **two coupled blocks** (rotation block first, translation block second):
+Read this as two coupled blocks (rotation block first, translation block second):
 
-1. **\(\mathbf{T}^{(t)}\)** — Protein backbone state at diffusion time \(t\).
-2. **Drift** \(\left[ 0,\; -\frac{1}{2}\mathbf{X}^{(t)} \right] dt\):
-   - **First entry \(0\)** — **No drift** on the **rotational** part of the forward process.
-   - **Second entry \(-\frac{1}{2}\mathbf{X}^{(t)}\)** — **\(\mathbf{X}^{(t)}\)** is the **position / translation** component at time \(t\); the factor **\(-\frac{1}{2}\)** gives **mean reversion** toward the origin (the structure is pulled toward a center as diffusion time runs forward, while noise competes with that pull).
-3. **Noise** \(\left[ d\mathbf{B}_{SO(3)}^{(t)},\; d\mathbf{B}_{\mathbb{R}^3}^{(t)} \right]\):
-   - **\(d\mathbf{B}_{\mathbb{R}^3}^{(t)}\)** — Random **translational** increments in \(\mathbb{R}^3\) (isotropic across three axes).
-   - **\(d\mathbf{B}_{SO(3)}^{(t)}\)** — Random **rotational** increments intrinsic to **\(SO(3)\)** (Brownian motion on the rotation group), not Euclidean noise pasted onto rotation matrices.
+1. \(\mathbf{T}^{(t)}\) — Protein backbone state at diffusion time \(t\).
+2. Drift \(\left[ 0,\; -\frac{1}{2}\mathbf{X}^{(t)} \right] dt\):
+   - First entry \(0\) — No drift on the rotational part of the forward process.
+   - Second entry \(-\frac{1}{2}\mathbf{X}^{(t)}\) — \(\mathbf{X}^{(t)}\) is the position / translation component at time \(t\); the factor \(-\frac{1}{2}\) gives mean reversion toward the origin (the structure is pulled toward a center as diffusion time runs forward, while noise competes with that pull).
+3. Noise \(\left[ d\mathbf{B}_{SO(3)}^{(t)},\; d\mathbf{B}_{\mathbb{R}^3}^{(t)} \right]\):
+   - \(d\mathbf{B}_{\mathbb{R}^3}^{(t)}\) — Random translational increments in \(\mathbb{R}^3\) (isotropic across three axes).
+   - \(d\mathbf{B}_{SO(3)}^{(t)}\) — Random rotational increments intrinsic to \(SO(3)\) (Brownian motion on the rotation group), not Euclidean noise pasted onto rotation matrices.
 
-**Backbone SDE in the same general form.** Write the forward process on the backbone as
+Backbone SDE in the same general form. Write the forward process on the backbone as
 
 $$
 d\mathcal{Y}_t = F(\mathcal{Y}_t, t)\,dt + G(\mathcal{Y}_t, t)\,d\mathbf{W}_t.
 $$
 
-**Explanation specialized to the backbone:**
+Explanation specialized to the backbone:
 
-- **\(\mathcal{Y}_t\)** — Entire backbone at diffusion time \(t\): all \(\{R_t^{(i)}, X_t^{(i)}\}\).
-- **\(F(\mathcal{Y}_t,t)\,dt\)** — **Drift** on the product manifold. In the splitting from the notes / Proteus-style forward noising: **no extra deterministic drift on the \(SO(3)\) factors** (rotation is not systematically steered by a drift term in the forward process); **translations** carry a **mean-reverting** drift **\(-\tfrac{1}{2} X_t^{(i)}\)** so positions are pulled toward the origin and do not wander arbitrarily in \(\mathbb{R}^3\) before noise dominates.
-- **\(G(\mathcal{Y}_t,t)\,d\mathbf{W}_t\)** — **Noise**, factored into **two geometries**:
-  - **\(dW_t^{(i)}\) in \(\mathbb{R}^3\)** — standard **Brownian motion** driving the **translational** component \(X_t^{(i)}\) (random displacement in 3D).
-  - **Brownian motion on \(SO(3)\)** driving \(R_t^{(i)}\) — random **reorientation** defined **intrinsically** on the rotation group (not by adding a matrix of Gaussian noise in \(\mathbb{R}^{3\times 3}\)).
+- \(\mathcal{Y}_t\) — Entire backbone at diffusion time \(t\): all \(\{R_t^{(i)}, X_t^{(i)}\}\).
+- \(F(\mathcal{Y}_t,t)\,dt\) — Drift on the product manifold. In the splitting from the notes / Proteus-style forward noising: no extra deterministic drift on the \(SO(3)\) factors (rotation is not systematically steered by a drift term in the forward process); translations carry a mean-reverting drift \(-\tfrac{1}{2} X_t^{(i)}\) so positions are pulled toward the origin and do not wander arbitrarily in \(\mathbb{R}^3\) before noise dominates.
+- \(G(\mathcal{Y}_t,t)\,d\mathbf{W}_t\) — Noise, factored into two geometries:
+  - \(dW_t^{(i)}\) in \(\mathbb{R}^3\) — standard Brownian motion driving the translational component \(X_t^{(i)}\) (random displacement in 3D).
+  - Brownian motion on \(SO(3)\) driving \(R_t^{(i)}\) — random reorientation defined intrinsically on the rotation group (not by adding a matrix of Gaussian noise in \(\mathbb{R}^{3\times 3}\)).
 
-**Per-residue equations (explicit drift vs noise).** For each residue \(i\),
+Per-residue equations (explicit drift vs noise). For each residue \(i\),
 
 $$
 dX_t^{(i)} = -\frac{1}{2} X_t^{(i)}\, dt + g_{\mathbb{R}^3}(t)\, dW_t^{(i)}, \qquad dW_t^{(i)} \text{ standard BM in } \mathbb{R}^3.
 $$
 
-Here **\(-\tfrac{1}{2} X_t^{(i)}\,dt\)** is the **drift on translation** (pull toward \(0\)); **\(g_{\mathbb{R}^3}(t)\, dW_t^{(i)}\)** is **translational noise**. For the rotation,
+Here \(-\tfrac{1}{2} X_t^{(i)}\,dt\) is the drift on translation (pull toward \(0\)); \(g_{\mathbb{R}^3}(t)\, dW_t^{(i)}\) is translational noise. For the rotation,
 
 $$
 dR_t^{(i)} = R_t^{(i)} \circ dB_t^{(i),SO(3)}, \qquad \text{with zero deterministic drift on } SO(3),
 $$
 
-schematically: **Brownian motion on \(SO(3)\)** (noise in the Lie algebra \(\mathfrak{so}(3)\) coupled to \(R_t^{(i)}\)). Thus the **protein backbone SDE** is the template **\(dY = f\,dt + g\,dW\)** with **\(f\)** **only** on translations (mean reversion) and **\(g\,dW\)** supplying **Euclidean noise for \(X\)** and **Riemannian noise for \(R\)**.
+schematically: Brownian motion on \(SO(3)\) (noise in the Lie algebra \(\mathfrak{so}(3)\) coupled to \(R_t^{(i)}\)). Thus the protein backbone SDE is the template \(dY = f\,dt + g\,dW\) with \(f\) only on translations (mean reversion) and \(g\,dW\) supplying Euclidean noise for \(X\) and Riemannian noise for \(R\).
 
-**Translational marginal and score (\(\mathbb{R}^3\)).** Conditioning on a clean \(\mathbf{x}^{(0)}\),
+Translational marginal and score (\(\mathbb{R}^3\)). Conditioning on a clean \(\mathbf{x}^{(0)}\),
 
 $$
 p_{t \mid 0}\bigl(\mathbf{x}^{(t)} \mid \mathbf{x}^{(0)}\bigr) = \mathcal{N}\bigl(\mathbf{x}^{(t)};\, e^{-t/2}\mathbf{x}^{(0)},\, (1-e^{-t})\, I_3 \bigr).
 $$
 
-As \(t\) grows, **\(\mathbf{x}^{(0)}\) matters less** (mean weight \(e^{-t/2}\) decays) and **isotropic** noise grows in all three axes of \(\mathbb{R}^3\). The **score** used in denoising (derivative of \(\log p_{t \mid 0}\) w.r.t. the noisy translation) can be written as
+As \(t\) grows, \(\mathbf{x}^{(0)}\) matters less (mean weight \(e^{-t/2}\) decays) and isotropic noise grows in all three axes of \(\mathbb{R}^3\). The score used in denoising (derivative of \(\log p_{t \mid 0}\) w.r.t. the noisy translation) can be written as
 
 $$
 \nabla_{\mathbf{x}^{(t)}} \log p_{t \mid 0}\bigl(\mathbf{x}^{(t)} \mid \mathbf{x}^{(0)}\bigr) = (1 - e^{-t})^{-1} \bigl( e^{-t/2}\mathbf{x}^{(0)} - \mathbf{x}^{(t)} \bigr),
@@ -228,32 +228,32 @@ $$
 
 equivalently \(\bigl(e^{-t/2}\mathbf{x}^{(0)} - \mathbf{x}^{(t)}\bigr) / (1 - e^{-t})\).
 
-**Rotational marginal and score (\(SO(3)\)).** Let \(r^{(t)}, r^{(0)} \in SO(3)\) denote noisy and clean rotations. The transition density depends on the **relative rotation** \(r^{(0)\mathsf{T}} r^{(t)}\) through its **rotation angle** \(\omega(\cdot)\) (geodesic length on \(SO(3)\)):
+Rotational marginal and score (\(SO(3)\)). Let \(r^{(t)}, r^{(0)} \in SO(3)\) denote noisy and clean rotations. The transition density depends on the relative rotation \(r^{(0)\mathsf{T}} r^{(t)}\) through its rotation angle \(\omega(\cdot)\) (geodesic length on \(SO(3)\)):
 
 $$
 p_{t \mid 0}\bigl(r^{(t)} \mid r^{(0)}\bigr) = f\bigl(\omega(r^{(0)\mathsf{T}} r^{(t)}),\, t\bigr).
 $$
 
-Here **\(f(\omega, t)\)** is the **heat kernel on \(SO(3)\)** (Brownian motion on the group), written as an expansion in **Wigner D-matrix** / character modes indexed by **\(\ell \in \mathbb{N}\)**:
+Here \(f(\omega, t)\) is the heat kernel on \(SO(3)\) (Brownian motion on the group), written as an expansion in Wigner D-matrix / character modes indexed by \(\ell \in \mathbb{N}\):
 
 $$
 f(\omega, t) = \sum_{\ell \in \mathbb{N}} (2\ell + 1)\, e^{-\ell(\ell+1)t/2}\, \frac{\sin\bigl((\ell + \tfrac{1}{2})\omega\bigr)}{\sin(\omega/2)}.
 $$
 
-The exponent **\(-\ell(\ell+1)t/2\)** is the familiar **angular Laplacian** eigenvalue decay on \(SO(3)\); **larger \(\ell\)** encodes **finer** angular detail in the kernel. At \(\omega \to 0\), treat the fraction by its **limit** so the expression stays finite (standard for this kernel). The **score on \(SO(3)\)** is again the gradient of \(\log p_{t \mid 0}\), but in **tangent (Lie algebra) directions** on the group, paralleling the translation formula above.
+The exponent \(-\ell(\ell+1)t/2\) is the familiar angular Laplacian eigenvalue decay on \(SO(3)\); larger \(\ell\) encodes finer angular detail in the kernel. At \(\omega \to 0\), treat the fraction by its limit so the expression stays finite (standard for this kernel). The score on \(SO(3)\) is again the gradient of \(\log p_{t \mid 0}\), but in tangent (Lie algebra) directions on the group, paralleling the translation formula above.
 
-One explicit way to write the **rotational score function** (matching the notes) is:
+One explicit way to write the rotational score function (matching the notes) is:
 
 $$
 \nabla \log p_{t \mid 0}\bigl(r^{(t)} \mid r^{(0)}\bigr)
 = \frac{r^{(t)}}{\omega(t)}\, \log\!\bigl(r^{(0)\mathsf{T}} r^{(t)}\bigr)\, \frac{\partial_{\omega} f(\omega(t), t)}{f(\omega(t), t)}.
 $$
 
-Here \(\omega(t) := \omega\!\bigl(r^{(0)\mathsf{T}} r^{(t)}\bigr)\) is the rotation angle (geodesic distance), and \(\log(\cdot)\) denotes the **matrix log / log map** from \(SO(3)\) to its Lie algebra \(\mathfrak{so}(3)\). Conceptually, \(\partial_{\omega} f / f = \partial_{\omega} \log f\) provides the “radial” part of the score along the geodesic, while the \(\log(r^{(0)\mathsf{T}} r^{(t)})\) term provides its direction in the tangent space.
+Here \(\omega(t) := \omega\!\bigl(r^{(0)\mathsf{T}} r^{(t)}\bigr)\) is the rotation angle (geodesic distance), and \(\log(\cdot)\) denotes the matrix log / log map from \(SO(3)\) to its Lie algebra \(\mathfrak{so}(3)\). Conceptually, \(\partial_{\omega} f / f = \partial_{\omega} \log f\) provides the “radial” part of the score along the geodesic, while the \(\log(r^{(0)\mathsf{T}} r^{(t)})\) term provides its direction in the tangent space.
 
-**Training and sampling.** Exact scores on \(SO(3)\) can be heavy, so training learns an approximate **score network** \(s_\theta(\mathcal{Y}_t, t)\) via **denoising score matching**; generation runs a **reverse-time** discretization (e.g. **Euler–Maruyama**).
+Training and sampling. Exact scores on \(SO(3)\) can be heavy, so training learns an approximate score network \(s_\theta(\mathcal{Y}_t, t)\) via denoising score matching; generation runs a reverse-time discretization (e.g. Euler–Maruyama).
 
-**Goal.** Recover the **clean backbone** \(\mathcal{Y}_0\) from **any** forward time \(t\)—same objective as image diffusion, with state space \(\prod_i \bigl(SO(3)\times\mathbb{R}^3\bigr)\) instead of a pixel vector in \(\mathbb{R}^d\).
+Goal. Recover the clean backbone \(\mathcal{Y}_0\) from any forward time \(t\); same objective as image diffusion, with state space \(\prod_i \bigl(SO(3)\times\mathbb{R}^3\bigr)\) instead of a pixel vector in \(\mathbb{R}^d\).
 
 ### 2.3 Deep learning network architectures for protein structure modeling
 The architecture in Proteus is explicitly **inspired by AlphaFold2 and RoseTTAFold**, then adapted for **diffusion-based backbone generation**. The subsections below follow that split: what each predecessor contributes conceptually, before Proteus-specific changes (local graph triangles, structure bias) appear again in §2.4.
