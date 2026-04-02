@@ -1726,6 +1726,7 @@ pre code {
 .blog-post {
   max-width: 100%;
   padding: var(--space-3xl) var(--space-xl) var(--space-2xl);
+  overflow-x: visible;
 }
 
 .blog-post-header {
@@ -1751,11 +1752,13 @@ pre code {
 }
 
 .blog-post-body {
+  position: relative;
   max-width: 900px;
   margin: 0 auto;
   font-size: var(--fs-lg);
   line-height: 1.9;
   color: var(--text-primary);
+  overflow-x: visible;
   /* How far left/right floats may hang past the text column into article padding */
   --blog-float-bleed: clamp(0.75rem, 2.5vw, 2rem);
 }
@@ -1871,13 +1874,12 @@ pre code {
   z-index: 10;
 }
 
-/* Sidebar notes (e.g. terminology) — pastel yellow, floats right in article */
+/* Margin notes: in-flow on small screens; in outer margin on wide screens (no column wrap) */
 .blog-post-notes {
-  float: right;
-  clear: right;
-  width: min(300px, 36%);
-  margin: 0 0 var(--space-md) var(--space-lg);
-  margin-right: calc(-1 * var(--blog-float-bleed));
+  position: static;
+  width: 100%;
+  max-width: 100%;
+  margin: var(--space-xl) 0;
   padding: var(--space-md) var(--space-lg);
   background: #fffbeb;
   border: 1px solid #f5e0a4;
@@ -1886,15 +1888,38 @@ pre code {
   font-size: var(--fs-sm);
   line-height: 1.65;
   color: var(--text-primary);
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+@media (min-width: 1200px) {
+  .blog-post-notes {
+    position: absolute;
+    left: calc(100% + 1.5rem);
+    top: auto;
+    width: 17.5rem;
+    max-width: min(17.5rem, calc(100vw - 960px));
+    margin: 0;
+  }
 }
 
 .blog-post-notes-label {
   display: block;
   margin-bottom: var(--space-sm);
   font-size: var(--fs-base);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-heading);
   letter-spacing: 0.02em;
+}
+
+.blog-post-notes-mark {
+  color: #c53030;
+  font-weight: 800;
+}
+
+.blog-post-notes-title-suffix {
+  color: var(--text-heading);
+  font-weight: 600;
 }
 
 .blog-post-notes-list {
@@ -2041,13 +2066,6 @@ pre code {
     font-size: var(--fs-xl);
   }
 
-  .blog-post-notes {
-    float: none;
-    width: 100%;
-    max-width: 100%;
-    margin: var(--space-lg) 0;
-    margin-right: 0;
-  }
 }
 
 /* --------------------------------- */

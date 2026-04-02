@@ -8,9 +8,11 @@ Usage: python scripts/convert_english.py
 
 YAML: `tag: Topic` or `tags: Reading, Writing` (comma-separated or [bracket, list]).
 
-Side notes (pastel box, floats right): use a fenced block. Title after `::: notes` is optional; default label is `Notes`. Body is normal markdown (lists, **bold**, `\(math\)`, images, links).
+Side notes (pastel box in the outer margin, out of the text column): use a fenced block.
+The visible title always starts with **Note** (bold red in CSS). Optional words after
+`::: notes` become a suffix, e.g. `::: notes Terminology` → "Note — Terminology".
 
-    ::: notes Optional title
+    ::: notes Optional suffix only
     - Bullet **with** formatting
     ![Alt text](image/file.png){width=100%}
     *Image caption on the next line*
@@ -60,7 +62,7 @@ def convert_markdown(md, folder_name):
             m = pattern.search(result)
             if not m:
                 return result
-            title = (m.group(1) or 'Notes').strip() or 'Notes'
+            title = (m.group(1) or '').strip()
             inner_md = m.group(2).rstrip('\n')
             token = f'@@NOTES_BLOCK_{notes_block_index}@@'
             notes_store[token] = (title, inner_md)
@@ -202,9 +204,19 @@ def convert_markdown(md, folder_name):
         rendered = rendered.replace(token, content)
     for token, (title, inner_md) in notes_store.items():
         inner_html = convert_markdown(inner_md, folder_name)
+        t = (title or '').strip()
+        if not t or t.lower() in ('note', 'notes'):
+            suffix_html = ''
+            aria = 'Note'
+        else:
+            suffix_html = (
+                f'<span class="blog-post-notes-title-suffix"> — {html_lib.escape(t)}</span>'
+            )
+            aria = f'Note — {t}'
         aside = (
-            f'<aside class="blog-post-notes" aria-label="{html_lib.escape(title)}">\n'
-            f'<strong class="blog-post-notes-label">{html_lib.escape(title)}</strong>\n'
+            f'<aside class="blog-post-notes" aria-label="{html_lib.escape(aria)}">\n'
+            f'<strong class="blog-post-notes-label"><span class="blog-post-notes-mark">Note</span>'
+            f'{suffix_html}</strong>\n'
             f'{inner_html}\n'
             f'</aside>'
         )
