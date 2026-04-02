@@ -381,7 +381,31 @@ flowchart LR
 
 <p class="blog-post-p">Triangle attention in Evoformer / AlphaFold2 is powerful but creates two bottlenecks for Proteus-style <strong>backbone diffusion</strong>: <strong>(1)</strong> cost is <span class="blog-post-math">\(O(N^3)\)</span> when every triangle over the full <span class="blog-post-math">\(N^2\)</span> edge set is considered. <strong>(2)</strong> Training is dominated by <strong>MSA</strong> and static <strong>pair co-evolution</strong> signals; the <strong>current noisy backbone</strong> is not threaded through every pair update, which is what a generative structure model needs at each step.</p>
 
-<p class="blog-post-p">The <strong>graph triangle block</strong> is the paper’s fix. <strong>(A)</strong> Attention runs on <strong><span class="blog-post-math">\(N\cdot K\)</span></strong> local edges: for each residue, keep the <strong><span class="blog-post-math">\(K\)</span></strong> nearest neighbours by <strong>Cα</strong> distance, so complexity drops toward <strong><span class="blog-post-math">\(O(NK^2)\)</span></strong> while still using triangle structure on that sparse set. <strong>(B)</strong> <strong>3D geometry</strong> enters through the <strong>third edge</strong> of each triangle: inter-atomic distances along that side are featurised (e.g. <strong>RBF</strong>), summed into a <strong>structural bias</strong> in the attention logits, and <strong>gated</strong> by a feed-forward on <strong>singles</strong> so the bias can be scaled against the other tracks. <strong>(C)</strong> Before that sparse attention, a <strong>triangle multiplicative update</strong> (AlphaFold2-style) refines the <strong>entire</strong> dense pair grid—multiplicative passes only, no softmax—so the later attention starts from a stronger pair state.</p>
+<strong>Three colored regions (A / B / C).</strong> On my working sketch of the block (<code class="blog-post-code">arch_graph_triangle_block.png</code>), the overlays mean: <strong>(C) yellow</strong> — <strong>only</strong> the <strong>triangle multiplicative update</strong> node on the dense pair track (no neighbour collate inside that tint). <strong>(B) blue</strong> — the <strong>upper</strong> <strong>geometry</strong> branch: <strong>distance matrix</strong> from backbone frames, <strong>bias featurize</strong>, <strong>gate</strong> on singles, and collated <strong>third-edge / RBF</strong> features into <strong>local pair geometry bias</strong>—not the far-left <strong>pair representation I/O</strong> tiles nor the far-right <strong>pair update</strong> output block. <strong>(A) red</strong> — the <strong>lower-right</strong> pipeline from <strong>neighbour collate</strong> of local pairs through <strong>linear</strong> projections, <strong>dot-product affinities</strong>, <strong>plus</strong> bias, <strong>softmax</strong>, <strong>scatter</strong>, up to the dense <strong>pair update</strong>—i.e. sparse triangle attention and write-back.
+
+<p class="blog-post-p">Paper-style placement of the block inside the full model (diffusion, one folding block, and the zoomed graph-triangle internals):</p>
+
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/model_architecture_figure2.png" alt="Proteus figure: diffusion (left), one block with IPA and graph triangle (top right), zoomed graph triangle block (bottom)" class="blog-post-img" style="width: 100%">
+<figcaption class="blog-post-caption">Lower panel: paper-style zoom of the graph triangle block—the same pipeline as my hand-drawn sketch. The <strong>A (red) / B (blue) / C (yellow)</strong> labels below line up with that sketch and the tinted overlays.</figcaption>
+</figure>
+
+<strong>Tinted overlays</strong> on the same hand-drawn block sketch:
+
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/graph_triangle_highlight_C_yellow.png" alt="Graph triangle block — region C (yellow): triangle multiplicative update only" class="blog-post-img" style="width: 92%">
+<figcaption class="blog-post-caption">Region <strong>(C) yellow</strong> — <strong>only</strong> the triangle multiplicative update on the dense pair track (Module 1 below).</figcaption>
+</figure>
+
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/graph_triangle_highlight_B_blue.png" alt="Graph triangle block — region B (blue): third-edge / RBF bias path" class="blog-post-img" style="width: 92%">
+<figcaption class="blog-post-caption">Region <strong>(B) blue</strong> — upper geometry branch: distance matrix, bias featurize, gate, local pair geometry bias (Module 2 below).</figcaption>
+</figure>
+
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/graph_triangle_highlight_A_red.png" alt="Graph triangle block — region A (red): neighbour collate through attention and scatter-back" class="blog-post-img" style="width: 92%">
+<figcaption class="blog-post-caption">Region <strong>(A) red</strong> — lower band from <strong>neighbour collate</strong> through affinities + bias, softmax, scatter to dense <strong>pair update</strong> (Module 3 below).</figcaption>
+</figure>
 
 
 <aside class="blog-post-notes blog-post-notes--right" aria-label="Note — Triangle multiplicative update">
@@ -397,7 +421,9 @@ flowchart LR
 </aside>
 
 
-<strong>Module 1: Triangle multiplicative update (full pair grid)</strong>
+<strong>Module 1 (C, yellow): Triangle multiplicative update (full pair grid)</strong>
+
+<p class="blog-post-p">This step is the <strong>(C) yellow</strong> highlight on the sketch: <strong>only</strong> the <strong>triangle multiplicative update</strong> on the <strong>dense</strong> pair tensor (before neighbour collate splits into local batches).</p>
 
 <p class="blog-post-p">Inputs: pair tensor <span class="blog-post-math">\(z^\ell\)</span> (after any entry transform) plus implicit use of geometry when indexing triangles. Outputs: dense <span class="blog-post-math">\(z_{\mathrm{mult}}\)</span>: each <span class="blog-post-math">\((i,j)\)</span> has absorbed <strong>outgoing</strong> and <strong>incoming</strong> multiplicative messages over triples <span class="blog-post-math">\((i,j,k)\)</span>. Complexity is still triangle-like on the full grid (<span class="blog-post-math">\(O(N^3)\)</span> in residue count for that submodule), but there is <strong>no</strong> attention softmax here—only the two multiplicative modes that couple “the other two sides” of each triangle into an update for the third side.</p>
 
@@ -412,7 +438,9 @@ flowchart LR
 </aside>
 
 
-<strong>Module 2: Neighborhood collation and gated geometry bias</strong>
+<strong>Module 2 (B, blue): Neighborhood collation and gated geometry bias</strong>
+
+<p class="blog-post-p">This is the <strong>(B) blue</strong> band: backbone distances and singles build the <strong>third-edge / RBF</strong> bias that will be added inside <strong>(A)</strong>.</p>
 
 <p class="blog-post-p">Inputs: the multiplied pairs <span class="blog-post-math">\(z_{\mathrm{mult}}\)</span>, current frames <span class="blog-post-math">\(T^{\ell+1}\)</span> for Cα distances, and singles <span class="blog-post-math">\(s^{\ell+1}\)</span> for gating. Outputs: a sparse set of local pair rows of shape <span class="blog-post-math">\((n, K, c_z)\)</span> with an accompanying geometry bias tensor shaped like <span class="blog-post-math">\((n, K, K, h)\)</span> (one head slice <span class="blog-post-math">\(h\)</span> after projection in the sketch).</p>
 
@@ -434,7 +462,9 @@ flowchart LR
 </aside>
 
 
-<strong>Module 3: Local triangle self-attention and scatter-back</strong>
+<strong>Module 3 (A, red): Local triangle self-attention and scatter-back</strong>
+
+<p class="blog-post-p">This is the <strong>(A) red</strong> band: from <strong>neighbour collate</strong> of local pairs through softmax <strong>triangle attention</strong> to <strong>scatter-back</strong> into the dense pair map (lower-right of the sketch).</p>
 
 <p class="blog-post-p">Inputs: Module 2’s <strong>local</strong> pack—the collated rows <span class="blog-post-math">\((n,K,c_z)\)</span> carrying <strong><span class="blog-post-math">\(z_{\mathrm{mult}}\)</span></strong> on each residue’s Cα-neighbourhood, plus the <strong>geometry bias</strong> <span class="blog-post-math">\((n,K,K,h)\)</span> from third-edge RBF features and the single-track gate. Outputs: the block’s <strong>dense</strong> pair tensor <strong><span class="blog-post-math">\(z^{\ell+1}\)</span></strong> on the full <span class="blog-post-math">\(N\times N\)</span> grid.</p>
 
@@ -444,11 +474,11 @@ flowchart LR
 
 <strong>End-to-end flow I drew for Proteus</strong>
 
-<p class="blog-post-p">The diagram matches how I think about it: single <span class="blog-post-math">\((n,c_s)\)</span>, backbone frames, pair <span class="blog-post-math">\((n,n,c_z)\)</span> → distance matrix from frames → triangle multiplicative pass on the full pair grid → neighbour collate down to <span class="blog-post-math">\((n,k,c_z)\)</span> local pairs → parallel branch: gate on single + bias featurize from distances → local pair geometry bias <span class="blog-post-math">\((n,k,k,h)\)</span> → dot-product affinities from projected local pairs, add bias, softmax to weights → weight a value projection from the multiplied pairs → scatter back to a full pair update <span class="blog-post-math">\((n,n,c_z)\)</span>.</p>
+<p class="blog-post-p">The diagram matches how I think about it: single <span class="blog-post-math">\((n,c_s)\)</span>, backbone frames, pair <span class="blog-post-math">\((n,n,c_z)\)</span> → distance matrix from frames → <strong>(C)</strong> triangle multiplicative pass on the full pair grid → neighbour collate down to <span class="blog-post-math">\((n,k,c_z)\)</span> local pairs → <strong>(B)</strong> parallel branch: gate on single + bias featurize from distances → local pair geometry bias <span class="blog-post-math">\((n,k,k,h)\)</span> → <strong>(A)</strong> dot-product affinities from projected local pairs, add bias, softmax to weights → weight a value projection from the multiplied pairs → scatter back to a full pair update <span class="blog-post-math">\((n,n,c_z)\)</span>.</p>
 
 <figure class="blog-post-figure">
   <img src="../markdown_posts_english/proteus/image/arch_graph_triangle_block.png" alt="gtb" class="blog-post-img" style="width: 92%">
-<figcaption class="blog-post-caption">My graph triangle block sketch: shapes <span class="blog-post-math">\((n,c_s)\)</span>, <span class="blog-post-math">\((n,n,c_z)\)</span>, <span class="blog-post-math">\(k\)</span> neighbors, <span class="blog-post-math">\(h\)</span> heads—triangle mult, collate, gated RBF bias, local attention, scatter.</figcaption>
+<figcaption class="blog-post-caption">Full uncolored sketch for comparison with the <strong>A (red) / B (blue) / C (yellow)</strong> overlays above.</figcaption>
 </figure>
 
 <p class="blog-post-p">There is a second layout I exported that is almost the same pipeline; if one is easier to read at small size, use either—they are the same story.</p>
@@ -509,7 +539,17 @@ flowchart LR
 
 <p class="blog-post-p">On protein complexes (dimers, trimers, tetramers), Proteus is compared especially to Chroma; the paper reports favorable complex performance there as well.</p>
 
-<p class="blog-post-p">The authors also describe wet-lab (in vitro) validation: designed proteins from Proteus were expressed and found to fold as intended, complementing the in silico designability numbers.</p>
+<p class="blog-post-p">#### In vitro validation (draft — filling from my lab notes)</p>
+
+<p class="blog-post-p">The paper reports wet-lab checks so designability scores are not only in silico. <strong>I am rewriting this subsection</strong> to match the fuller experiment write-up in my Notes (strains, constructs, expression conditions, purification, and the assays that connect back to the designed sequences). For now, this scaffold tracks what belongs here:</p>
+
+<ul class="blog-post-list">
+  <li><strong>Designs versus controls</strong> — which Proteus-generated sequences (and any baselines) went to expression; what length / fold family / oligomer state.</li>
+  <li><strong>Expression and readout</strong> — host, induction, solubility / pellet vs supernatant, and whether folding was assessed by CD, SEC, NMR, activity, or structural methods.</li>
+  <li><strong>Outcome vs computation</strong> — which designs behaved as folded or functional proteins, and how that lines up with <strong>sc_TM</strong> / <strong>scRMSD</strong> from the paper’s screens.</li>
+</ul>
+
+<em>Placeholder one-liner from the paper (to be replaced with detail):</em> designed proteins from Proteus were expressed and reported to fold consistently with intent, complementing the in silico designability tables.
 
 <h2 class="blog-post-h2">3. Final thoughts</h2>
 <p class="blog-post-p">What I like about Proteus is that it sits in a very interesting place in the post-AlphaFold era.</p>

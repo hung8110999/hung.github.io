@@ -334,7 +334,23 @@ Inputs: singles \(s^{\ell+1}\), updated frames \(T^{\ell+1}\), and the pair tens
 
 Triangle attention in Evoformer / AlphaFold2 is powerful but creates two bottlenecks for Proteus-style **backbone diffusion**: **(1)** cost is \(O(N^3)\) when every triangle over the full \(N^2\) edge set is considered. **(2)** Training is dominated by **MSA** and static **pair co-evolution** signals; the **current noisy backbone** is not threaded through every pair update, which is what a generative structure model needs at each step.
 
-The **graph triangle block** is the paper’s fix. **(A)** Attention runs on **\(N\cdot K\)** local edges: for each residue, keep the **\(K\)** nearest neighbours by **Cα** distance, so complexity drops toward **\(O(NK^2)\)** while still using triangle structure on that sparse set. **(B)** **3D geometry** enters through the **third edge** of each triangle: inter-atomic distances along that side are featurised (e.g. **RBF**), summed into a **structural bias** in the attention logits, and **gated** by a feed-forward on **singles** so the bias can be scaled against the other tracks. **(C)** Before that sparse attention, a **triangle multiplicative update** (AlphaFold2-style) refines the **entire** dense pair grid—multiplicative passes only, no softmax—so the later attention starts from a stronger pair state.
+**Three colored regions (A / B / C).** On my working sketch of the block (`arch_graph_triangle_block.png`), the overlays mean: **(C) yellow** — **only** the **triangle multiplicative update** node on the dense pair track (no neighbour collate inside that tint). **(B) blue** — the **upper** **geometry** branch: **distance matrix** from backbone frames, **bias featurize**, **gate** on singles, and collated **third-edge / RBF** features into **local pair geometry bias**—not the far-left **pair representation I/O** tiles nor the far-right **pair update** output block. **(A) red** — the **lower-right** pipeline from **neighbour collate** of local pairs through **linear** projections, **dot-product affinities**, **plus** bias, **softmax**, **scatter**, up to the dense **pair update**—i.e. sparse triangle attention and write-back.
+
+Paper-style placement of the block inside the full model (diffusion, one folding block, and the zoomed graph-triangle internals):
+
+![Proteus figure: diffusion (left), one block with IPA and graph triangle (top right), zoomed graph triangle block (bottom)](image/model_architecture_figure2.png){width=100%}
+*Lower panel: paper-style zoom of the graph triangle block—the same pipeline as my hand-drawn sketch. The **A (red) / B (blue) / C (yellow)** labels below line up with that sketch and the tinted overlays.*
+
+**Tinted overlays** on the same hand-drawn block sketch:
+
+![Graph triangle block — region C (yellow): triangle multiplicative update only](image/graph_triangle_highlight_C_yellow.png){width=92%}
+*Region **(C) yellow** — **only** the triangle multiplicative update on the dense pair track (Module 1 below).*
+
+![Graph triangle block — region B (blue): third-edge / RBF bias path](image/graph_triangle_highlight_B_blue.png){width=92%}
+*Region **(B) blue** — upper geometry branch: distance matrix, bias featurize, gate, local pair geometry bias (Module 2 below).*
+
+![Graph triangle block — region A (red): neighbour collate through attention and scatter-back](image/graph_triangle_highlight_A_red.png){width=92%}
+*Region **(A) red** — lower band from **neighbour collate** through affinities + bias, softmax, scatter to dense **pair update** (Module 3 below).*
 
 ::: notes [right] Triangle multiplicative update
 <span class="blog-post-notes-def">Triangle multiplicative update</span> — Before any triangle attention runs, the block applies this step on the full pair grid (Evoformer / AlphaFold2). Each edge \((i,j)\) is refined using triangles \((i,j,k)\): the embedding is updated from the **two other edges** of the triangle. There is **no softmax attention** here—only multiplicative message passing on pairs.
@@ -345,7 +361,9 @@ AlphaFold2 uses **outgoing** (edges that **leave** the endpoints of \(ij\) towar
 *Outgoing (left) vs incoming (right): one triangle \((i,j,k)\), two ways to fold the other two sides into an update for \((i,j)\).*
 :::
 
-**Module 1: Triangle multiplicative update (full pair grid)**
+**Module 1 (C, yellow): Triangle multiplicative update (full pair grid)**
+
+This step is the **(C) yellow** highlight on the sketch: **only** the **triangle multiplicative update** on the **dense** pair tensor (before neighbour collate splits into local batches).
 
 Inputs: pair tensor \(z^\ell\) (after any entry transform) plus implicit use of geometry when indexing triangles. Outputs: dense \(z_{\mathrm{mult}}\): each \((i,j)\) has absorbed **outgoing** and **incoming** multiplicative messages over triples \((i,j,k)\). Complexity is still triangle-like on the full grid (\(O(N^3)\) in residue count for that submodule), but there is **no** attention softmax here—only the two multiplicative modes that couple “the other two sides” of each triangle into an update for the third side.
 
@@ -357,7 +375,9 @@ Inputs: pair tensor \(z^\ell\) (after any entry transform) plus implicit use of 
 <span class="blog-post-notes-def">Scatter</span> — maps local attention outputs back into the full dense pair grid. **K** Cα-nearest neighbours per residue control the sparse attention cost (\(O(NK^2)\)).
 :::
 
-**Module 2: Neighborhood collation and gated geometry bias**
+**Module 2 (B, blue): Neighborhood collation and gated geometry bias**
+
+This is the **(B) blue** band: backbone distances and singles build the **third-edge / RBF** bias that will be added inside **(A)**.
 
 Inputs: the multiplied pairs \(z_{\mathrm{mult}}\), current frames \(T^{\ell+1}\) for Cα distances, and singles \(s^{\ell+1}\) for gating. Outputs: a sparse set of local pair rows of shape \((n, K, c_z)\) with an accompanying geometry bias tensor shaped like \((n, K, K, h)\) (one head slice \(h\) after projection in the sketch).
 
@@ -374,7 +394,9 @@ For \((i,j)\), **starting-node** vs **ending-node** layouts pool along triangle 
 *Grey edge: not updated like the black legs; it feeds the bias that closes the triangle in the score.*
 :::
 
-**Module 3: Local triangle self-attention and scatter-back**
+**Module 3 (A, red): Local triangle self-attention and scatter-back**
+
+This is the **(A) red** band: from **neighbour collate** of local pairs through softmax **triangle attention** to **scatter-back** into the dense pair map (lower-right of the sketch).
 
 Inputs: Module 2’s **local** pack—the collated rows \((n,K,c_z)\) carrying **\(z_{\mathrm{mult}}\)** on each residue’s Cα-neighbourhood, plus the **geometry bias** \((n,K,K,h)\) from third-edge RBF features and the single-track gate. Outputs: the block’s **dense** pair tensor **\(z^{\ell+1}\)** on the full \(N\times N\) grid.
 
@@ -384,10 +406,10 @@ This is the block’s only **softmax** stage, and it runs entirely on the **\(N\
 
 **End-to-end flow I drew for Proteus**
 
-The diagram matches how I think about it: single \((n,c_s)\), backbone frames, pair \((n,n,c_z)\) → distance matrix from frames → triangle multiplicative pass on the full pair grid → neighbour collate down to \((n,k,c_z)\) local pairs → parallel branch: gate on single + bias featurize from distances → local pair geometry bias \((n,k,k,h)\) → dot-product affinities from projected local pairs, add bias, softmax to weights → weight a value projection from the multiplied pairs → scatter back to a full pair update \((n,n,c_z)\).
+The diagram matches how I think about it: single \((n,c_s)\), backbone frames, pair \((n,n,c_z)\) → distance matrix from frames → **(C)** triangle multiplicative pass on the full pair grid → neighbour collate down to \((n,k,c_z)\) local pairs → **(B)** parallel branch: gate on single + bias featurize from distances → local pair geometry bias \((n,k,k,h)\) → **(A)** dot-product affinities from projected local pairs, add bias, softmax to weights → weight a value projection from the multiplied pairs → scatter back to a full pair update \((n,n,c_z)\).
 
 ![gtb](image/arch_graph_triangle_block.png){width=92%}
-*My graph triangle block sketch: shapes \((n,c_s)\), \((n,n,c_z)\), \(k\) neighbors, \(h\) heads—triangle mult, collate, gated RBF bias, local attention, scatter.*
+*Full uncolored sketch for comparison with the **A (red) / B (blue) / C (yellow)** overlays above.*
 
 There is a second layout I exported that is almost the same pipeline; if one is easier to read at small size, use either—they are the same story.
 
@@ -440,7 +462,15 @@ Figure 1 combines several views: a radar chart on designability (sc_TM-score), t
 
 On protein complexes (dimers, trimers, tetramers), Proteus is compared especially to Chroma; the paper reports favorable complex performance there as well.
 
-The authors also describe wet-lab (in vitro) validation: designed proteins from Proteus were expressed and found to fold as intended, complementing the in silico designability numbers.
+#### In vitro validation (draft — filling from my lab notes)
+
+The paper reports wet-lab checks so designability scores are not only in silico. **I am rewriting this subsection** to match the fuller experiment write-up in my Notes (strains, constructs, expression conditions, purification, and the assays that connect back to the designed sequences). For now, this scaffold tracks what belongs here:
+
+- **Designs versus controls** — which Proteus-generated sequences (and any baselines) went to expression; what length / fold family / oligomer state.
+- **Expression and readout** — host, induction, solubility / pellet vs supernatant, and whether folding was assessed by CD, SEC, NMR, activity, or structural methods.
+- **Outcome vs computation** — which designs behaved as folded or functional proteins, and how that lines up with **sc_TM** / **scRMSD** from the paper’s screens.
+
+*Placeholder one-liner from the paper (to be replaced with detail):* designed proteins from Proteus were expressed and reported to fold consistently with intent, complementing the in silico designability tables.
 
 ## 3. Final thoughts
 What I like about Proteus is that it sits in a very interesting place in the post-AlphaFold era.
