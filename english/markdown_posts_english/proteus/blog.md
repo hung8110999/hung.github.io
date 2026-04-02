@@ -10,7 +10,7 @@ Since this is my first academic paper, I thought it would be easier to start wit
 *Paper we read today*
 ## 1. Protein
 ### 1.1 What made protein ?
-**Amino Acids**
+#### Amino acids
 
 I'll start with this, amino acids. It is the building blocks of proteins (of course there's a lot of concept that smaller than this, but I think this level is enough to understand this paper). 
 
@@ -25,13 +25,13 @@ We have 22 different amino acids, and they are making the different between prot
 ![types](image/aminoacid_types.png){width=60%}
 *22 types of amino acids. Cre:[JPT](https://www.jpt.com/support-contact/resources/amino-acids/?srsltid=AfmBOop7xZYwPVHzS3WKGWbyR-3O0MFi922hlCleeX-WMBDGccPSVVNQ) *
 
-**Protein**
+#### Protein
 From the basic concept of amino acids above, we continue to Protein, which basically is the chain of amino acids. 
 ![protein](image/protein.png){width=80% position=right}
 *Protein is the chain of amino acids. Cre: [Technologynetwork](https://www.technologynetworks.com/applied-sciences/articles/essential-amino-acids-chart-abbreviations-and-structure-324357)*
 Yeah, it is that simple. But the problem is that the protein is not just a straight chain of amino acids. It is a 3D structure that is folded in a specific way. So the next question is, how does the protein fold into a 3D structure?
 
-**Protein Folding**
+#### Protein folding
 The protein folding is the process by which a protein folds into its 3D structure. Present into 4 levels:
 1. Primary structure: The sequence of amino acids.
 2. Secondary structure: The local folding of the protein, such as alpha-helices and beta-sheets.
@@ -56,18 +56,18 @@ In recent years, CASP 15 with RoseTTAFold and AlphaFold2 updated or CASP 16 with
 
 
 ### 1.3 Some former model and its story
-**AlphaFold series and AlphaFold2**
+#### AlphaFold series and AlphaFold2
 
 AlphaFold is the turning point of modern protein structure prediction. The first version (CASP13, 2018) showed that deep learning could strongly improve geometric prediction, and AlphaFold2 (CASP14, 2020) pushed performance close to experimental accuracy with end-to-end geometric modeling.
 
 ![af22](image/af22.png){width=60%}
 *AlphaFold2 architecture* 
 
-**AlphaFold first appearance**
+#### AlphaFold first appearance
 
 At first appearance, AlphaFold mainly predicted geometric constraints (especially pairwise residue distances) and reconstructed 3D from them. It was a major breakthrough, but still pipeline-heavy. AlphaFold2 made the decisive jump by jointly refining sequence, pair, and 3D representations; this is the key reason later generation models (including Proteus) inherit many of its ideas.
 
-**RoseTTAFold**
+#### RoseTTAFold
 RoseTTAFold is used because its 3-track design (1D sequence, 2D pair, 3D structure) exchanges information effectively and gives strong structure reasoning.  
 ![rstfold](image/rstfold.png){width=60%}
 *RoseTTAFold architecture*
@@ -85,12 +85,14 @@ Two notes that matter for the intuition:
 1. Rigid means distance-preserving. \(T = (R, t)\) is a rigid transformation: it does not change distances (or angles) within the object being moved—only its position and orientation in space.
 2. What the backbone atoms are. Each amino acid has an amino group (N) and a carboxyl group (C), with the alpha-carbon (Cα) sitting between them on the backbone. The local frame is built from these three backbone atoms (N, Cα, C), not from the whole side chain.
 
-**What \(R\) and \(t\) mean in that local picture.**
+#### What \(R\) and \(t\) mean in that local picture
 
 1. \(R\) (rotation matrix in \(SO(3)\)) encodes 3D rotations. It describes the relative orientation of the residue in its own (local) frame: you can think of it as rotating the axes so the residue is described in a consistent local geometry.
 2. \(t\) (translation vector in \(\mathbb{R}^3\)) encodes translation. It describes the relative position of the residue—where the origin of that local frame sits in space (in standard constructions, the origin is tied to the Cα / frame construction rather than using raw atom triples alone as the only description).
 
-**Why not only global \([N, Cα, C]\) coordinates?** A protein has many residues at different absolute positions. Raw 3D coordinates of backbone atoms only give absolute placements; exploiting local geometric relationships across the chain is awkward if every residue is expressed only in a single global coordinate system. So each residue is embedded in its own 3D coordinate system (its frame): \(R\) rotates that system so the residue is represented in a sensible local pose (with Cα playing the role of the frame origin in the usual construction), and \(t\) places that frame in space.
+#### Why not only global \([N, Cα, C]\) coordinates?
+
+A protein has many residues at different absolute positions. Raw 3D coordinates of backbone atoms only give absolute placements; exploiting local geometric relationships across the chain is awkward if every residue is expressed only in a single global coordinate system. So each residue is embedded in its own 3D coordinate system (its frame): \(R\) rotates that system so the residue is represented in a sensible local pose (with Cα playing the role of the frame origin in the usual construction), and \(t\) places that frame in space.
 
 Instead of describing the backbone only by listing atom coordinates in global 3D, the model uses a rigid transform per residue to describe the state of each amino acid. That is convenient when you want to update one residue’s pose independently during generation, instead of having to adjust the entire backbone in an unconstrained way.
 ![backbone](image/backbone.png){width=60%}
@@ -128,7 +130,7 @@ Below: (1) the general forward representation in diffusion modeling—the SDE wr
 ![dfs](image/dfs.png){width=60% position=left}
 *Diffusion process*
 
-### **(1) General forward representation in diffusion modeling**
+### (1) General forward representation in diffusion modeling
 
 A forward diffusion process maps a clean random variable \(Y_0\) to increasingly noisy \(Y_t\) as \(t\) increases. In continuous time, the canonical general forward SDE (Itô form) is:
 
@@ -172,7 +174,7 @@ $$
 
 i.e. \(Y_t = \sqrt{1-\beta_t}\, Y_{t-1} + \sqrt{\beta_t}\, \varepsilon_t\) with \(\varepsilon_t \sim \mathcal{N}(0,I)\). That is the same update if you identify \(\alpha_t = 1 - \beta_t\) (keep fraction \(\alpha_t\), noise fraction \(1-\alpha_t = \beta_t\)). \(\beta_t\) is then the variance of the new noise at step \(t\). Under standard scalings, long chains of such steps converge to an SDE of the form \(dY_t = f\,dt + g\,dW_t\) above.
 
-### **(2) SDE of the protein backbone**
+### (2) SDE of the protein backbone
 
 Let residue \(i\) have rotation \(R_t^{(i)} \in SO(3)\) and translation \(X_t^{(i)} \in \mathbb{R}^3\) in the model's coordinates. The full backbone state is
 
@@ -265,69 +267,77 @@ Here \(\omega(t) := \omega\!\bigl(r^{(0)\mathsf{T}} r^{(t)}\bigr)\) is the rotat
 
 Training and sampling. Exact scores on \(SO(3)\) can be heavy, so training learns an approximate score network \(s_\theta(\mathcal{Y}_t, t)\) via denoising score matching; generation runs a reverse-time discretization (e.g. Euler–Maruyama).
 
-Goal. Recover the clean backbone \(\mathcal{Y}_0\) from any forward time \(t\); same objective as image diffusion, with state space \(\prod_i \bigl(SO(3)\times\mathbb{R}^3\bigr)\) instead of a pixel vector in \(\mathbb{R}^d\). **Notation:** diffusion time stays \(t\) (and \(\mathbf{T}^{(t)}\) above); folding-block depth uses \(\ell\) and backbone frames \(T^\ell\) in §2.3.
+Goal. Recover the clean backbone \(\mathcal{Y}_0\) from any forward time \(t\); same objective as image diffusion, with state space \(\prod_i \bigl(SO(3)\times\mathbb{R}^3\bigr)\) instead of a pixel vector in \(\mathbb{R}^d\). Notation: diffusion time stays \(t\) (and \(\mathbf{T}^{(t)}\) above); folding-block depth uses \(\ell\) and backbone frames \(T^\ell\) in §2.3.
 
-### 2.3 Model architecture (Proteus folding block)
+### 2.3 Model architecture 
 
-This is the section where I leaned on my own figures the most, not only the paper’s Figure 2. I’ll stay consistent with §2.2: there **diffusion time** is \(t\) and the whole noisy backbone is \(\mathbf{T}^{(t)}\). Here **\(\ell\)** is the **folding-block layer**: \(T^\ell\) is the stack of per-residue frames after layer \(\ell\) (same rigid-frame idea as §2.1). I write **\(s^\ell\)** for the **single** (node) embedding and **\(z^\ell\)** for the **pair / edge** tensor.
+This is the section where I leaned on my own figures the most, not only the paper’s Figure 2. I’ll stay consistent with §2.2: there diffusion time is \(t\) and the whole noisy backbone is \(\mathbf{T}^{(t)}\). Here \(\ell\) is the folding-block layer: \(T^\ell\) is the stack of per-residue frames after layer \(\ell\) (same rigid-frame idea as §2.1). I write \(s^\ell\) for the single (node) embedding and \(z^\ell\) for the pair / edge tensor.
 
-Yeah, the high-level story is simple. Proteus runs **\(L\) folding blocks** one after another, and **the blocks do not share weights**—each has its own parameters.
+Yeah, the high-level story is simple. Proteus runs \(L\) folding blocks one after another, and the blocks do not share weights—each has its own parameters.
 
-Inside one block you always have **three tracks** going in: **single**, **pair**, and **backbone frames**. The block always does the same three steps in order:
+Inside one block you always have three tracks going in: single, pair, and backbone frames. The block always does the same three steps in order:
 
-1. **IPA–Transformer** — refreshes **\(s\)**.
-2. **Backbone update** — moves the **frames** forward.
-3. **Graph triangle block** — refreshes **\(z\)** (the pair grid).
+1. IPA–Transformer — refreshes \(s\).
+2. Backbone update — moves the frames forward.
+3. Graph triangle block — refreshes \(z\) (the pair grid).
 
-Every step looks at the other tracks, but only one track is “owned” by that step. The authors say openly that the **graph triangle block** is what really buys **designability and efficiency** (“Our primary emphasis is on elucidating the graph triangle block…”).
+Every step looks at the other tracks, but only one track is “owned” by that step. The authors say openly that the graph triangle block is what really buys designability and efficiency (“Our primary emphasis is on elucidating the graph triangle block…”).
 
 ![model](image/model_architecture_figure2.png){width=85%}
 *Figure 2 from the paper: (A) backbone diffusion in/out, (B) stack of folding blocks, (C) zoom on the graph triangle idea.*
 
 #### IPA–Transformer block
 
-So this first step is exactly the **Invariant Point Attention (IPA)** story from **AlphaFold2**, plus a **normal Transformer** on top (that is how Wang et al. describe it).
+So this first step is exactly the Invariant Point Attention (IPA) story from AlphaFold2, plus a normal Transformer on top (that is how Wang et al. describe it).
 
-**IPA** is the part that respects **3D**. You don’t want attention logits to change just because you **rotate or translate the whole protein** in space for no reason. Roughly: each residue builds **Q, K, V** in its **local** frame, maps those into a **global** frame fixed by the current backbone, mixes information, then maps back so the update still “knows” geometry. After that, the **Transformer** path does the usual **self-attention + FFN** on the **single** chain, but with a small twist from the paper: they **concatenate** the current **\(s_\ell\)** with a **linear** projection of the **initial** **\(s_0\)** before the Transformer, so the block does not forget where the sequence started.
+IPA is the part that respects 3D. You don’t want attention logits to change just because you rotate or translate the whole protein in space for no reason. Roughly: each residue builds Q, K, V in its local frame, maps those into a global frame fixed by the current backbone, mixes information, then maps back so the update still “knows” geometry. After that, the Transformer path does the usual self-attention + FFN on the single chain, but with a small twist from the paper: they concatenate the current \(s_\ell\) with a linear projection of the initial \(s_0\) before the Transformer, so the block does not forget where the sequence started.
 
-The block I saved as equations is just the same thing in math form: IPA residual + layer norm, concat with **\(s_0\)**, Transformer + linear residual, then an **MLP** that outputs **\(s_{\ell+1}\)**.
+The block I saved as equations is just the same thing in math form: IPA residual + layer norm, concat with \(s_0\), Transformer + linear residual, then an MLP that outputs \(s_{\ell+1}\).
 
 ![ipa_eq](image/arch_ipa_transformer_eq.png){width=75%}
 *How I wrote the IPA–Transformer block: IPA on \((s_\ell, z_\ell, T_\ell)\), then concat with \(\mathrm{Linear}(s_0)\), Transformer, and MLP to \(s_{\ell+1}\).*
 
 #### Backbone update layer
 
-Once **\(s\)** has moved, the **frames** should move too—backbone shape is really **about how residues talk to each other**, not a separate magic tensor.
+Once \(s\) has moved, the frames should move too—backbone shape is really about how residues talk to each other, not a separate magic tensor.
 
-**Inputs:** the new single state **\(s_{\ell+1}\)** (here I use the paper’s subscript after the IPA–Transformer) and the **old** frames **\(T^\ell\)**. **Outputs:** **\(T^{\ell+1}\)**.
+Inputs: the new single state \(s_{\ell+1}\) (here I use the paper’s subscript after the IPA–Transformer) and the old frames \(T^\ell\). Outputs: \(T^{\ell+1}\).
 
-The implementation is very AlphaFold2-flavored: a **linear** map reads **\(s_{\ell+1}\)** and predicts three quaternion components **\(b_i,c_i,d_i\)** plus a **translation** **\(\vec{x}_i^{\mathrm{update}}\)**. You fix the first quaternion component to **1**, **normalize** the 4-vector to unit length, turn it into a **3×3 rotation** **\(R_i^{\mathrm{update}}\)**, pack that with the translation into an **update rigid map** **\(\mathbf{T}_i^{\mathrm{update}}\)**, and **compose** it with the layer-**\(\ell\)** frame. That is the slide I kept referring to as “equations (1)–(5)” in my notes.
+The implementation is very AlphaFold2-flavored: a linear map reads \(s_{\ell+1}\) and predicts three quaternion components \(b_i,c_i,d_i\) plus a translation \(\vec{x}_i^{\mathrm{update}}\). You fix the first quaternion component to 1, normalize the 4-vector to unit length, turn it into a 3×3 rotation \(R_i^{\mathrm{update}}\), pack that with the translation into an update rigid map \(\mathbf{T}_i^{\mathrm{update}}\), and compose it with the layer-\(\ell\) frame. That is the slide I kept referring to as “equations (1)–(5)” in my notes.
 
 ![backbone_eq](image/arch_backbone_update_eq.png){width=78%}
 *Backbone update: linear → unit quaternion → rotation matrix → compose with \(T^\ell\) to get \(T^{\ell+1}\).*
 
 #### Graph triangle block
 
-This is the heavy module: it takes **\(s^{\ell+1}\)** (after IPA–Transformer), **\(T^{\ell+1}\)** (after the backbone update), and the **old pair** **\(z^\ell\)**, and writes **\(z^{\ell+1}\)**. It is also where Proteus stops pretending it can paste **Evoformer** onto diffusion **without changes**.
+This is the heavy module: it takes \(s^{\ell+1}\) (after IPA–Transformer), \(T^{\ell+1}\) (after the backbone update), and the old pair \(z^\ell\), and writes \(z^{\ell+1}\). It is also where Proteus stops pretending it can paste Evoformer onto diffusion without changes.
 
 ![evoformer](image/arch_evoformer.png){width=72%}
 *Evoformer (AlphaFold2): MSA track and pair track talk back and forth; triangle ops live in the pair world.*
 
-**Why Evoformer-as-is is painful here.** (1) **Complexity:** plain triangle attention is **\(O(N^3)\)** in the number of residues. (2) **Information:** Evoformer is built to turn **MSA + co-evolution** into **single** and **pair** features; it is **not** built to thread **the current noisy backbone** through every pair update, which is exactly what a **backbone diffusion** network needs at each step.
+#### Why Evoformer-as-is is painful here
 
-Proteus answers with the **graph triangle block**: keep the **triangle multiplication** idea on the **full** \(N\times N\) grid, but do **attention** only on **\(N\cdot K\)** **local** edges ( **\(K\)** nearest neighbors by **Cα** distance ), and **bias** attention with **geometry** from the **third edge** of each triangle (**RBF** on distances), **gated** by a small net that reads **single** features so the bias does not fight the other tracks.
+(1) Complexity: plain triangle attention is \(O(N^3)\) in the number of residues. (2) Information: Evoformer is built to turn MSA + co-evolution into single and pair features; it is not built to thread the current noisy backbone through every pair update, which is exactly what a backbone diffusion network needs at each step.
 
-**Triangle multiplication (outgoing vs incoming).** If you already studied AlphaFold2, this picture is familiar: one variant uses edges that **leave** \(i\) and \(j\) and meet at \(k\); the other uses edges that **arrive** at \(i\) and \(j\) from \(k\). Both are ways to enforce “if \((i,k)\) and \((j,k)\) agree, then \((i,j)\) should not be crazy.”
+Proteus answers with the graph triangle block: keep the triangle multiplication idea on the full \(N\times N\) grid, but do attention only on \(N\cdot K\) local edges (\(K\) nearest neighbors by Cα distance), and bias attention with geometry from the third edge of each triangle (RBF on distances), gated by a small net that reads single features so the bias does not fight the other tracks.
+
+#### Triangle multiplication (outgoing vs incoming)
+
+If you already studied AlphaFold2, this picture is familiar: one variant uses edges that leave \(i\) and \(j\) and meet at \(k\); the other uses edges that arrive at \(i\) and \(j\) from \(k\). Both are ways to enforce “if \((i,k)\) and \((j,k)\) agree, then \((i,j)\) should not be crazy.”
 
 ![tri_mult](image/arch_triangle_mult_update.png){width=82%}
-*Triangle **multiplicative** update: outgoing edges (left) vs incoming edges (right), same \((i,j,k)\) triangle story.*
+*Triangle multiplicative update: outgoing edges (left) vs incoming edges (right), same \((i,j,k)\) triangle story.*
 
-**Triangle self-attention** is the sister idea: still a triangle, but now you **attend** over edges that share a **start node** or an **end node** so two sides of the triangle help update the third. That is where the “missing edge” / **logit bias** trick comes from when a sparse graph does not store every pair explicitly.
+#### Triangle self-attention
+
+Triangle self-attention is the sister idea: still a triangle, but now you attend over edges that share a start node or an end node so two sides of the triangle help update the third. That is where the “missing edge” / logit bias trick comes from when a sparse graph does not store every pair explicitly.
 
 ![tri_attn](image/arch_triangle_self_attention.png){width=82%}
-*Triangle **self-attention** around the **starting** node vs around the **ending** node (edges \(ij\) and \(ik\) or \(ij\) and \(kj\)); the grey edge is the “third side.”*
+*Triangle self-attention around the starting node vs around the ending node (edges \(ij\) and \(ik\) or \(ij\) and \(kj\)); the grey edge is the “third side.”*
 
-**End-to-end flow I drew for Proteus.** The diagram matches how I think about it: **single** \((n,c_s)\), **backbone frames**, **pair** \((n,n,c_z)\) → distance matrix from frames → **triangle multiplicative** pass on the full pair grid → **neighbour collate** down to **\((n,k,c_z)\)** local pairs → parallel branch: **gate** on single + **bias featurize** from distances → **local pair geometry bias** \((n,k,k,h)\) → dot-product **affinities** from projected local pairs, **add bias**, **softmax** to weights → weight a **value** projection from the multiplied pairs → **scatter** back to a full **pair update** \((n,n,c_z)\).
+#### End-to-end flow I drew for Proteus
+
+The diagram matches how I think about it: single \((n,c_s)\), backbone frames, pair \((n,n,c_z)\) → distance matrix from frames → triangle multiplicative pass on the full pair grid → neighbour collate down to \((n,k,c_z)\) local pairs → parallel branch: gate on single + bias featurize from distances → local pair geometry bias \((n,k,k,h)\) → dot-product affinities from projected local pairs, add bias, softmax to weights → weight a value projection from the multiplied pairs → scatter back to a full pair update \((n,n,c_z)\).
 
 ![gtb](image/arch_graph_triangle_block.png){width=92%}
 *My graph triangle block sketch: shapes \((n,c_s)\), \((n,n,c_z)\), \(k\) neighbors, \(h\) heads—triangle mult, collate, gated RBF bias, local attention, scatter.*
@@ -337,14 +347,58 @@ There is a second layout I exported that is almost the same pipeline; if one is 
 ![gtb2](image/arch_graph_triangle_block_alt.png){width=92%}
 *Same block, alternate figure layout (bias branch + collate paths).*
 
-**Why I care about this stack.** You dodge the worst **\(O(N^3)\)** wall for big \(N\), you keep **current 3D** inside the pair update (not only MSA statistics), and the paper reports training on **longer** chains (**1024** residues in their setup vs **384**-style limits often quoted for AlphaFold2 / RFdiffusion-class training). For me the punchline is still: **fast enough to use**, **geometric enough to design with**.
+#### Why I care about this stack
+
+You dodge the worst \(O(N^3)\) wall for big \(N\), you keep current 3D inside the pair update (not only MSA statistics), and the paper reports training on longer chains (1024 residues in their setup vs 384-style limits often quoted for AlphaFold2 / RFdiffusion-class training). For me the punchline is still: fast enough to use, geometric enough to design with.
 
 Full paper write-up: Wang et al., *Proteus*, ICML 2024, PMLR 235:51376–51395 — [proceedings page](https://proceedings.mlr.press/v235/wang24bi.html).
+
+### 2.4 Training and evaluation
+
+#### Overall procedure (sampling / inference)
+
+![Algorithm 1: Proteus model inference (reverse diffusion on \(SE(3)\) per residue)](image/proteus_algorithm1_inference.png){width=48% position=left}
+
+Generation is still a diffusion story, but the noise is geometric: you perturb both where each residue sits and how it is oriented (random translations in \(\mathbb{R}^3\) and random rotations per residue), not raw image pixels. The model is trained end-to-end; at inference you only run the reverse process, discretized with an Euler–Maruyama-style SDE step on the product of \(SE(3)\) factors, using the score parametrization from Section 2.2.
+
+In words that match Algorithm 1 and the same structure as Section 2.3: start at diffusion time \(t = 1\) with a fully noisy backbone—sample a translation and rotation per residue and pack them into rigid transforms \(T_i^{(t)}\), with a “previous structure” cache initialized to identity transforms. Each outer step embeds the timestep into single and pair features (`InputEmbedder`), adds conditioning from the previous predicted backbone (`ConditionEmbedder`), then runs the folding stack for \(N_{\text{layer}}\) blocks: IPA–Transformer on \((s, z, \hat{T}^{(0)})\), backbone update on \(\hat{T}^{(0)}\), then the graph triangle module on \(z\). The network’s current estimate \(\hat{T}^{(0)}\) becomes \(T^{\text{prev}}\) for the next diffusion step; \(t\) is decremented and an \(SE(3)\) SDE solver updates the noisy state \(T^{(t)}\) toward that prediction, with default settings such as \(N_{\text{step}} = 100\), \(N_{\text{layer}} = 4\), \(t_{\min} = 0.005\), and a small noise scale for the discretization.
+
+Feature initialization (the “node / pair init” in my notes) is also where the pipeline connects to sequence: the node embedding concatenates diffusion time \(t\) and a one-hot amino-acid type (fixed to alanine for the unconditional backbone experiment in the notes tied to `D:\proteus\proteus2.pdf`), then passes through an MLP; pair features combine the two endpoint node embeddings with relative sequence-position encodings in the AlphaFold spirit. The PDF walks through the same high-level loop—backbone init, embeddings, repeated folding blocks, and SDE updates—and adds subjective “which block helps which structural level” intuition (IPA + backbone updates leaning on local geometry and secondary-structure-like organization; the graph triangle block injecting long-range geometric consistency; chain positional encoding and local graph modeling for multi-chain complexes). I kept that file as extended commentary; the figure on the left is the paper’s official pseudocode.
+
+#### Data and training objective
+
+Training uses structures from the [Protein Data Bank](https://www.rcsb.org/) with a cutoff of 1 August 2023, plus additional data augmentation. In total the authors report 50,773 protein chains in the training set.
+
+The total objective is the sum of a denoising score-matching block on translations and rotations plus light auxiliary terms on coordinates and the distance matrix, active only once the noise is low enough (\(t < 0.25\)):
+
+$$
+\mathcal{L} = \underbrace{\mathcal{L}_{\text{trans}} + 0.5\mathcal{L}_{\text{rot}}}_{\text{dsm loss}} + \underbrace{0.25\mathcal{L}_{\text{coord}}^{t<0.25} + 0.25\mathcal{L}_{\text{dm}}^{t<0.25}}_{\text{auxiliary loss}} \quad (3)
+$$
+
+![Equation (3) as in the paper: DSM on translation + 0.5× rotation; auxiliary coord and distance-matrix losses with weight 0.25 when \(t<0.25\).](image/proteus_loss_eq3.png){width=88%}
+
+When \(t\) is still large, the backbone is too corrupted for atomic coordinates or pairwise distances to be meaningful supervision; after \(t\) drops below \(0.25\), those terms help lock in fine-grained geometry. Denoising score matching remains the main signal: it pushes the learned score to match the true score of the noised process for both translation and rotation.
+
+#### Benchmarks (designability, speed, diversity)
+
+The paper evaluates monomer generation against RFdiffusion, Genie (SwissProt), FrameDiff, and Chroma. One compact summary table (same metrics as the paper’s main comparison):
+
+![Monomer benchmark table: parameters, designability, sampling time, diversity, timesteps.](image/proteus_benchmark_table.png){width=95%}
+
+Reading that snapshot in plain language: Proteus reaches the highest designability score (0.921) and the fastest per-sample wall time (18.20 s in the reported setup) while using 100 timesteps; diversity is second-best (0.235) behind RFdiffusion (0.328). RFdiffusion carries the most parameters (59.8M) and is much slower (120.24 s); Genie is smallest (4.1M) but slowest here (188.07 s) and needs many steps (1000); Chroma is almost as fast as Proteus in seconds but lags sharply on designability and diversity; FrameDiff sits in the middle on several axes.
+
+Figure 1 combines several views: a radar chart on designability (sc_TM-score), throughput (samples per minute), and diversity; box plots of scRMSD versus length (200 backbones per length; horizontal reference near 2 Å; ProteinMPNN with 8 sequences per backbone except Chroma’s own designer); and inference time versus length on an A40, with Proteus staying nearly flat while others grow steeply (Genie stops after 600 residues because of memory limits).
+
+![Figure 1: benchmarking Proteus against other backbone diffusion models on designability, efficiency, and diversity.](image/proteus_figure1_benchmark.png){width=92%}
+
+On protein complexes (dimers, trimers, tetramers), Proteus is compared especially to Chroma; the paper reports favorable complex performance there as well.
+
+The authors also describe wet-lab (in vitro) validation: designed proteins from Proteus were expressed and found to fold as intended, complementing the in silico designability numbers.
 
 ## 3. Final thoughts
 What I like about Proteus is that it sits in a very interesting place in the post-AlphaFold era.
 
-AlphaFold2 more or less changed the question from "can we predict a structure?" to "what else can we do with structural intelligence?" Proteus is a nice example of this shift. Instead of focusing only on prediction, it moves toward **generation**, **designability**, and **efficiency**.
+AlphaFold2 more or less changed the question from "can we predict a structure?" to "what else can we do with structural intelligence?" Proteus is a nice example of this shift. Instead of focusing only on prediction, it moves toward generation, designability, and efficiency.
 
 For me, the most memorable points of the paper are:
 
