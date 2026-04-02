@@ -201,7 +201,7 @@ flowchart LR
 <p class="blog-post-p">Below: (1) the general forward representation in diffusion modeling—the SDE written explicitly, with each symbol explained; (2) the SDE for the protein backbone, i.e. the same template when the state is on <span class="blog-post-math">\(SO(3) \times \mathbb{R}^3\)</span> per residue.</p>
 
 <figure class="blog-post-figure fig-left">
-  <img src="../markdown_posts_english/proteus/image/dfs.png" alt="dfs" class="blog-post-img" style="width: 60%">
+  <img src="../markdown_posts_english/proteus/image/dfs.png" alt="dfs" class="blog-post-img" style="width: 80%">
 <figcaption class="blog-post-caption">Diffusion process</figcaption>
 </figure>
 
@@ -351,8 +351,8 @@ flowchart LR
 
 <p class="blog-post-p">The implementation is very AlphaFold2-flavored: a linear map reads <span class="blog-post-math">\(s_{\ell+1}\)</span> and predicts three quaternion components <span class="blog-post-math">\(b_i,c_i,d_i\)</span> plus a translation <span class="blog-post-math">\(\vec{x}_i^{\mathrm{update}}\)</span>. You fix the first quaternion component to 1, normalize the 4-vector to unit length, turn it into a 3×3 rotation <span class="blog-post-math">\(R_i^{\mathrm{update}}\)</span>, pack that with the translation into an update rigid map <span class="blog-post-math">\(\mathbf{T}_i^{\mathrm{update}}\)</span>, and compose it with the layer-<span class="blog-post-math">\(\ell\)</span> frame. That is the slide I kept referring to as “equations (1)–(5)” in my notes.</p>
 
-<figure class="blog-post-figure">
-  <img src="../markdown_posts_english/proteus/image/arch_backbone_update_eq.png" alt="backbone_eq" class="blog-post-img" style="width: 78%">
+<figure class="blog-post-figure fig-right">
+  <img src="../markdown_posts_english/proteus/image/arch_backbone_update_eq.png" alt="backbone_eq" class="blog-post-img" style="width: 40%">
 <figcaption class="blog-post-caption">Backbone update: linear → unit quaternion → rotation matrix → compose with <span class="blog-post-math">\(T^\ell\)</span> to get <span class="blog-post-math">\(T^{\ell+1}\)</span>.</figcaption>
 </figure>
 
@@ -360,8 +360,8 @@ flowchart LR
 
 <p class="blog-post-p">This is the heavy module: it takes <span class="blog-post-math">\(s^{\ell+1}\)</span> (after IPA–Transformer), <span class="blog-post-math">\(T^{\ell+1}\)</span> (after the backbone update), and the old pair <span class="blog-post-math">\(z^\ell\)</span>, and writes <span class="blog-post-math">\(z^{\ell+1}\)</span>. It is also where Proteus stops pretending it can paste Evoformer onto diffusion without changes.</p>
 
-<figure class="blog-post-figure">
-  <img src="../markdown_posts_english/proteus/image/arch_evoformer.png" alt="evoformer" class="blog-post-img" style="width: 72%">
+<figure class="blog-post-figure fig-left">
+  <img src="../markdown_posts_english/proteus/image/arch_evoformer.png" alt="evoformer" class="blog-post-img" style="width: 50%">
 <figcaption class="blog-post-caption">Evoformer (AlphaFold2): MSA track and pair track talk back and forth; triangle ops live in the pair world.</figcaption>
 </figure>
 

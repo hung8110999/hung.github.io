@@ -127,7 +127,7 @@ The central idea of Proteus is to use the forward process of a diffusion model, 
 
 Below: (1) the general forward representation in diffusion modeling—the SDE written explicitly, with each symbol explained; (2) the SDE for the protein backbone, i.e. the same template when the state is on \(SO(3) \times \mathbb{R}^3\) per residue.
 
-![dfs](image/dfs.png){width=60% position=left}
+![dfs](image/dfs.png){width=80% position=left}
 *Diffusion process*
 
 ### (1) General forward representation in diffusion modeling
@@ -305,14 +305,14 @@ Inputs: the new single state \(s_{\ell+1}\) (here I use the paper’s subscript 
 
 The implementation is very AlphaFold2-flavored: a linear map reads \(s_{\ell+1}\) and predicts three quaternion components \(b_i,c_i,d_i\) plus a translation \(\vec{x}_i^{\mathrm{update}}\). You fix the first quaternion component to 1, normalize the 4-vector to unit length, turn it into a 3×3 rotation \(R_i^{\mathrm{update}}\), pack that with the translation into an update rigid map \(\mathbf{T}_i^{\mathrm{update}}\), and compose it with the layer-\(\ell\) frame. That is the slide I kept referring to as “equations (1)–(5)” in my notes.
 
-![backbone_eq](image/arch_backbone_update_eq.png){width=78%}
+![backbone_eq](image/arch_backbone_update_eq.png){width=40% position=right}
 *Backbone update: linear → unit quaternion → rotation matrix → compose with \(T^\ell\) to get \(T^{\ell+1}\).*
 
 #### Graph triangle block
 
 This is the heavy module: it takes \(s^{\ell+1}\) (after IPA–Transformer), \(T^{\ell+1}\) (after the backbone update), and the old pair \(z^\ell\), and writes \(z^{\ell+1}\). It is also where Proteus stops pretending it can paste Evoformer onto diffusion without changes.
 
-![evoformer](image/arch_evoformer.png){width=72%}
+![evoformer](image/arch_evoformer.png){width=50% position=left}
 *Evoformer (AlphaFold2): MSA track and pair track talk back and forth; triangle ops live in the pair world.*
 
 #### Why Evoformer-as-is is painful here
