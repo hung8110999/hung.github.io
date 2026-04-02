@@ -1928,6 +1928,12 @@ pre code {
   font-weight: 600;
 }
 
+/* Bold red glossary-style terms inside a margin note */
+.blog-post-notes-def {
+  color: #c53030;
+  font-weight: 700;
+}
+
 .blog-post-notes-list {
   margin: 0;
   padding-left: var(--space-lg);

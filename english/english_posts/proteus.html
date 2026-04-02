@@ -371,33 +371,6 @@ flowchart LR
 
 <p class="blog-post-p">Inputs: singles <span class="blog-post-math">\(s^{\ell+1}\)</span>, updated frames <span class="blog-post-math">\(T^{\ell+1}\)</span>, and the pair tensor <span class="blog-post-math">\(z^\ell\)</span> entering the block. Outputs: a new pair tensor <span class="blog-post-math">\(z^{\ell+1}\)</span> that encodes refined <span class="blog-post-math">\((i,j)\)</span> relationships consistent with the current geometry. This is also where Proteus stops pretending it can paste Evoformer onto diffusion without changes.</p>
 
-
-<aside class="blog-post-notes" aria-label="Note — Graph triangle block">
-<strong class="blog-post-notes-label"><span class="blog-post-notes-mark">Note</span><span class="blog-post-notes-title-suffix"> — Graph triangle block</span></strong>
-<p class="blog-post-p">These bullets follow my longer write-up in <code class="blog-post-code">proteus3.pdf</code>: order inside the block is <strong>triangle multiplicative update first</strong>, then <strong>local triangle attention</strong> (with geometry), and Proteus reduces cost to <span class="blog-post-math">\(O(NK^2)\)</span> with <span class="blog-post-math">\(K\)</span> Cα-nearest neighbours.</p>
-
-<strong>Triangle Multiplicative update (no attention yet).</strong> Taken from AlphaFold2’s Evoformer idea: every edge <span class="blog-post-math">\((i,j)\)</span> in the pair grid is updated using <strong>triples</strong> <span class="blog-post-math">\((i,j,k)\)</span>—the third residue <span class="blog-post-math">\(k\)</span> closes a triangle, and each edge is refined from the <strong>two other sides</strong> of that triangle. There are two algebraically distinct passes—<strong>outgoing</strong> (messages along edges <strong>leaving</strong> the endpoints of <span class="blog-post-math">\(ij\)</span>) and <strong>incoming</strong> (edges <strong>arriving</strong> at <span class="blog-post-math">\(ij\)</span>)—as in the official diagrams. This stage is <strong>pure multiplicative routing</strong> on pairs (no softmax attention). As AlphaFold2 reports, <strong>either</strong> multiplicative update <strong>or</strong> triangle attention alone is already strong, but <strong>combining both</strong> works best—which is why Proteus keeps multiplication <strong>before</strong> attention.
-
-<figure class="blog-post-figure">
-  <img src="../markdown_posts_english/proteus/image/arch_triangle_mult_update.png" alt="Triangle Multiplicative update: outgoing vs incoming edges around \((i,j,k)\)." class="blog-post-img" style="width: 100%">
-<figcaption class="blog-post-caption">Same convention as AlphaFold2 / my slides: two multiplicative modes share one triangle story.</figcaption>
-</figure>
-
-<strong>Triangle attention.</strong> A graph attention variant on the <strong>pair</strong> tensor: vertices are residues; each <strong>edge</strong> carries <span class="blog-post-math">\(z_{ij}\)</span>. The model does not only score isolated pairs—it looks at <strong>triangles</strong>: <strong>two edges of the triangle contribute evidence to update the third.</strong> Concretely, after multiplicative prep, Proteus (like the Evoformer lineage) aggregates over triangle configurations (globally on the grid first, then on <strong><span class="blog-post-math">\(N\cdot K\)</span></strong> local edges) to reweight edges.
-
-<strong>The “third edge” and the missing edge.</strong> In a triangle <span class="blog-post-math">\((i,j,k)\)</span>, the side that is <strong>not</strong> the pair you are updating right now is the <strong>third edge</strong> (often drawn in grey in figures). On a <strong>sparse</strong> graph, that edge may be <strong>implicit</strong>—a <strong>“missing edge”</strong> that does not appear as an explicit stored pair in the current local batch. AlphaFold2 fixes this by injecting a <strong>logit bias</strong> along the attention axis so information from the <strong>two visible sides</strong> still nudges the update as if the closing geometry were present. In Proteus, the bias is <strong>grounded in 3D</strong>: distances along that third edge are expanded with <strong>RBF</strong>s and <strong>gated</strong> by the single track so the backbone does not fight the sequence/pair tracks.
-
-<p class="blog-post-p">Examples of how <strong>edge <span class="blog-post-math">\((i,j)\)</span></strong> is refreshed under triangle attention (same story as in <code class="blog-post-code">proteus3.pdf</code>): <strong>(1)</strong> update using messages <strong>out of</strong> node <span class="blog-post-math">\(i\)</span> along the triangle; <strong>(2)</strong> update using messages <strong>into</strong> node <span class="blog-post-math">\(j\)</span>. The third side supplies the structural bias described above.</p>
-
-<figure class="blog-post-figure">
-  <img src="../markdown_posts_english/proteus/image/arch_triangle_self_attention.png" alt="Triangle self-attention: start-node vs end-node updates; grey = third edge / bias." class="blog-post-img" style="width: 100%">
-<figcaption class="blog-post-caption">cf. AlphaFold2 “starting” vs “ending” triangle attention; the grey edge is the third side feeding the logit bias.</figcaption>
-</figure>
-
-<strong>Quick terminology.</strong> <strong>Single</strong> — per-residue <span class="blog-post-math">\(s_i\)</span>. <strong>Pair</strong> — <span class="blog-post-math">\(z_{ij}\)</span>. <strong><span class="blog-post-math">\(K\)</span></strong> nearest neighbours by Cα distance for the sparse attention set. <strong>RBF</strong> — radial basis features on inter-residue distances for the bias. <strong>Scatter</strong> — write local attention outputs back into the full <span class="blog-post-math">\(N\times N\)</span> pair map. <strong>MSA</strong> — the Evoformer track Proteus replaces with <strong>live backbone</strong> conditioning during diffusion.
-</aside>
-
-
 <figure class="blog-post-figure fig-left">
   <img src="../markdown_posts_english/proteus/image/arch_evoformer.png" alt="evoformer" class="blog-post-img" style="width: 50%">
 <figcaption class="blog-post-caption">Evoformer (AlphaFold2): MSA track and pair track talk back and forth; triangle ops live in the pair world.</figcaption>
@@ -405,20 +378,38 @@ flowchart LR
 
 <strong>Why Evoformer-as-is is painful here</strong>
 
-<p class="blog-post-p">(1) Complexity: plain triangle attention is <span class="blog-post-math">\(O(N^3)\)</span> in the number of residues. (2) Information: Evoformer is built to turn MSA + co-evolution into single and pair features; it is not built to thread the current noisy backbone through every pair update, which is exactly what a backbone diffusion network needs at each step.</p>
+<p class="blog-post-p">Triangle attention in Evoformer / AlphaFold2 is powerful but creates two bottlenecks for Proteus-style <strong>backbone diffusion</strong>: <strong>(1)</strong> cost is <span class="blog-post-math">\(O(N^3)\)</span> when every triangle over the full <span class="blog-post-math">\(N^2\)</span> edge set is considered. <strong>(2)</strong> Training is dominated by <strong>MSA</strong> and static <strong>pair co-evolution</strong> signals; the <strong>current noisy backbone</strong> is not threaded through every pair update, which is what a generative structure model needs at each step.</p>
 
-<p class="blog-post-p">Proteus answers with the graph triangle block: keep the triangle multiplication idea on the full <span class="blog-post-math">\(N\times N\)</span> grid, but do attention only on <span class="blog-post-math">\(N\cdot K\)</span> local edges (<span class="blog-post-math">\(K\)</span> nearest neighbors by Cα distance), and bias attention with geometry from the third edge of each triangle (RBF on distances), gated by a small net that reads single features so the bias does not fight the other tracks.</p>
+<p class="blog-post-p">The <strong>graph triangle block</strong> is the paper’s fix. <strong>(A)</strong> Attention runs on <strong><span class="blog-post-math">\(N\cdot K\)</span></strong> local edges: for each residue, keep the <strong><span class="blog-post-math">\(K\)</span></strong> nearest neighbours by <strong>Cα</strong> distance, so complexity drops toward <strong><span class="blog-post-math">\(O(NK^2)\)</span></strong> while still using triangle structure on that sparse set. <strong>(B)</strong> <strong>3D geometry</strong> enters through the <strong>third edge</strong> of each triangle: inter-atomic distances along that side are featurised (e.g. <strong>RBF</strong>), summed into a <strong>structural bias</strong> in the attention logits, and <strong>gated</strong> by a feed-forward on <strong>singles</strong> so the bias can be scaled against the other tracks. <strong>(C)</strong> Before that sparse attention, a <strong>triangle multiplicative update</strong> (AlphaFold2-style) refines the <strong>entire</strong> dense pair grid—multiplicative passes only, no softmax—so the later attention starts from a stronger pair state.</p>
+
+
+<aside class="blog-post-notes" aria-label="Note — Triangle multiplicative update">
+<strong class="blog-post-notes-label"><span class="blog-post-notes-mark">Note</span><span class="blog-post-notes-title-suffix"> — Triangle multiplicative update</span></strong>
+<span class="blog-post-notes-def">Triangle multiplicative update</span> — Before any triangle attention runs, the block applies this step on the full pair grid (Evoformer / AlphaFold2). Each edge <span class="blog-post-math">\((i,j)\)</span> is refined using triangles <span class="blog-post-math">\((i,j,k)\)</span>: the embedding is updated from the <strong>two other edges</strong> of the triangle. There is <strong>no softmax attention</strong> here—only multiplicative message passing on pairs.
+
+<p class="blog-post-p">AlphaFold2 uses <strong>outgoing</strong> (edges that <strong>leave</strong> the endpoints of <span class="blog-post-math">\(ij\)</span> toward <span class="blog-post-math">\(k\)</span>) and <strong>incoming</strong> (edges that <strong>arrive</strong> at <span class="blog-post-math">\(ij\)</span>) variants. Either multiplication or triangle attention alone is strong; <strong>stacking both</strong> is strongest; Proteus runs multiply-then-attend. Multiplicative triangle updates also help backbone diffusion and memory versus attention-heavy stacks (as argued in RFdiffusion-style work).</p>
+
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/arch_triangle_mult_update.png" alt="Triangle multiplicative update: outgoing vs incoming edges around \((i,j,k)\)." class="blog-post-img" style="width: 100%">
+<figcaption class="blog-post-caption">Outgoing (left) vs incoming (right): one triangle <span class="blog-post-math">\((i,j,k)\)</span>, two ways to fold the other two sides into an update for <span class="blog-post-math">\((i,j)\)</span>.</figcaption>
+</figure>
+</aside>
+
 
 <strong>Module 1: Triangle multiplicative update (full pair grid)</strong>
 
-<p class="blog-post-p">Inputs: pair tensor <span class="blog-post-math">\(z^\ell\)</span> (after any entry transform) plus geometry implied by <span class="blog-post-math">\(T^{\ell+1}\)</span> for indexing triangles. Outputs: an updated dense pair representation—call it <span class="blog-post-math">\(z_{\mathrm{mult}}\)</span>—where <span class="blog-post-math">\((i,j)\)</span> has absorbed multiplicative messages along triangles through both outgoing and incoming triangle variants.</p>
+<p class="blog-post-p">Inputs: pair tensor <span class="blog-post-math">\(z^\ell\)</span> (after any entry transform) plus implicit use of geometry when indexing triangles. Outputs: dense <span class="blog-post-math">\(z_{\mathrm{mult}}\)</span>: each <span class="blog-post-math">\((i,j)\)</span> has absorbed <strong>outgoing</strong> and <strong>incoming</strong> multiplicative messages over triples <span class="blog-post-math">\((i,j,k)\)</span>. Complexity is still triangle-like on the full grid (<span class="blog-post-math">\(O(N^3)\)</span> in residue count for that submodule), but there is <strong>no</strong> attention softmax here—only the two multiplicative modes that couple “the other two sides” of each triangle into an update for the third side.</p>
 
-<p class="blog-post-p">If you already studied AlphaFold2, this picture is familiar: one variant uses edges that leave <span class="blog-post-math">\(i\)</span> and <span class="blog-post-math">\(j\)</span> and meet at <span class="blog-post-math">\(k\)</span>; the other uses edges that arrive at <span class="blog-post-math">\(i\)</span> and <span class="blog-post-math">\(j\)</span> from <span class="blog-post-math">\(k\)</span>. Both are ways to enforce “if <span class="blog-post-math">\((i,k)\)</span> and <span class="blog-post-math">\((j,k)\)</span> agree, then <span class="blog-post-math">\((i,j)\)</span> should not be crazy.” This module is <span class="blog-post-math">\(O(N^3)\)</span> in the same sense as vanilla triangle multiplication—still heavy—but it does not add another global attention over all edges; later modules sparsify.</p>
 
-<figure class="blog-post-figure">
-  <img src="../markdown_posts_english/proteus/image/arch_triangle_mult_update.png" alt="tri_mult" class="blog-post-img" style="width: 82%">
-<figcaption class="blog-post-caption">Triangle multiplicative update: outgoing edges (left) vs incoming edges (right), same <span class="blog-post-math">\((i,j,k)\)</span> triangle story.</figcaption>
-</figure>
+<aside class="blog-post-notes" aria-label="Note — Third edge and structural bias">
+<strong class="blog-post-notes-label"><span class="blog-post-notes-mark">Note</span><span class="blog-post-notes-title-suffix"> — Third edge and structural bias</span></strong>
+<span class="blog-post-notes-def">Third edge</span> — In <span class="blog-post-math">\((i,j,k)\)</span>, the side that <strong>completes</strong> the triangle for the two edges you are mixing (often <strong>grey</strong> in figures). <span class="blog-post-notes-def">Structural bias</span> — Proteus measures <strong>distances along that third edge</strong>, maps them through <strong>RBF</strong> (responses shrink as distance grows), and adds the result to <strong>attention logits</strong>. A <strong>feed-forward gate</strong> on <strong>singles</strong> scales the bias so it blends with the other tracks.
+
+<span class="blog-post-notes-def">Missing edge</span> — On a sparse local batch, a triangle leg may not exist as an explicit pair row. A <strong>logit bias</strong> (the same third-edge / RBF signal) lets the <strong>two visible edges</strong> still influence the update as if the closing geometry were stored, improving global pair reasoning. Proteus ties that bias to the <strong>live backbone</strong>, not only MSA co-evolution.
+
+<span class="blog-post-notes-def">Scatter</span> — maps local attention outputs back into the full dense pair grid. <strong>K</strong> Cα-nearest neighbours per residue control the sparse attention cost (<span class="blog-post-math">\(O(NK^2)\)</span>).
+</aside>
+
 
 <strong>Module 2: Neighborhood collation and gated geometry bias</strong>
 
@@ -426,16 +417,27 @@ flowchart LR
 
 <p class="blog-post-p">For each residue <span class="blog-post-math">\(i\)</span>, collate its top-<span class="blog-post-math">\(K\)</span> neighbors by Cα distance so attention only scores <span class="blog-post-math">\((i,j)\)</span> when <span class="blog-post-math">\(j\)</span> is a candidate partner. In parallel, turn pairwise distances between those neighbors into RBF features, run a light network with a gate that reads <span class="blog-post-math">\(s^{\ell+1}\)</span>, and build a logit bias from the “third edge” of each local triangle. That injects the current 3D backbone into the attention scores without revisiting the full <span class="blog-post-math">\(O(N^3)\)</span> attention graph.</p>
 
+
+<aside class="blog-post-notes" aria-label="Note — Triangle attention">
+<strong class="blog-post-notes-label"><span class="blog-post-notes-mark">Note</span><span class="blog-post-notes-title-suffix"> — Triangle attention</span></strong>
+<span class="blog-post-notes-def">Triangle attention</span> — Attention on the <strong>pair</strong> graph: residues are vertices; pair embeddings are edges. Updates use <strong>triangles</strong>: <strong>two edges inform the third</strong> instead of treating <span class="blog-post-math">\((i,j)\)</span> alone.
+
+<p class="blog-post-p">Enumerate triangles (dense grid first, then the <strong><span class="blog-post-math">\(N\cdot K\)</span></strong> local set), apply softmax attention, scatter updates to pairs. This stage follows the multiplicative preconditioning.</p>
+
+<p class="blog-post-p">For <span class="blog-post-math">\((i,j)\)</span>, <strong>starting-node</strong> vs <strong>ending-node</strong> layouts pool along triangle legs out of <span class="blog-post-math">\(i\)</span> or into <span class="blog-post-math">\(j\)</span> (AlphaFold2 convention). The <strong>grey third edge</strong> is where <strong>structural bias</strong> enters the logits (third-edge distances, RBF, gate).</p>
+
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/arch_triangle_self_attention.png" alt="Triangle self-attention: starting-node vs ending-node updates; grey edge is the third side / bias channel." class="blog-post-img" style="width: 100%">
+<figcaption class="blog-post-caption">Grey edge: not updated like the black legs; it feeds the bias that closes the triangle in the score.</figcaption>
+</figure>
+</aside>
+
+
 <strong>Module 3: Local triangle self-attention and scatter-back</strong>
 
 <p class="blog-post-p">Inputs: local pair features and the bias from Module 2. Outputs: the block’s final <span class="blog-post-math">\(z^{\ell+1}\)</span> on the full <span class="blog-post-math">\(N\times N\)</span> grid.</p>
 
-<p class="blog-post-p">Here triangle self-attention means: attend over edges that share a start node or an end node so two sides of a triangle inform the third. The geometry bias fills in tie-breaking when some pairs are implicit in the sparse view. Weighted values are projected and scattered (summed) back into the dense pair tensor, producing <span class="blog-post-math">\(z^{\ell+1}\)</span> that the next folding block consumes.</p>
-
-<figure class="blog-post-figure">
-  <img src="../markdown_posts_english/proteus/image/arch_triangle_self_attention.png" alt="tri_attn" class="blog-post-img" style="width: 82%">
-<figcaption class="blog-post-caption">Triangle self-attention around the starting node vs around the ending node (edges <span class="blog-post-math">\(ij\)</span> and <span class="blog-post-math">\(ik\)</span> or <span class="blog-post-math">\(ij\)</span> and <span class="blog-post-math">\(kj\)</span>); the grey edge is the “third side.”</figcaption>
-</figure>
+<strong>Triangle attention</strong> here is the sparse analogue of Evoformer’s idea: attend over edges that share a <strong>start</strong> or <strong>end</strong> node so two legs of a triangle refresh the third. The <strong>structural bias</strong> (third-edge distances, RBF, gate) is added to logits before softmax. If a triangle side is absent from the local sparse batch, the bias plays the role of a <strong>missing-edge</strong> correction so global geometry still influences the update. Weighted values are projected and <strong>scattered</strong> back into the dense pair tensor for the next folding block.
 
 <strong>End-to-end flow I drew for Proteus</strong>
 
