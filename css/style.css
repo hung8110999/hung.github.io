@@ -1788,6 +1788,15 @@ pre code {
   margin-bottom: var(--space-lg);
 }
 
+/* Bold subsection titles in prose (e.g. model architecture); not nested inside <p> */
+.blog-post-body > strong {
+  display: block;
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-sm);
+  font-size: var(--fs-lg);
+  color: var(--text-heading);
+}
+
 .blog-post-figure {
   margin: var(--space-sm) auto;
   text-align: center;
@@ -1860,6 +1869,65 @@ pre code {
 .blog-post-figure.fig-front {
   position: relative;
   z-index: 10;
+}
+
+/* Sidebar notes (e.g. terminology) — pastel yellow, floats right in article */
+.blog-post-notes {
+  float: right;
+  clear: right;
+  width: min(300px, 36%);
+  margin: 0 0 var(--space-md) var(--space-lg);
+  margin-right: calc(-1 * var(--blog-float-bleed));
+  padding: var(--space-md) var(--space-lg);
+  background: #fffbeb;
+  border: 1px solid #f5e0a4;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+  color: var(--text-primary);
+}
+
+.blog-post-notes-label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--text-heading);
+  letter-spacing: 0.02em;
+}
+
+.blog-post-notes-list {
+  margin: 0;
+  padding-left: var(--space-lg);
+  list-style-type: disc;
+}
+
+.blog-post-notes-list li {
+  margin-bottom: var(--space-sm);
+}
+
+.blog-post-notes-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Images and figures *inside* a side note — keep them in the yellow column */
+.blog-post-notes .blog-post-figure {
+  float: none;
+  width: 100%;
+  max-width: 100%;
+  margin: var(--space-sm) 0;
+}
+
+.blog-post-notes .blog-post-img {
+  max-width: 100%;
+}
+
+.blog-post-notes .blog-post-caption {
+  display: block;
+  max-width: 100%;
+  font-size: 0.78rem;
+  margin-top: var(--space-sm);
 }
 
 /* Clearfix for floated images */
@@ -1971,6 +2039,14 @@ pre code {
 
   .blog-post-h2 {
     font-size: var(--fs-xl);
+  }
+
+  .blog-post-notes {
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    margin: var(--space-lg) 0;
+    margin-right: 0;
   }
 }
 

@@ -271,7 +271,7 @@ Goal. Recover the clean backbone \(\mathcal{Y}_0\) from any forward time \(t\); 
 
 ### 2.3 Model architecture 
 
-This is the section where I leaned on my own figures the most, not only the paper’s Figure 2. I’ll stay consistent with §2.2: there diffusion time is \(t\) and the whole noisy backbone is \(\mathbf{T}^{(t)}\). Here \(\ell\) is the folding-block layer: \(T^\ell\) is the stack of per-residue frames after layer \(\ell\) (same rigid-frame idea as §2.1). I write \(s^\ell\) for the single (node) embedding and \(z^\ell\) for the pair / edge tensor.
+This is the section where I leaned on my own figures the most, not only the paper’s Figure 2. I’ll stay consistent with Section 2.2: there diffusion time is \(t\) and the whole noisy backbone is \(\mathbf{T}^{(t)}\). Here \(\ell\) is the folding-block layer: \(T^\ell\) is the stack of per-residue frames after layer \(\ell\) (same rigid-frame idea as Section 2.1). I write \(s^\ell\) for the single (node) embedding and \(z^\ell\) for the pair / edge tensor.
 
 Yeah, the high-level story is simple. Proteus runs \(L\) folding blocks one after another, and the blocks do not share weights—each has its own parameters.
 
@@ -286,7 +286,9 @@ Every step looks at the other tracks, but only one track is “owned” by that 
 ![model](image/model_architecture_figure2.png){width=85%}
 *Figure 2 from the paper: (A) backbone diffusion in/out, (B) stack of folding blocks, (C) zoom on the graph triangle idea.*
 
-#### IPA–Transformer block
+**IPA–Transformer block**
+
+Inputs: single representation \(s_\ell\), pair representation \(z_\ell\), current per-residue frames \(T^\ell\), and the initial singles \(s_0\) (for the skip-style path into the Transformer). Outputs: updated singles \(s_{\ell+1}\) only; \(z_\ell\) and \(T^\ell\) are unchanged until the later submodules run.
 
 So this first step is exactly the Invariant Point Attention (IPA) story from AlphaFold2, plus a normal Transformer on top (that is how Wang et al. describe it).
 
@@ -297,45 +299,78 @@ The block I saved as equations is just the same thing in math form: IPA residual
 ![ipa_eq](image/arch_ipa_transformer_eq.png){width=75%}
 *How I wrote the IPA–Transformer block: IPA on \((s_\ell, z_\ell, T_\ell)\), then concat with \(\mathrm{Linear}(s_0)\), Transformer, and MLP to \(s_{\ell+1}\).*
 
-#### Backbone update layer
+**Backbone update layer**
+
+Inputs: singles \(s_{\ell+1}\) right after the IPA–Transformer, and the current frames \(T^\ell = \{(R_i^\ell, \mathbf{t}_i^\ell)\}_{i=1}^N\) per residue \(i\). Outputs: updated frames \(T^{\ell+1}\) in the same rigid-frame format; \(s_{\ell+1}\) and \(z_\ell\) are unchanged here.
 
 Once \(s\) has moved, the frames should move too—backbone shape is really about how residues talk to each other, not a separate magic tensor.
 
-Inputs: the new single state \(s_{\ell+1}\) (here I use the paper’s subscript after the IPA–Transformer) and the old frames \(T^\ell\). Outputs: \(T^{\ell+1}\).
+What the equations are for. The network must turn a per-residue vector \(s_{\ell+1,i}\) into a small rigid motion that can actually be composed with the current pose: a rotation in \(SO(3)\) and a translation in \(\mathbb{R}^3\). The AlphaFold2-style recipe predicts a raw quaternion tail \((b_i,c_i,d_i)\) with the first component fixed to 1, predicts a translation increment \(\Delta\mathbf{t}_i\), then builds a valid rotation matrix from a normalized quaternion so every update stays a legal Euclidean motion.
 
-The implementation is very AlphaFold2-flavored: a linear map reads \(s_{\ell+1}\) and predicts three quaternion components \(b_i,c_i,d_i\) plus a translation \(\vec{x}_i^{\mathrm{update}}\). You fix the first quaternion component to 1, normalize the 4-vector to unit length, turn it into a 3×3 rotation \(R_i^{\mathrm{update}}\), pack that with the translation into an update rigid map \(\mathbf{T}_i^{\mathrm{update}}\), and compose it with the layer-\(\ell\) frame. That is the slide I kept referring to as “equations (1)–(5)” in my notes.
+Why that form is necessary. (1) Unconstrained \(3\times 3\) matrices from a linear layer are not guaranteed orthogonal or det = +1; quaternion normalization plus the standard quaternion-to-\(SO(3)\) map is a cheap way to guarantee \(R_i^{\mathrm{upd}}\in SO(3)\). (2) Keeping the head at 1 trims one degree of freedom so the downstream map from \(\mathbb{R}^3\) to \(S^3\) is well posed before normalization. (3) Composition \(T_i^{\ell+1} = T_i^{\mathrm{upd}} \circ T_i^\ell\) matches “update the frame in place” during diffusion: you are not solving for the whole chain in one shot—you are applying a learned local rigid transform each time.
+
+How you “solve” them. There is no inner optimization loop here; it is a forward pass of closed-form operations. Write \(\tilde{q}_i = (1, b_i, c_i, d_i)\), \(\hat{q}_i = \tilde{q}_i / \|\tilde{q}_i\|\), convert \(\hat{q}_i\) to \(R_i^{\mathrm{upd}}\) with the usual quaternion–matrix formulas, then compose
+
+$$
+R_i^{\ell+1} = R_i^{\mathrm{upd}}\, R_i^\ell,
+\qquad
+\mathbf{t}_i^{\ell+1} = R_i^{\mathrm{upd}}\, \mathbf{t}_i^\ell + \Delta\mathbf{t}_i
+$$
+
+(for the right-multiply convention used in many structure networks; the paper’s slide “equations (1)–(5)” pins down sign/order exactly). Backpropagation differentiates through normalization and the quaternion map automatically—the “solution” at inference is just evaluating this recipe once per block.
 
 ![backbone_eq](image/arch_backbone_update_eq.png){width=40% position=right}
 *Backbone update: linear → unit quaternion → rotation matrix → compose with \(T^\ell\) to get \(T^{\ell+1}\).*
 
-#### Graph triangle block
+**Graph triangle block**
 
-This is the heavy module: it takes \(s^{\ell+1}\) (after IPA–Transformer), \(T^{\ell+1}\) (after the backbone update), and the old pair \(z^\ell\), and writes \(z^{\ell+1}\). It is also where Proteus stops pretending it can paste Evoformer onto diffusion without changes.
+Inputs: singles \(s^{\ell+1}\), updated frames \(T^{\ell+1}\), and the pair tensor \(z^\ell\) entering the block. Outputs: a new pair tensor \(z^{\ell+1}\) that encodes refined \((i,j)\) relationships consistent with the current geometry. This is also where Proteus stops pretending it can paste Evoformer onto diffusion without changes.
+
+::: notes Terminology
+- **Single** — per-residue embedding \(s_i\); “what this residue is doing” in latent space.
+- **Pair** — embedding \(z_{ij}\) for an ordered residue pair \((i,j)\); the main place triangle reasoning lives.
+- **Triangle (multiplicative) update** — AlphaFold2-style message passing on triples \((i,j,k)\) so consistency of \((i,k)\) and \((j,k)\) constrains \((i,j)\).
+- **\(K\) nearest neighbors** — keep only the \(K\) closest partners by Cα distance for expensive attention, instead of all \(N-1\) edges.
+- **RBF** — radial basis expansion of inter-residue distances, turning a scalar distance into a short feature vector for biasing attention.
+- **Logit bias** — add a learned or geometry-derived term to attention scores so likely triangles up-weight compatible third edges.
+- **Scatter** — map updates computed on sparse/local edges back into the dense \(N\times N\) pair grid.
+- **MSA** — multiple sequence alignment track in Evoformer; Proteus diffusion conditions on the live backbone instead.
+:::
 
 ![evoformer](image/arch_evoformer.png){width=50% position=left}
 *Evoformer (AlphaFold2): MSA track and pair track talk back and forth; triangle ops live in the pair world.*
 
-#### Why Evoformer-as-is is painful here
+**Why Evoformer-as-is is painful here**
 
 (1) Complexity: plain triangle attention is \(O(N^3)\) in the number of residues. (2) Information: Evoformer is built to turn MSA + co-evolution into single and pair features; it is not built to thread the current noisy backbone through every pair update, which is exactly what a backbone diffusion network needs at each step.
 
 Proteus answers with the graph triangle block: keep the triangle multiplication idea on the full \(N\times N\) grid, but do attention only on \(N\cdot K\) local edges (\(K\) nearest neighbors by Cα distance), and bias attention with geometry from the third edge of each triangle (RBF on distances), gated by a small net that reads single features so the bias does not fight the other tracks.
 
-#### Triangle multiplication (outgoing vs incoming)
+**Module 1: Triangle multiplicative update (full pair grid)**
 
-If you already studied AlphaFold2, this picture is familiar: one variant uses edges that leave \(i\) and \(j\) and meet at \(k\); the other uses edges that arrive at \(i\) and \(j\) from \(k\). Both are ways to enforce “if \((i,k)\) and \((j,k)\) agree, then \((i,j)\) should not be crazy.”
+Inputs: pair tensor \(z^\ell\) (after any entry transform) plus geometry implied by \(T^{\ell+1}\) for indexing triangles. Outputs: an updated dense pair representation—call it \(z_{\mathrm{mult}}\)—where \((i,j)\) has absorbed multiplicative messages along triangles through both outgoing and incoming triangle variants.
+
+If you already studied AlphaFold2, this picture is familiar: one variant uses edges that leave \(i\) and \(j\) and meet at \(k\); the other uses edges that arrive at \(i\) and \(j\) from \(k\). Both are ways to enforce “if \((i,k)\) and \((j,k)\) agree, then \((i,j)\) should not be crazy.” This module is \(O(N^3)\) in the same sense as vanilla triangle multiplication—still heavy—but it does not add another global attention over all edges; later modules sparsify.
 
 ![tri_mult](image/arch_triangle_mult_update.png){width=82%}
 *Triangle multiplicative update: outgoing edges (left) vs incoming edges (right), same \((i,j,k)\) triangle story.*
 
-#### Triangle self-attention
+**Module 2: Neighborhood collation and gated geometry bias**
 
-Triangle self-attention is the sister idea: still a triangle, but now you attend over edges that share a start node or an end node so two sides of the triangle help update the third. That is where the “missing edge” / logit bias trick comes from when a sparse graph does not store every pair explicitly.
+Inputs: the multiplied pairs \(z_{\mathrm{mult}}\), current frames \(T^{\ell+1}\) for Cα distances, and singles \(s^{\ell+1}\) for gating. Outputs: a sparse set of local pair rows of shape \((n, K, c_z)\) with an accompanying geometry bias tensor shaped like \((n, K, K, h)\) (one head slice \(h\) after projection in the sketch).
+
+For each residue \(i\), collate its top-\(K\) neighbors by Cα distance so attention only scores \((i,j)\) when \(j\) is a candidate partner. In parallel, turn pairwise distances between those neighbors into RBF features, run a light network with a gate that reads \(s^{\ell+1}\), and build a logit bias from the “third edge” of each local triangle. That injects the current 3D backbone into the attention scores without revisiting the full \(O(N^3)\) attention graph.
+
+**Module 3: Local triangle self-attention and scatter-back**
+
+Inputs: local pair features and the bias from Module 2. Outputs: the block’s final \(z^{\ell+1}\) on the full \(N\times N\) grid.
+
+Here triangle self-attention means: attend over edges that share a start node or an end node so two sides of a triangle inform the third. The geometry bias fills in tie-breaking when some pairs are implicit in the sparse view. Weighted values are projected and scattered (summed) back into the dense pair tensor, producing \(z^{\ell+1}\) that the next folding block consumes.
 
 ![tri_attn](image/arch_triangle_self_attention.png){width=82%}
 *Triangle self-attention around the starting node vs around the ending node (edges \(ij\) and \(ik\) or \(ij\) and \(kj\)); the grey edge is the “third side.”*
 
-#### End-to-end flow I drew for Proteus
+**End-to-end flow I drew for Proteus**
 
 The diagram matches how I think about it: single \((n,c_s)\), backbone frames, pair \((n,n,c_z)\) → distance matrix from frames → triangle multiplicative pass on the full pair grid → neighbour collate down to \((n,k,c_z)\) local pairs → parallel branch: gate on single + bias featurize from distances → local pair geometry bias \((n,k,k,h)\) → dot-product affinities from projected local pairs, add bias, softmax to weights → weight a value projection from the multiplied pairs → scatter back to a full pair update \((n,n,c_z)\).
 
@@ -347,9 +382,9 @@ There is a second layout I exported that is almost the same pipeline; if one is 
 ![gtb2](image/arch_graph_triangle_block_alt.png){width=92%}
 *Same block, alternate figure layout (bias branch + collate paths).*
 
-#### Why I care about this stack
+**Why I care about this stack**
 
-You dodge the worst \(O(N^3)\) wall for big \(N\), you keep current 3D inside the pair update (not only MSA statistics), and the paper reports training on longer chains (1024 residues in their setup vs 384-style limits often quoted for AlphaFold2 / RFdiffusion-class training). For me the punchline is still: fast enough to use, geometric enough to design with.
+You dodge the worst \(O(N^3)\) wall for big \(N\) on the attention-heavy part, you keep current 3D inside the pair update (not only MSA statistics), and the paper reports training on longer chains (1024 residues in their setup vs 384-style limits often quoted for AlphaFold2 / RFdiffusion-class training). For me the punchline is still: fast enough to use, geometric enough to design with.
 
 Full paper write-up: Wang et al., *Proteus*, ICML 2024, PMLR 235:51376–51395 — [proceedings page](https://proceedings.mlr.press/v235/wang24bi.html).
 
@@ -383,7 +418,7 @@ When \(t\) is still large, the backbone is too corrupted for atomic coordinates 
 
 The paper evaluates monomer generation against RFdiffusion, Genie (SwissProt), FrameDiff, and Chroma. One compact summary table (same metrics as the paper’s main comparison):
 
-![Monomer benchmark table: parameters, designability, sampling time, diversity, timesteps.](image/proteus_benchmark_table.png){width=95%}
+![Monomer benchmark table: parameters, designability, sampling time, diversity, timesteps.](image/proteus_benchmark_table.png){width=45%}
 
 Reading that snapshot in plain language: Proteus reaches the highest designability score (0.921) and the fastest per-sample wall time (18.20 s in the reported setup) while using 100 timesteps; diversity is second-best (0.235) behind RFdiffusion (0.328). RFdiffusion carries the most parameters (59.8M) and is much slower (120.24 s); Genie is smallest (4.1M) but slowest here (188.07 s) and needs many steps (1000); Chroma is almost as fast as Proteus in seconds but lags sharply on designability and diversity; FrameDiff sits in the middle on several axes.
 

@@ -7,6 +7,16 @@ converts them to HTML post pages, and generates english/english_posts.json.
 Usage: python scripts/convert_english.py
 
 YAML: `tag: Topic` or `tags: Reading, Writing` (comma-separated or [bracket, list]).
+
+Side notes (pastel box, floats right): use a fenced block. Title after `::: notes` is optional; default label is `Notes`. Body is normal markdown (lists, **bold**, `\(math\)`, images, links).
+
+    ::: notes Optional title
+    - Bullet **with** formatting
+    ![Alt text](image/file.png){width=100%}
+    *Image caption on the next line*
+    :::
+
+Closing line must be exactly `:::` (optionally trailing spaces). Nested `::: notes` inside a note is supported.
 """
 
 import json
@@ -28,6 +38,8 @@ def convert_markdown(md, folder_name):
     html = md
     block_store = {}
     block_index = 0
+    notes_store = {}
+    notes_block_index = 0
 
     def stash_block(content):
         nonlocal block_index
@@ -35,6 +47,25 @@ def convert_markdown(md, folder_name):
         block_store[token] = content
         block_index += 1
         return token
+
+    def extract_notes(s):
+        """Fenced side notes: ::: notes [optional title] ... markdown body ... :::"""
+        nonlocal notes_block_index
+        pattern = re.compile(
+            r'^::: notes(?:[ \t]+([^\n]*))?[ \t]*\n([\s\S]*?)^:::[ \t]*$',
+            re.MULTILINE,
+        )
+        result = s
+        while True:
+            m = pattern.search(result)
+            if not m:
+                return result
+            title = (m.group(1) or 'Notes').strip() or 'Notes'
+            inner_md = m.group(2).rstrip('\n')
+            token = f'@@NOTES_BLOCK_{notes_block_index}@@'
+            notes_store[token] = (title, inner_md)
+            notes_block_index += 1
+            result = result[:m.start()] + '\n' + token + '\n' + result[m.end():]
 
     def fenced_block_repl(m):
         lang = (m.group(1) or '').strip().lower()
@@ -49,6 +80,9 @@ def convert_markdown(md, folder_name):
 
     # Fenced code blocks (including mermaid) must be handled before inline backticks.
     html = re.sub(r'```([a-zA-Z0-9_-]*)\n([\s\S]*?)\n```', fenced_block_repl, html)
+
+    # Side notes (markdown inside, including images); before math so $$ can appear in a note if needed
+    html = extract_notes(html)
 
     # Math blocks: $$ ... $$ (stash to avoid paragraph/list post-processing)
     html = re.sub(
@@ -157,7 +191,8 @@ def convert_markdown(md, folder_name):
             t.startswith('<!--') or
             t == '</ul>' or
             t == '</figure>' or
-            re.match(r'^@@BLOCK_\d+@@$', t)
+            re.match(r'^@@BLOCK_\d+@@$', t) or
+            re.match(r'^@@NOTES_BLOCK_\d+@@$', t)
         ):
             output.append(line)
         else:
@@ -165,6 +200,15 @@ def convert_markdown(md, folder_name):
     rendered = '\n'.join(output)
     for token, content in block_store.items():
         rendered = rendered.replace(token, content)
+    for token, (title, inner_md) in notes_store.items():
+        inner_html = convert_markdown(inner_md, folder_name)
+        aside = (
+            f'<aside class="blog-post-notes" aria-label="{html_lib.escape(title)}">\n'
+            f'<strong class="blog-post-notes-label">{html_lib.escape(title)}</strong>\n'
+            f'{inner_html}\n'
+            f'</aside>'
+        )
+        rendered = rendered.replace(token, aside)
     return rendered
 
 
