@@ -129,6 +129,23 @@ def convert_markdown(md, folder_name):
 
     html = re.sub(r'!\[([^\]]*)\]\(([^)]+)\)(?:\{([^}]*)\})?', img_repl, html)
 
+    # Figures may contain alt="... \(...\) ..." after html.escape; inline math below would
+    # still match \( inside attributes and inject <span>. Stash <figure>...</figure> first.
+    figure_stash = {}
+    fig_stash_i = [0]
+
+    def stash_figure_block(m):
+        tok = f"@@FIGSTASH_{fig_stash_i[0]}@@"
+        figure_stash[tok] = m.group(0)
+        fig_stash_i[0] += 1
+        return tok
+
+    html = re.sub(
+        r'<figure class="blog-post-figure[^"]*">[\s\S]*?</figure>',
+        stash_figure_block,
+        html,
+    )
+
     # Inline math: \( ... \)
     html = re.sub(
         r'\\\((.+?)\\\)',
@@ -142,6 +159,9 @@ def convert_markdown(md, folder_name):
         lambda m: f'<span class="blog-post-math">\\({m.group(1).strip()}\\)</span>',
         html
     )
+
+    for _tok, _fig in figure_stash.items():
+        html = html.replace(_tok, _fig)
 
     html = re.sub(r'^### (.+)$', r'<h3 class="blog-post-h3">\1</h3>', html, flags=re.MULTILINE)
     html = re.sub(r'^## (.+)$', r'<h2 class="blog-post-h2">\1</h2>', html, flags=re.MULTILINE)

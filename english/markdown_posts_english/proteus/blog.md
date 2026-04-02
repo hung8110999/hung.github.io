@@ -326,15 +326,24 @@ $$
 
 Inputs: singles \(s^{\ell+1}\), updated frames \(T^{\ell+1}\), and the pair tensor \(z^\ell\) entering the block. Outputs: a new pair tensor \(z^{\ell+1}\) that encodes refined \((i,j)\) relationships consistent with the current geometry. This is also where Proteus stops pretending it can paste Evoformer onto diffusion without changes.
 
-::: notes Terminology
-- **Single** — per-residue embedding \(s_i\); “what this residue is doing” in latent space.
-- **Pair** — embedding \(z_{ij}\) for an ordered residue pair \((i,j)\); the main place triangle reasoning lives.
-- **Triangle (multiplicative) update** — AlphaFold2-style message passing on triples \((i,j,k)\) so consistency of \((i,k)\) and \((j,k)\) constrains \((i,j)\).
-- **\(K\) nearest neighbors** — keep only the \(K\) closest partners by Cα distance for expensive attention, instead of all \(N-1\) edges.
-- **RBF** — radial basis expansion of inter-residue distances, turning a scalar distance into a short feature vector for biasing attention.
-- **Logit bias** — add a learned or geometry-derived term to attention scores so likely triangles up-weight compatible third edges.
-- **Scatter** — map updates computed on sparse/local edges back into the dense \(N\times N\) pair grid.
-- **MSA** — multiple sequence alignment track in Evoformer; Proteus diffusion conditions on the live backbone instead.
+::: notes Graph triangle block
+These bullets follow my longer write-up in `proteus3.pdf`: order inside the block is **triangle multiplicative update first**, then **local triangle attention** (with geometry), and Proteus reduces cost to \(O(NK^2)\) with \(K\) Cα-nearest neighbours.
+
+**Triangle Multiplicative update (no attention yet).** Taken from AlphaFold2’s Evoformer idea: every edge \((i,j)\) in the pair grid is updated using **triples** \((i,j,k)\)—the third residue \(k\) closes a triangle, and each edge is refined from the **two other sides** of that triangle. There are two algebraically distinct passes—**outgoing** (messages along edges **leaving** the endpoints of \(ij\)) and **incoming** (edges **arriving** at \(ij\))—as in the official diagrams. This stage is **pure multiplicative routing** on pairs (no softmax attention). As AlphaFold2 reports, **either** multiplicative update **or** triangle attention alone is already strong, but **combining both** works best—which is why Proteus keeps multiplication **before** attention.
+
+![Triangle Multiplicative update: outgoing vs incoming edges around \((i,j,k)\).](image/arch_triangle_mult_update.png){width=100%}
+*Same convention as AlphaFold2 / my slides: two multiplicative modes share one triangle story.*
+
+**Triangle attention.** A graph attention variant on the **pair** tensor: vertices are residues; each **edge** carries \(z_{ij}\). The model does not only score isolated pairs—it looks at **triangles**: **two edges of the triangle contribute evidence to update the third.** Concretely, after multiplicative prep, Proteus (like the Evoformer lineage) aggregates over triangle configurations (globally on the grid first, then on **\(N\cdot K\)** local edges) to reweight edges.
+
+**The “third edge” and the missing edge.** In a triangle \((i,j,k)\), the side that is **not** the pair you are updating right now is the **third edge** (often drawn in grey in figures). On a **sparse** graph, that edge may be **implicit**—a **“missing edge”** that does not appear as an explicit stored pair in the current local batch. AlphaFold2 fixes this by injecting a **logit bias** along the attention axis so information from the **two visible sides** still nudges the update as if the closing geometry were present. In Proteus, the bias is **grounded in 3D**: distances along that third edge are expanded with **RBF**s and **gated** by the single track so the backbone does not fight the sequence/pair tracks.
+
+Examples of how **edge \((i,j)\)** is refreshed under triangle attention (same story as in `proteus3.pdf`): **(1)** update using messages **out of** node \(i\) along the triangle; **(2)** update using messages **into** node \(j\). The third side supplies the structural bias described above.
+
+![Triangle self-attention: start-node vs end-node updates; grey = third edge / bias.](image/arch_triangle_self_attention.png){width=100%}
+*cf. AlphaFold2 “starting” vs “ending” triangle attention; the grey edge is the third side feeding the logit bias.*
+
+**Quick terminology.** **Single** — per-residue \(s_i\). **Pair** — \(z_{ij}\). **\(K\)** nearest neighbours by Cα distance for the sparse attention set. **RBF** — radial basis features on inter-residue distances for the bias. **Scatter** — write local attention outputs back into the full \(N\times N\) pair map. **MSA** — the Evoformer track Proteus replaces with **live backbone** conditioning during diffusion.
 :::
 
 ![evoformer](image/arch_evoformer.png){width=50% position=left}
