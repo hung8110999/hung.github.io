@@ -112,7 +112,7 @@ function alignTimelineDots() {
   });
 }
 
-/** Wide-screen margin notes: prevent overlapping asides by nudging top (pairs with --blog-post-notes-stack-gap). */
+/** Wide-screen margin notes: per side (left / right), nudge top so same-side notes do not overlap. */
 function initMarginNotesStacking() {
   const body = document.querySelector('.blog-post-body');
   if (!body) return;
@@ -129,11 +129,30 @@ function initMarginNotesStacking() {
     return Number.isFinite(n) ? n : 20;
   };
 
+  const noteSide = (el) => (el.classList.contains('blog-post-notes--left') ? 'left' : 'right');
+
+  const stackOneSide = (group, gap) => {
+    if (group.length < 2) return;
+
+    const heights = group.map((el) => el.getBoundingClientRect().height);
+    const naturalTops = group.map((el) => el.offsetTop);
+    let prevBottom = 0;
+
+    for (let i = 0; i < group.length; i++) {
+      const floor = i === 0 ? naturalTops[i] : prevBottom + gap;
+      const t = Math.max(naturalTops[i], floor);
+      prevBottom = t + heights[i];
+      if (Math.abs(t - naturalTops[i]) > 0.5) {
+        group[i].style.top = `${Math.round(t * 100) / 100}px`;
+      } else {
+        group[i].style.top = '';
+      }
+    }
+  };
+
   const run = () => {
     const notes = listNotes();
-    if (notes.length < 2) return;
-
-    const gap = stackGapPx();
+    if (!notes.length) return;
 
     if (!mq.matches) {
       notes.forEach((el) => {
@@ -142,31 +161,22 @@ function initMarginNotesStacking() {
       return;
     }
 
+    const gap = stackGapPx();
+
     notes.forEach((el) => {
       el.style.top = '';
     });
     void body.offsetHeight;
 
-    const heights = notes.map((el) => el.getBoundingClientRect().height);
-    const naturalTops = notes.map((el) => el.offsetTop);
-
-    let prevBottom = 0;
-    const adjusted = [];
-
-    for (let i = 0; i < notes.length; i++) {
-      const floor = i === 0 ? naturalTops[i] : prevBottom + gap;
-      const t = Math.max(naturalTops[i], floor);
-      adjusted.push(t);
-      prevBottom = t + heights[i];
-    }
-
-    notes.forEach((el, i) => {
-      if (Math.abs(adjusted[i] - naturalTops[i]) > 0.5) {
-        el.style.top = `${Math.round(adjusted[i] * 100) / 100}px`;
-      } else {
-        el.style.top = '';
-      }
+    const left = [];
+    const right = [];
+    notes.forEach((el) => {
+      if (noteSide(el) === 'left') left.push(el);
+      else right.push(el);
     });
+
+    stackOneSide(left, gap);
+    stackOneSide(right, gap);
   };
 
   const schedule = () => {

@@ -353,6 +353,11 @@ flowchart LR
 
 <p class="blog-post-p">What the equations are for. The network must turn a per-residue vector <span class="blog-post-math">\(s_{\ell+1,i}\)</span> into a small rigid motion that can actually be composed with the current pose: a rotation in <span class="blog-post-math">\(SO(3)\)</span> and a translation in <span class="blog-post-math">\(\mathbb{R}^3\)</span>. The AlphaFold2-style recipe predicts a raw quaternion tail <span class="blog-post-math">\((b_i,c_i,d_i)\)</span> with the first component fixed to 1, predicts a translation increment <span class="blog-post-math">\(\Delta\mathbf{t}_i\)</span>, then builds a valid rotation matrix from a normalized quaternion so every update stays a legal Euclidean motion.</p>
 
+<figure class="blog-post-figure fig-right">
+  <img src="../markdown_posts_english/proteus/image/arch_backbone_update_eq.png" alt="backbone_eq" class="blog-post-img" style="width: 40%">
+<figcaption class="blog-post-caption">Backbone update: linear → unit quaternion → rotation matrix → compose with <span class="blog-post-math">\(T^\ell\)</span> to get <span class="blog-post-math">\(T^{\ell+1}\)</span>.</figcaption>
+</figure>
+
 <p class="blog-post-p">Why that form is necessary. (1) Unconstrained <span class="blog-post-math">\(3\times 3\)</span> matrices from a linear layer are not guaranteed orthogonal or det = +1; quaternion normalization plus the standard quaternion-to-<span class="blog-post-math">\(SO(3)\)</span> map is a cheap way to guarantee <span class="blog-post-math">\(R_i^{\mathrm{upd}}\in SO(3)\)</span>. (2) Keeping the head at 1 trims one degree of freedom so the downstream map from <span class="blog-post-math">\(\mathbb{R}^3\)</span> to <span class="blog-post-math">\(S^3\)</span> is well posed before normalization. (3) Composition <span class="blog-post-math">\(T_i^{\ell+1} = T_i^{\mathrm{upd}} \circ T_i^\ell\)</span> matches “update the frame in place” during diffusion: you are not solving for the whole chain in one shot—you are applying a learned local rigid transform each time.</p>
 
 <p class="blog-post-p">How you “solve” them. There is no inner optimization loop here; it is a forward pass of closed-form operations. Write <span class="blog-post-math">\(\tilde{q}_i = (1, b_i, c_i, d_i)\)</span>, <span class="blog-post-math">\(\hat{q}_i = \tilde{q}_i / \|\tilde{q}_i\|\)</span>, convert <span class="blog-post-math">\(\hat{q}_i\)</span> to <span class="blog-post-math">\(R_i^{\mathrm{upd}}\)</span> with the usual quaternion–matrix formulas, then compose</p>
@@ -362,10 +367,6 @@ flowchart LR
 \mathbf{t}_i^{\ell+1} = R_i^{\mathrm{upd}}\, \mathbf{t}_i^\ell + \Delta\mathbf{t}_i\]</div>
 <p class="blog-post-p">(for the right-multiply convention used in many structure networks; the paper’s slide “equations (1)–(5)” pins down sign/order exactly). Backpropagation differentiates through normalization and the quaternion map automatically—the “solution” at inference is just evaluating this recipe once per block.</p>
 
-<figure class="blog-post-figure fig-right">
-  <img src="../markdown_posts_english/proteus/image/arch_backbone_update_eq.png" alt="backbone_eq" class="blog-post-img" style="width: 40%">
-<figcaption class="blog-post-caption">Backbone update: linear → unit quaternion → rotation matrix → compose with <span class="blog-post-math">\(T^\ell\)</span> to get <span class="blog-post-math">\(T^{\ell+1}\)</span>.</figcaption>
-</figure>
 
 <strong>Graph triangle block</strong>
 
@@ -383,7 +384,7 @@ flowchart LR
 <p class="blog-post-p">The <strong>graph triangle block</strong> is the paper’s fix. <strong>(A)</strong> Attention runs on <strong><span class="blog-post-math">\(N\cdot K\)</span></strong> local edges: for each residue, keep the <strong><span class="blog-post-math">\(K\)</span></strong> nearest neighbours by <strong>Cα</strong> distance, so complexity drops toward <strong><span class="blog-post-math">\(O(NK^2)\)</span></strong> while still using triangle structure on that sparse set. <strong>(B)</strong> <strong>3D geometry</strong> enters through the <strong>third edge</strong> of each triangle: inter-atomic distances along that side are featurised (e.g. <strong>RBF</strong>), summed into a <strong>structural bias</strong> in the attention logits, and <strong>gated</strong> by a feed-forward on <strong>singles</strong> so the bias can be scaled against the other tracks. <strong>(C)</strong> Before that sparse attention, a <strong>triangle multiplicative update</strong> (AlphaFold2-style) refines the <strong>entire</strong> dense pair grid—multiplicative passes only, no softmax—so the later attention starts from a stronger pair state.</p>
 
 
-<aside class="blog-post-notes" aria-label="Note — Triangle multiplicative update">
+<aside class="blog-post-notes blog-post-notes--right" aria-label="Note — Triangle multiplicative update">
 <strong class="blog-post-notes-label"><span class="blog-post-notes-mark">Note</span><span class="blog-post-notes-title-suffix"> — Triangle multiplicative update</span></strong>
 <span class="blog-post-notes-def">Triangle multiplicative update</span> — Before any triangle attention runs, the block applies this step on the full pair grid (Evoformer / AlphaFold2). Each edge <span class="blog-post-math">\((i,j)\)</span> is refined using triangles <span class="blog-post-math">\((i,j,k)\)</span>: the embedding is updated from the <strong>two other edges</strong> of the triangle. There is <strong>no softmax attention</strong> here—only multiplicative message passing on pairs.
 
@@ -401,7 +402,7 @@ flowchart LR
 <p class="blog-post-p">Inputs: pair tensor <span class="blog-post-math">\(z^\ell\)</span> (after any entry transform) plus implicit use of geometry when indexing triangles. Outputs: dense <span class="blog-post-math">\(z_{\mathrm{mult}}\)</span>: each <span class="blog-post-math">\((i,j)\)</span> has absorbed <strong>outgoing</strong> and <strong>incoming</strong> multiplicative messages over triples <span class="blog-post-math">\((i,j,k)\)</span>. Complexity is still triangle-like on the full grid (<span class="blog-post-math">\(O(N^3)\)</span> in residue count for that submodule), but there is <strong>no</strong> attention softmax here—only the two multiplicative modes that couple “the other two sides” of each triangle into an update for the third side.</p>
 
 
-<aside class="blog-post-notes" aria-label="Note — Third edge and structural bias">
+<aside class="blog-post-notes blog-post-notes--left" aria-label="Note — Third edge and structural bias">
 <strong class="blog-post-notes-label"><span class="blog-post-notes-mark">Note</span><span class="blog-post-notes-title-suffix"> — Third edge and structural bias</span></strong>
 <span class="blog-post-notes-def">Third edge</span> — In <span class="blog-post-math">\((i,j,k)\)</span>, the side that <strong>completes</strong> the triangle for the two edges you are mixing (often <strong>grey</strong> in figures). <span class="blog-post-notes-def">Structural bias</span> — Proteus measures <strong>distances along that third edge</strong>, maps them through <strong>RBF</strong> (responses shrink as distance grows), and adds the result to <strong>attention logits</strong>. A <strong>feed-forward gate</strong> on <strong>singles</strong> scales the bias so it blends with the other tracks.
 
@@ -418,7 +419,7 @@ flowchart LR
 <p class="blog-post-p">For each residue <span class="blog-post-math">\(i\)</span>, collate its top-<span class="blog-post-math">\(K\)</span> neighbors by Cα distance so attention only scores <span class="blog-post-math">\((i,j)\)</span> when <span class="blog-post-math">\(j\)</span> is a candidate partner. In parallel, turn pairwise distances between those neighbors into RBF features, run a light network with a gate that reads <span class="blog-post-math">\(s^{\ell+1}\)</span>, and build a logit bias from the “third edge” of each local triangle. That injects the current 3D backbone into the attention scores without revisiting the full <span class="blog-post-math">\(O(N^3)\)</span> attention graph.</p>
 
 
-<aside class="blog-post-notes" aria-label="Note — Triangle attention">
+<aside class="blog-post-notes blog-post-notes--right" aria-label="Note — Triangle attention">
 <strong class="blog-post-notes-label"><span class="blog-post-notes-mark">Note</span><span class="blog-post-notes-title-suffix"> — Triangle attention</span></strong>
 <span class="blog-post-notes-def">Triangle attention</span> — Attention on the <strong>pair</strong> graph: residues are vertices; pair embeddings are edges. Updates use <strong>triangles</strong>: <strong>two edges inform the third</strong> instead of treating <span class="blog-post-math">\((i,j)\)</span> alone.
 
@@ -435,9 +436,11 @@ flowchart LR
 
 <strong>Module 3: Local triangle self-attention and scatter-back</strong>
 
-<p class="blog-post-p">Inputs: local pair features and the bias from Module 2. Outputs: the block’s final <span class="blog-post-math">\(z^{\ell+1}\)</span> on the full <span class="blog-post-math">\(N\times N\)</span> grid.</p>
+<p class="blog-post-p">Inputs: Module 2’s <strong>local</strong> pack—the collated rows <span class="blog-post-math">\((n,K,c_z)\)</span> carrying <strong><span class="blog-post-math">\(z_{\mathrm{mult}}\)</span></strong> on each residue’s Cα-neighbourhood, plus the <strong>geometry bias</strong> <span class="blog-post-math">\((n,K,K,h)\)</span> from third-edge RBF features and the single-track gate. Outputs: the block’s <strong>dense</strong> pair tensor <strong><span class="blog-post-math">\(z^{\ell+1}\)</span></strong> on the full <span class="blog-post-math">\(N\times N\)</span> grid.</p>
 
-<strong>Triangle attention</strong> here is the sparse analogue of Evoformer’s idea: attend over edges that share a <strong>start</strong> or <strong>end</strong> node so two legs of a triangle refresh the third. The <strong>structural bias</strong> (third-edge distances, RBF, gate) is added to logits before softmax. If a triangle side is absent from the local sparse batch, the bias plays the role of a <strong>missing-edge</strong> correction so global geometry still influences the update. Weighted values are projected and <strong>scattered</strong> back into the dense pair tensor for the next folding block.
+<p class="blog-post-p">This is the block’s only <strong>softmax</strong> stage, and it runs entirely on the <strong><span class="blog-post-math">\(N\cdot K\)</span></strong> sparse edge set. For each triangle that survives collation, logits come from projected pair features <strong>plus</strong> the <strong>structural bias</strong> (already fixed in Module 2); softmax turns those into weights over the <strong>starting-node</strong> and <strong>ending-node</strong> triangle patterns—the same “two legs refresh the third” picture as Evoformer’s triangle attention, only restricted to neighbours (margin figure). When a leg is missing as an explicit row, the bias still carries <strong>third-edge</strong> mileage so the visible legs are not updated in isolation—that is the <strong>missing-edge</strong> correction tied to the <strong>live backbone</strong>.</p>
+
+<strong>Scatter-back</strong> folds those local weighted messages into the <strong>global</strong> pair indices: every contributing view of an edge <span class="blog-post-math">\((i,j)\)</span> lands in <strong><span class="blog-post-math">\(z^{\ell+1}_{ij}\)</span></strong>. The next IPA–backbone–triangle cycle therefore starts again from one coherent dense pair map, not a bag of neighbourhood shards.
 
 <strong>End-to-end flow I drew for Proteus</strong>
 

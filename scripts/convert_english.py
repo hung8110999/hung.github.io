@@ -12,7 +12,10 @@ Side notes (pastel box in the outer margin, out of the text column): use a fence
 The visible title always starts with **Note** (bold red in CSS). Optional words after
 `::: notes` become a suffix, e.g. `::: notes Terminology` → "Note — Terminology".
 
-    ::: notes Optional suffix only
+Placement on wide viewports: prefix the title line with `[left]` or `[right]` (default is right).
+Example: `::: notes [left] Terminology` parks the note in the left outer margin; `[right]` is explicit.
+
+    ::: notes [right] Optional suffix only
     - Bullet **with** formatting
     ![Alt text](image/file.png){width=100%}
     *Image caption on the next line*
@@ -34,6 +37,17 @@ POSTS_DIR = os.path.join(ENGLISH_ROOT, 'english_posts')
 POSTS_JSON = os.path.join(ENGLISH_ROOT, 'english_posts.json')
 
 os.makedirs(POSTS_DIR, exist_ok=True)
+
+_NOTES_SIDE_PREFIX = re.compile(r'^\[\s*(left|right)\s*\]\s*(.*)$', re.IGNORECASE | re.DOTALL)
+
+
+def _parse_notes_title_line(raw: str):
+    """Return (side, display_title) where side is 'left' or 'right'."""
+    s = (raw or '').strip()
+    m = _NOTES_SIDE_PREFIX.match(s)
+    if m:
+        return m.group(1).lower(), (m.group(2) or '').strip()
+    return 'right', s
 
 
 def convert_markdown(md, folder_name):
@@ -62,10 +76,11 @@ def convert_markdown(md, folder_name):
             m = pattern.search(result)
             if not m:
                 return result
-            title = (m.group(1) or '').strip()
+            raw_title = (m.group(1) or '').strip()
+            side, title = _parse_notes_title_line(raw_title)
             inner_md = m.group(2).rstrip('\n')
             token = f'@@NOTES_BLOCK_{notes_block_index}@@'
-            notes_store[token] = (title, inner_md)
+            notes_store[token] = (title, inner_md, side)
             notes_block_index += 1
             result = result[:m.start()] + '\n' + token + '\n' + result[m.end():]
 
@@ -225,7 +240,7 @@ def convert_markdown(md, folder_name):
     rendered = '\n'.join(output)
     for token, content in block_store.items():
         rendered = rendered.replace(token, content)
-    for token, (title, inner_md) in notes_store.items():
+    for token, (title, inner_md, side) in notes_store.items():
         inner_html = convert_markdown(inner_md, folder_name)
         t = (title or '').strip()
         if not t or t.lower() in ('note', 'notes'):
@@ -236,8 +251,9 @@ def convert_markdown(md, folder_name):
                 f'<span class="blog-post-notes-title-suffix"> — {html_lib.escape(t)}</span>'
             )
             aria = f'Note — {t}'
+        side_class = 'blog-post-notes--left' if side == 'left' else 'blog-post-notes--right'
         aside = (
-            f'<aside class="blog-post-notes" aria-label="{html_lib.escape(aria)}">\n'
+            f'<aside class="blog-post-notes {side_class}" aria-label="{html_lib.escape(aria)}">\n'
             f'<strong class="blog-post-notes-label"><span class="blog-post-notes-mark">Note</span>'
             f'{suffix_html}</strong>\n'
             f'{inner_html}\n'

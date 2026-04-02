@@ -307,6 +307,9 @@ Once \(s\) has moved, the frames should move too—backbone shape is really abou
 
 What the equations are for. The network must turn a per-residue vector \(s_{\ell+1,i}\) into a small rigid motion that can actually be composed with the current pose: a rotation in \(SO(3)\) and a translation in \(\mathbb{R}^3\). The AlphaFold2-style recipe predicts a raw quaternion tail \((b_i,c_i,d_i)\) with the first component fixed to 1, predicts a translation increment \(\Delta\mathbf{t}_i\), then builds a valid rotation matrix from a normalized quaternion so every update stays a legal Euclidean motion.
 
+![backbone_eq](image/arch_backbone_update_eq.png){width=40% position=right}
+*Backbone update: linear → unit quaternion → rotation matrix → compose with \(T^\ell\) to get \(T^{\ell+1}\).*
+
 Why that form is necessary. (1) Unconstrained \(3\times 3\) matrices from a linear layer are not guaranteed orthogonal or det = +1; quaternion normalization plus the standard quaternion-to-\(SO(3)\) map is a cheap way to guarantee \(R_i^{\mathrm{upd}}\in SO(3)\). (2) Keeping the head at 1 trims one degree of freedom so the downstream map from \(\mathbb{R}^3\) to \(S^3\) is well posed before normalization. (3) Composition \(T_i^{\ell+1} = T_i^{\mathrm{upd}} \circ T_i^\ell\) matches “update the frame in place” during diffusion: you are not solving for the whole chain in one shot—you are applying a learned local rigid transform each time.
 
 How you “solve” them. There is no inner optimization loop here; it is a forward pass of closed-form operations. Write \(\tilde{q}_i = (1, b_i, c_i, d_i)\), \(\hat{q}_i = \tilde{q}_i / \|\tilde{q}_i\|\), convert \(\hat{q}_i\) to \(R_i^{\mathrm{upd}}\) with the usual quaternion–matrix formulas, then compose
@@ -319,8 +322,6 @@ $$
 
 (for the right-multiply convention used in many structure networks; the paper’s slide “equations (1)–(5)” pins down sign/order exactly). Backpropagation differentiates through normalization and the quaternion map automatically—the “solution” at inference is just evaluating this recipe once per block.
 
-![backbone_eq](image/arch_backbone_update_eq.png){width=40% position=right}
-*Backbone update: linear → unit quaternion → rotation matrix → compose with \(T^\ell\) to get \(T^{\ell+1}\).*
 
 **Graph triangle block**
 
@@ -335,7 +336,7 @@ Triangle attention in Evoformer / AlphaFold2 is powerful but creates two bottlen
 
 The **graph triangle block** is the paper’s fix. **(A)** Attention runs on **\(N\cdot K\)** local edges: for each residue, keep the **\(K\)** nearest neighbours by **Cα** distance, so complexity drops toward **\(O(NK^2)\)** while still using triangle structure on that sparse set. **(B)** **3D geometry** enters through the **third edge** of each triangle: inter-atomic distances along that side are featurised (e.g. **RBF**), summed into a **structural bias** in the attention logits, and **gated** by a feed-forward on **singles** so the bias can be scaled against the other tracks. **(C)** Before that sparse attention, a **triangle multiplicative update** (AlphaFold2-style) refines the **entire** dense pair grid—multiplicative passes only, no softmax—so the later attention starts from a stronger pair state.
 
-::: notes Triangle multiplicative update
+::: notes [right] Triangle multiplicative update
 <span class="blog-post-notes-def">Triangle multiplicative update</span> — Before any triangle attention runs, the block applies this step on the full pair grid (Evoformer / AlphaFold2). Each edge \((i,j)\) is refined using triangles \((i,j,k)\): the embedding is updated from the **two other edges** of the triangle. There is **no softmax attention** here—only multiplicative message passing on pairs.
 
 AlphaFold2 uses **outgoing** (edges that **leave** the endpoints of \(ij\) toward \(k\)) and **incoming** (edges that **arrive** at \(ij\)) variants. Either multiplication or triangle attention alone is strong; **stacking both** is strongest; Proteus runs multiply-then-attend. Multiplicative triangle updates also help backbone diffusion and memory versus attention-heavy stacks (as argued in RFdiffusion-style work).
@@ -348,7 +349,7 @@ AlphaFold2 uses **outgoing** (edges that **leave** the endpoints of \(ij\) towar
 
 Inputs: pair tensor \(z^\ell\) (after any entry transform) plus implicit use of geometry when indexing triangles. Outputs: dense \(z_{\mathrm{mult}}\): each \((i,j)\) has absorbed **outgoing** and **incoming** multiplicative messages over triples \((i,j,k)\). Complexity is still triangle-like on the full grid (\(O(N^3)\) in residue count for that submodule), but there is **no** attention softmax here—only the two multiplicative modes that couple “the other two sides” of each triangle into an update for the third side.
 
-::: notes Third edge and structural bias
+::: notes [left] Third edge and structural bias
 <span class="blog-post-notes-def">Third edge</span> — In \((i,j,k)\), the side that **completes** the triangle for the two edges you are mixing (often **grey** in figures). <span class="blog-post-notes-def">Structural bias</span> — Proteus measures **distances along that third edge**, maps them through **RBF** (responses shrink as distance grows), and adds the result to **attention logits**. A **feed-forward gate** on **singles** scales the bias so it blends with the other tracks.
 
 <span class="blog-post-notes-def">Missing edge</span> — On a sparse local batch, a triangle leg may not exist as an explicit pair row. A **logit bias** (the same third-edge / RBF signal) lets the **two visible edges** still influence the update as if the closing geometry were stored, improving global pair reasoning. Proteus ties that bias to the **live backbone**, not only MSA co-evolution.
@@ -362,7 +363,7 @@ Inputs: the multiplied pairs \(z_{\mathrm{mult}}\), current frames \(T^{\ell+1}\
 
 For each residue \(i\), collate its top-\(K\) neighbors by Cα distance so attention only scores \((i,j)\) when \(j\) is a candidate partner. In parallel, turn pairwise distances between those neighbors into RBF features, run a light network with a gate that reads \(s^{\ell+1}\), and build a logit bias from the “third edge” of each local triangle. That injects the current 3D backbone into the attention scores without revisiting the full \(O(N^3)\) attention graph.
 
-::: notes Triangle attention
+::: notes [right] Triangle attention
 <span class="blog-post-notes-def">Triangle attention</span> — Attention on the **pair** graph: residues are vertices; pair embeddings are edges. Updates use **triangles**: **two edges inform the third** instead of treating \((i,j)\) alone.
 
 Enumerate triangles (dense grid first, then the **\(N\cdot K\)** local set), apply softmax attention, scatter updates to pairs. This stage follows the multiplicative preconditioning.
@@ -375,9 +376,11 @@ For \((i,j)\), **starting-node** vs **ending-node** layouts pool along triangle 
 
 **Module 3: Local triangle self-attention and scatter-back**
 
-Inputs: local pair features and the bias from Module 2. Outputs: the block’s final \(z^{\ell+1}\) on the full \(N\times N\) grid.
+Inputs: Module 2’s **local** pack—the collated rows \((n,K,c_z)\) carrying **\(z_{\mathrm{mult}}\)** on each residue’s Cα-neighbourhood, plus the **geometry bias** \((n,K,K,h)\) from third-edge RBF features and the single-track gate. Outputs: the block’s **dense** pair tensor **\(z^{\ell+1}\)** on the full \(N\times N\) grid.
 
-**Triangle attention** here is the sparse analogue of Evoformer’s idea: attend over edges that share a **start** or **end** node so two legs of a triangle refresh the third. The **structural bias** (third-edge distances, RBF, gate) is added to logits before softmax. If a triangle side is absent from the local sparse batch, the bias plays the role of a **missing-edge** correction so global geometry still influences the update. Weighted values are projected and **scattered** back into the dense pair tensor for the next folding block.
+This is the block’s only **softmax** stage, and it runs entirely on the **\(N\cdot K\)** sparse edge set. For each triangle that survives collation, logits come from projected pair features **plus** the **structural bias** (already fixed in Module 2); softmax turns those into weights over the **starting-node** and **ending-node** triangle patterns—the same “two legs refresh the third” picture as Evoformer’s triangle attention, only restricted to neighbours (margin figure). When a leg is missing as an explicit row, the bias still carries **third-edge** mileage so the visible legs are not updated in isolation—that is the **missing-edge** correction tied to the **live backbone**.
+
+**Scatter-back** folds those local weighted messages into the **global** pair indices: every contributing view of an edge \((i,j)\) lands in **\(z^{\ell+1}_{ij}\)**. The next IPA–backbone–triangle cycle therefore starts again from one coherent dense pair map, not a bag of neighbourhood shards.
 
 **End-to-end flow I drew for Proteus**
 
