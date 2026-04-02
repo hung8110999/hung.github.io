@@ -122,6 +122,11 @@ function initMarginNotesStacking() {
 
   const mq = window.matchMedia('(min-width: 1280px)');
   let raf = null;
+  let debounceId = null;
+  /** Debounce resize/observation/MathJax: avoids dozens of layout passes while the article body is still settling. */
+  const DEBOUNCE_MS = 120;
+
+  let resizeObserver = null;
 
   const stackGapPx = () => {
     const raw = getComputedStyle(body).getPropertyValue('--blog-post-notes-stack-gap').trim();
@@ -187,14 +192,37 @@ function initMarginNotesStacking() {
     });
   };
 
-  schedule();
-  mq.addEventListener('change', schedule);
-  window.addEventListener('resize', schedule);
+  const debouncedSchedule = () => {
+    if (debounceId != null) clearTimeout(debounceId);
+    debounceId = setTimeout(() => {
+      debounceId = null;
+      schedule();
+    }, DEBOUNCE_MS);
+  };
 
-  if (typeof ResizeObserver !== 'undefined') {
-    const ro = new ResizeObserver(schedule);
-    ro.observe(body);
-  }
+  const syncResizeObserver = () => {
+    if (typeof ResizeObserver === 'undefined') return;
+    if (!resizeObserver) {
+      resizeObserver = new ResizeObserver(() => {
+        if (!mq.matches) return;
+        debouncedSchedule();
+      });
+    }
+    resizeObserver.disconnect();
+    if (mq.matches) {
+      resizeObserver.observe(body);
+    }
+  };
+
+  schedule();
+  syncResizeObserver();
+
+  mq.addEventListener('change', () => {
+    syncResizeObserver();
+    schedule();
+  });
+
+  window.addEventListener('resize', debouncedSchedule);
 
   listNotes().forEach((aside) => {
     aside.querySelectorAll('img').forEach((img) => {
@@ -203,7 +231,7 @@ function initMarginNotesStacking() {
   });
 
   if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
-    window.MathJax.startup.promise.then(schedule).catch(() => {});
+    window.MathJax.startup.promise.then(debouncedSchedule).catch(() => {});
   }
 }
 

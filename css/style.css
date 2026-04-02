@@ -1926,13 +1926,15 @@ pre code {
   margin-bottom: var(--space-sm);
   font-size: var(--fs-base);
   font-weight: 600;
-  color: var(--text-heading);
   letter-spacing: 0.02em;
+  /* Title suffix picks up heading color; “Note” uses nested rule so it stays red. */
+  color: var(--text-heading);
 }
 
-.blog-post-notes-mark {
+.blog-post-notes-label .blog-post-notes-mark {
   color: #c53030;
   font-weight: 800;
+  -webkit-text-fill-color: #c53030;
 }
 
 .blog-post-notes-title-suffix {
