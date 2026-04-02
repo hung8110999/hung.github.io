@@ -1761,6 +1761,8 @@ pre code {
   overflow-x: visible;
   /* How far left/right floats may hang past the text column into article padding */
   --blog-float-bleed: clamp(0.75rem, 2.5vw, 2rem);
+  /* Vertical gap between margin notes when JS stacks them (wide viewports) */
+  --blog-post-notes-stack-gap: var(--space-lg);
 }
 
 .blog-post-h1 {
@@ -1903,6 +1905,7 @@ pre code {
     left: auto;
     right: calc(50% - 50vw + var(--space-xl));
     top: auto;
+    bottom: auto;
     width: min(17.5rem, max(11.5rem, calc(50vw - 50% - var(--space-xl) - var(--space-md))));
     max-width: calc(50vw - 50% - var(--space-md));
     margin: 0;

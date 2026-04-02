@@ -112,6 +112,91 @@ function alignTimelineDots() {
   });
 }
 
+/** Wide-screen margin notes: prevent overlapping asides by nudging top (pairs with --blog-post-notes-stack-gap). */
+function initMarginNotesStacking() {
+  const body = document.querySelector('.blog-post-body');
+  if (!body) return;
+
+  const listNotes = () => Array.from(body.querySelectorAll('.blog-post-notes'));
+  if (!listNotes().length) return;
+
+  const mq = window.matchMedia('(min-width: 1280px)');
+  let raf = null;
+
+  const stackGapPx = () => {
+    const raw = getComputedStyle(body).getPropertyValue('--blog-post-notes-stack-gap').trim();
+    const n = parseFloat(raw);
+    return Number.isFinite(n) ? n : 20;
+  };
+
+  const run = () => {
+    const notes = listNotes();
+    if (notes.length < 2) return;
+
+    const gap = stackGapPx();
+
+    if (!mq.matches) {
+      notes.forEach((el) => {
+        el.style.top = '';
+      });
+      return;
+    }
+
+    notes.forEach((el) => {
+      el.style.top = '';
+    });
+    void body.offsetHeight;
+
+    const heights = notes.map((el) => el.getBoundingClientRect().height);
+    const naturalTops = notes.map((el) => el.offsetTop);
+
+    let prevBottom = 0;
+    const adjusted = [];
+
+    for (let i = 0; i < notes.length; i++) {
+      const floor = i === 0 ? naturalTops[i] : prevBottom + gap;
+      const t = Math.max(naturalTops[i], floor);
+      adjusted.push(t);
+      prevBottom = t + heights[i];
+    }
+
+    notes.forEach((el, i) => {
+      if (Math.abs(adjusted[i] - naturalTops[i]) > 0.5) {
+        el.style.top = `${Math.round(adjusted[i] * 100) / 100}px`;
+      } else {
+        el.style.top = '';
+      }
+    });
+  };
+
+  const schedule = () => {
+    if (raf != null) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      raf = null;
+      run();
+    });
+  };
+
+  schedule();
+  mq.addEventListener('change', schedule);
+  window.addEventListener('resize', schedule);
+
+  if (typeof ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(schedule);
+    ro.observe(body);
+  }
+
+  listNotes().forEach((aside) => {
+    aside.querySelectorAll('img').forEach((img) => {
+      if (!img.complete) img.addEventListener('load', schedule, { once: true });
+    });
+  });
+
+  if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+    window.MathJax.startup.promise.then(schedule).catch(() => {});
+  }
+}
+
 // ---------- Dynamic Posts Loading ----------
 async function loadPosts() {
   const targets = Array.from(document.querySelectorAll('[data-json], [data-json-sources]'));
@@ -273,6 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTopicToggles();
   initTopicTagTooltips();
   alignTimelineDots();
+  initMarginNotesStacking();
   loadPosts();
 });
 
