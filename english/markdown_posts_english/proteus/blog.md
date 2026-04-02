@@ -265,87 +265,88 @@ Here \(\omega(t) := \omega\!\bigl(r^{(0)\mathsf{T}} r^{(t)}\bigr)\) is the rotat
 
 Training and sampling. Exact scores on \(SO(3)\) can be heavy, so training learns an approximate score network \(s_\theta(\mathcal{Y}_t, t)\) via denoising score matching; generation runs a reverse-time discretization (e.g. Euler–Maruyama).
 
-Goal. Recover the clean backbone \(\mathcal{Y}_0\) from any forward time \(t\); same objective as image diffusion, with state space \(\prod_i \bigl(SO(3)\times\mathbb{R}^3\bigr)\) instead of a pixel vector in \(\mathbb{R}^d\).
+Goal. Recover the clean backbone \(\mathcal{Y}_0\) from any forward time \(t\); same objective as image diffusion, with state space \(\prod_i \bigl(SO(3)\times\mathbb{R}^3\bigr)\) instead of a pixel vector in \(\mathbb{R}^d\). **Notation:** diffusion time stays \(t\) (and \(\mathbf{T}^{(t)}\) above); folding-block depth uses \(\ell\) and backbone frames \(T^\ell\) in §2.3.
 
-### 2.3 Deep learning network architectures for protein structure modeling
-The architecture in Proteus is explicitly **inspired by AlphaFold2 and RoseTTAFold**, then adapted for **diffusion-based backbone generation**. The subsections below follow that split: what each predecessor contributes conceptually, before Proteus-specific changes (local graph triangles, structure bias) appear again in section 2.4.
+### 2.3 Model architecture (Proteus folding block)
 
-**RoseTTAFold (3-track design).** RoseTTAFold merges information from **three levels**:
+**Notation.** In §2.2, \(\mathbf{T}^{(\tau)}\) (or \(\mathcal{Y}_\tau\)) denotes the **whole backbone at diffusion time** \(\tau\). Here, \(T^\ell\) denotes the **backbone frames after folding-block layer** \(\ell\) (one rigid transform per residue, as in §2.1). The single (node) representation is written \(s^\ell\), and the pair / edge representation \(z^\ell\).
 
-1. **1D track:** amino-acid **sequence** information.
-2. **2D track:** **spatial relationships between residues**—distances and related pairwise quantities, in the same spirit as AlphaFold2’s **pair representation**. In more detail, the 2D path builds **several matrices**: not only inter-residue distances, but also **other pairwise features** (one matrix per feature family). Because of **coevolution** and long-range couplings in proteins, these pairwise signals are important for the network.
-3. **3D track:** **3D structure**, combining distance and sequence cues: 3D coordinates (or equivalent geometric state) are predicted using information **fed from** the 1D and 2D tracks.
+Proteus refines structure through **\(L\) folding blocks** stacked in sequence. **Weights are not shared** across blocks: each layer has its own parameters.
 
-**How the tracks interact.** Each track uses **attention** to pull out salient patterns. **Information is exchanged back and forth continuously** between tracks rather than staying isolated. In the **3D** track specifically, RoseTTAFold relies on an **SE(3)-equivariant Transformer**—a transformer architecture tailored to 3D data so that predictions change consistently under Euclidean transforms. Training uses **structure losses** such as **RMSD** and **lDDT**.
+Each block takes **three tracks** as input: the **single** (node) representation, the **pair** representation, and the **structural frames** (backbone). It then runs **three modules** in order:
 
-**Why Proteus still references it, and what it avoids.** RoseTTAFold’s rich **triangle** and pair machinery is powerful but **heavy**: full **triangle attention** scales roughly like **\(O(N^3)\)** in the number of residues, and injecting **explicit backbone geometry** at each stage is less direct than in Proteus’s graph-based design. Proteus responds with **local neighborhoods** (roughly **\(O(NK^2)\)**) and **structure-aware biases** (section 2.4).
+1. **IPA–Transformer block** — updates the **single** representation.
+2. **Backbone update** — updates the **frames**.
+3. **Graph triangle block** — updates the **pair / edge** representation.
 
-**AlphaFold2 (pipeline and geometric core).** AlphaFold2 is the other major inspiration. At a high level its processing can be read as:
+Every module reads the other tracks as context, but each is responsible for one kind of state. The paper stresses that the **graph triangle block** is the main source of gains in **designability and efficiency** (their words: “Our primary emphasis is on elucidating the graph triangle block…”).
 
-1. **Inputs.** **Amino-acid sequence**; **MSA** (multiple sequence alignment) carrying evolutionary statistics; **templates** from PDB when available—structural homologs that seed geometry.
-2. **Evoformer (sequence–pair reasoning).** Deep stack that updates:
-   - **MSA representation:** rows are homologous sequences, columns are positions; **axial attention** mixes along rows and columns to propagate evolutionary constraints.
-   - **Pair representation:** one feature block per residue pair (distances, angles, compatibility). **Triangle multiplicative updates** and **triangle attention** enforce **transitive** geometric consistency (if \((i,j)\) and \((j,k)\) agree, \((i,k)\) should too).
-   - **Recycling:** earlier structure guesses are fed back into later blocks to refine predictions over iterations.
-3. **Structure module (3D output).** Predicts each residue’s **position and orientation** in 3D. **Invariant Point Attention (IPA)** combines sequence, pair, and **current 3D** information in a way that is (approximately) invariant to global rigid motion—so attention scores do not depend on arbitrary placement of the whole structure in space. Iterative **refinement** adjusts frames and local geometry; the main geometric loss is **FAPE** (frame aligned point error), which measures atom positions **in local frames** so errors are meaningful in angstroms on the backbone and side chains.
-4. **Optional post-refinement and confidence.** **Amber** (or similar) force fields can remove small clashes; confidence heads report **pLDDT** (per-residue local quality) and **pTM** (global template-modeling score).
+![model](image/model_architecture_figure2.png){width=85%}
+*Figure 2 (Wang et al., 2024): protein backbone diffusion overview (A), stacked folding blocks (B), and the graph triangle block (C).*
 
-**Output.** A full **3D structure**: heavy-atom coordinates (or equivalent) for the protein.
+```mermaid
+flowchart TB
+    subgraph oneBlock [One folding block layer l]
+        A["Tracks in s z T at layer l"]
+        B["IPA–Transformer"]
+        C["Backbone update"]
+        D["Graph triangle block"]
+        A --> B --> C --> D
+        E["Out s z T at layer l plus 1"]
+        D --> E
+    end
+```
 
-**Link to Proteus.** AlphaFold2 supplies the mental toolkit Proteus reuses most directly: **per-residue frames**, **pair tracks**, and **IPA-style** geometry-aware attention. Proteus then trades some global triangle cost for **graph-local triangles** and explicit **structure bias**, targeting **speed** and **designable** backbones under diffusion—developed in the next section.
+#### IPA–Transformer block
 
-### 2.4 Model architecture
+This block is the **Invariant Point Attention (IPA)** machinery from **AlphaFold2**, followed by a **standard Transformer** stack (as in the paper).
 
-The paragraphs below are copied verbatim from Wang et al. (2024), Section 3.1 (PDF page layout: words broken across lines with hyphens are rejoined; the sentence that crosses Table 1 in the PDF is restored as a single “Before triangle attention…” sentence; duplicate “Employing this technique…” blocks from the typeset PDF appear once).
+- **Inputs:** the three representations (single, pair, backbone frames).
+- **Output:** an updated **single** representation \(s^{\ell+1}\).
 
-![Figure 2 from Wang et al. (2024)](image/model_architecture_figure2.png){width=85%}
-*Figure 2: Model illustration (A) The Protein backbone diffusion model is trained to recover noised structures and generate new structures by reversing the forward process. (B) The overall architecture of Proteus. (C) The detailed model architecture of graph triangle block.*
+**IPA (intuition).** Protein geometry lives in 3D, and we do not want attention scores to depend on an arbitrary **global** rotation or translation of the whole structure. IPA builds **queries, keys, and values per residue** in a **local** frame, maps them into a **global** frame shared by the protein (defined from the current backbone), lets them interact, then maps back to compute attention weights. That keeps long-range reasoning **consistent** with rigid geometry. A lightweight mental model: IPA runs attention in 3D frame space, **reweights** residue interactions each iteration, and **updates the single channel** while respecting the current backbone layout.
 
-**Overview**
+The **Transformer** part is the usual self-attention + feed-forward pattern on the **single** sequence; together, this sub-block’s job is **node-centric** refinement.
 
-In this section, we present the architecture of Proteus. Proteus iteratively updates the structural frames of proteins through a sequence of L layers of folding blocks. As shown in Figure 2B, each layer of the folding block receives input from three distinct tracks: node representation, edge representation, and structural frames. A folding block is composed of three components: an IPA-Transformer block, a backbone update layer, and a graph triangle block. Each component is tailored to model and refine one of input tracks while being aware of the representations from other tracks. The IPA-Transformer block integrates an Invariant Point Attention (IPA) mechanism with a traditional transformer. The IPA conducts standard attention operations, incorporating a bias derived from the spatial distance between inter-residue atoms and edge representation. The Backbone Update, inspired by AlphaFold2's methodology, utilizes a linear layer to predict translation and rotation updates for the frames of each residue, informed by the updated sequence representation. The graph triangle block is tasked to update the edge representation. It employs a graph-based attention mechanism that operates on edge representation, modulated by a sequence representation-gated structural bias. The entire network consists of L layers of folding blocks, and no weights are shared among them. The sequence representation is initialized using the diffusion timestep and the edge representation is initialized using a relative sequential distance map introduced in AlphaFold2. When self-conditioning data is available, additional features, including the Ca distance map and relative rotational features from preceding predictions, are incorporated, with more elaborate explanations provided in Table 5. Our primary emphasis is on elucidating the graph triangle block, which is the source of significant enhancements in designability and efficiency.
+#### Backbone update layer
 
-**Graph triangle block**
+Backbone geometry is **emergent from residue–residue coupling**, so once the **single** representation changes, the model applies an explicit **pose update** to the frames.
 
-The graph triangle block in our model is engineered to update the edge representation in the backbone diffusion process. Drawing inspiration from AlphaFold2's network, we have innovatively adapted the concept of triangle attention and the multiplication method, which are central to AlphaFold2's Evoformer module. Triangle attention is crucial for generating valid protein structures by enforcing the triangle inequality for the pair distance distribution when updating edge representations. This module significantly contributes to AlphaFold2's exceptional accuracy but presents computational challenges due to its O(N 3) computational complexity and substantial memory demands. Processing a 384-residue protein, a single layer of Evoformer can require upwards of 20GB memory during training, making it necessary to employ techniques of gradient checkpoint, especially considering the network comprises 48 Evoformer blocks. In terms of diffusion modeling, generating a 384 residue protein with 50 steps using AlphaFold2 can take a minimum of 10 minutes on a V100 GPU. Another challenge encountered with the application of the naive triangle attention technique to protein backbone diffusion models is the lack of awareness of the current structure. The Evoformer is tailored to convert Multiple Sequence Alignment (MSA) data into individual and edge representations, yet it lacks provision for structural information as an input to inform these update processes. To address the aforementioned two major limitations when applying the triangle technique to protein backbone diffusion, we have devised the graph triangle block. This block computes triangle attention for edge representation with an optimized O(NK2) complexity. Utilizing the noisy input structure, we identify the k nearest neighbor residues for each residue and subsequently gather the N *K edges from the comprehensive N 2 edge representation. Attention logits are then calculated among each residue's K edges. To incorporate 3D spatial information, we calculate the inter-atom distances of the third edge and derive their Radial Basis Function (RBF) features as structural bias, rather than directly utilizing the representation of the third edge. Furthermore, the structure bias is gated by a feedforward network that leverages the sequence representations from both the starting and ending residues, thus ensuring seamless integration of inputs across all three tracks. Before triangle attention is performed for N *K edge representations, we first apply a triangle multiplicative update, as used in Evoformer, to update the entire N *N edge representations. Employing this technique confers three distinct benefits over the axial attention layer used in RFdiffusion and the simpler message-passing layer utilized in FrameDiff and Genie. Firstly, the integration of triangle attention for edge representation updates markedly augments the model's proficiency in modeling the protein backbone diffusion process. This advancement enables the model to achieve superior results with significantly fewer steps, yielding a threefold speedup and significantly outperforms the baseline model. Secondly, this approach significantly curtails memory requirements, allowing for training on much larger proteins without the necessity to crop the input. We can handle proteins up to 1024 residues in length during training on A40 GPU, compared to the 384 residues-limit for AlphaFold2 and RFdiffusion. This capability enhances the model's efficacy in generating larger protein structures. Lastly, by incorporating inputs from all three tracks to update edge representation and protein structure, the protein structure is refined in a holistic manner. The architecture is more compact and best suited for structure-to-structure tasks, such as protein structure generation and predicting the protein's apo-to-holo conformational transition (Hou et al., 2023).
+- **Inputs:** \(s^{\ell+1}\) (from the IPA–Transformer) and the **previous** frames \(T^\ell\).
+- **Outputs:** **Updated** frames \(T^{\ell+1}\).
 
-Source: C. Wang et al., “Proteus: Exploring Protein Structure Generation for Enhanced Designability and Efficiency,” in Proceedings of the 41st International Conference on Machine Learning, PMLR 235:51376–51395, 2024. [Proceedings page](https://proceedings.mlr.press/v235/wang24bi.html)
+Mechanistically, a **linear layer** maps the updated residue embedding to coefficients for a **translation** vector and for a **unit quaternion** (three components are predicted; the fourth is fixed so that the quaternion **normalizes** to unit length, i.e. \(a^2 + b^2 + c^2 + d^2 = 1\)). The quaternion is converted to a **rotation matrix** in \(SO(3)\), and that rotation–translation is **composed** with the old frame to obtain the new backbone state (same idea as AlphaFold2’s frame update).
 
-### 2.5 A personal interpretation of which block helps which protein level
-The paper itself mainly focuses on architecture and empirical performance, not on assigning each folding-block stage to exactly one biological structure level. Still, it helps to map **section 2.4’s three stages**—**IPA–Transformer** (single / node \(s\)), **backbone update** (frames \(T_i\)), **graph triangle block** (pair / edge \(z\))—onto folding hierarchy in a loose way.
+#### Graph triangle block
 
-1. **Secondary structure (local motifs).** **IPA–Transformer** mixes sequence, pair, and **current frames** while keeping geometry in an **SE(3)-sensible** way; the **backbone update** then applies small rigid deltas \((\Delta R_i, x_i)\). Together they are natural candidates for **local** regularity—helices, sheets, turns—because they directly reshape **per-residue frames** in 3D.
-2. **Tertiary structure (global fold organization).** The **graph triangle block** refines the **pair representation** using **local \(K\)-neighbor graphs**, **triangle multiplicative updates**, and **RBF structure bias** from **current** inter-residue distances. That is where **mid- and longer-range consistency** in the **edge** channel catches up with the **single** and **frame** tracks, which matters for the overall 3D packing of one chain.
-3. **Quaternary structure (multi-chain complexes).** Besides **chain positional encodings** (so the model knows which token belongs to which chain), **spatial** **neighbor collate** in the graph block can still link residues that are **close in 3D** even when they are **far in sequence**—including **across chains**—so **local graph triangle** updates remain relevant for assemblies.
+This module is the **heart of the architecture** for **pair** refinement during **backbone diffusion**. It consumes:
 
-This is only a mental picture: **\(s\)**, **\(T\)**, and **\(z\)** are coupled every **folding block**, and diffusion time also mixes the roles above.
+- the **updated** single \(s^{\ell+1}\),
+- the **updated** backbone \(T^{\ell+1}\),
+- the **previous** edge tensor \(z^\ell\),
 
-### 2.6 Training objective
-Proteus is trained mainly with **denoising score matching** losses for both translation and rotation. This fits the diffusion viewpoint very well: the model learns a score field that tells it how to denoise a noisy structure.
+and outputs an **updated** edge representation \(z^{\ell+1}\).
 
-There are also auxiliary losses, especially when the noise level becomes smaller and the structure starts to look realistic again. In that stage, it makes sense to add stronger geometric constraints, such as:
+**Why not recycle the Evoformer triangle stack as-is?** Triangle attention is the workhorse of AlphaFold2’s **Evoformer**, but two issues show up when you aim it at **diffusion on the backbone**:
 
-1. distance matrix loss,
-2. coordinate loss on atoms.
+1. **Cost:** full triangle attention scales like **\(O(N^3)\)** in the number of residues \(N\).
+2. **Structure blind spot:** Evoformer is built around **MSA** and **pair** statistics; it does not feed **current 3D backbone** through those updates the way a diffusion model needs at every step.
 
-This also matches intuition. When the protein is still extremely noisy, asking for precise atom-level agreement is not very meaningful. But when the structure is already partly recovered, these losses become much more useful.
+The **graph triangle block** addresses both points.
 
-The training data mainly comes from the Protein Data Bank (PDB), together with data augmentation and filtering strategies described in the paper.
+**(A) Local graph, \(O(NK^2)\).** For each residue, the model selects the **\(K\) nearest neighbors in space** (typically by **Cα–Cα** distance). Attention runs on the **\(N \cdot K\)** directed edges carved out of the full \(N^2\) pair grid, so cost grows like **\(O(NK^2)\)** instead of **\(O(N^3)\)**.
 
-### 2.7 Experiments: why Proteus matters
-The paper evaluates Proteus against several other backbone generation models, such as Chroma, RFdiffusion, FrameDiff, and Genie.
+**(B) Structure bias from the “third edge”.** For a triangle \((i,j,k)\), the model does **not** always materialize every pair inside the cheap local edge set. It uses **inter-atomic distances along the closing (“third”) edge** of the triangle, passes them through **radial basis functions (RBFs)**—functions whose response **decays with distance**—and injects the result as a **structural bias** into attention logits. A **feedforward gate** (often conditioned on **single** features at the edge endpoints) **scales** that bias and blends it with the other tracks, so geometry does not drown out sequence or pair evidence.
 
-The main criteria are:
+**(C) Triangle multiplicative update first.** Before local triangle attention, Proteus applies a **triangle multiplicative update** in the spirit of **Evoformer**: it propagates **transitive** consistency on the **full** \(N \times N\) pair grid (if \((i,j)\) and \((j,k)\) agree, \((i,k)\) should move in a compatible way). **RFdiffusion** and related work argue this style of update **helps backbone diffusion**, reduces **memory** versus naïve dense attention in some designs, and stays useful across **structure-to-structure** tasks. After that global multiplicative pass, **local triangle attention** refines the **gathered** \(N \cdot K\) edges.
 
-1. **Designability**: can the generated backbone support a sequence that will really fold into it?
-2. **Efficiency**: how fast and how cheaply can the model generate samples?
-3. **Diversity**: does the model produce a rich set of structures instead of repeating a few familiar shapes?
+**Internal pipeline (conceptual order).** Triangle multiplicative update (global pair grid) → **neighbour collate** (per-residue \(K\)NN in 3D) → **local pair** features → **distance / RBF bias** featurization → **local pair geometry bias** + **gate** → **attention** (linear projections, dot-product affinities, softmax, edge weights) → **pair update** → **scatter** local updates back into the global edge tensor.
 
-According to the reported experiments, Proteus performs especially well on **designability**, and this is one of the reasons I found the paper interesting. It is not only about generating a pretty 3D backbone, but about generating a backbone that can actually be used for downstream protein design.
+**Triangle attention in one picture.** On the residue graph, **vertices** are residues and **edges** are pair relations. Triangle attention does not score isolated pairs only: for a triangle formed by **three residues**, it routes messages so that **two edges jointly inform the third**—the AlphaFold2 “**outgoing**” and “**incoming**” edge updates. When an edge is **missing** from the active sparse set, **logit bias** along one axis can still carry information from the **other two sides** of the triangle, improving **global** consistency of the pair map.
 
-For complexes such as dimers, trimers, or tetramers, the paper also reports strong performance. In other words, the model is not restricted to the easiest single-chain setting.
+#### Why this architecture matters (short)
 
-There are also in-vitro validations in the paper, which is another strong point. In-silico metrics are already useful, but experimental confirmation is much more convincing because it tells us whether the designed proteins can really be expressed and folded in the lab.
+Taken together, the design **drops the worst \(O(N^3)\) wall** of naïve Evoformer-style triangles for large \(N\), **injects current backbone geometry** where naive triangle-only pipelines do not, and—in the authors’ setup—supports training on **longer chains** (they report handling on the order of **1024** residues where **384** was a practical limit for AlphaFold2 / RFdiffusion class models on comparable hardware). Your notes also frame this as easing reliance on **pretrained** pipelines in the RFdiffusion line; the quantitative headline is: **faster, leaner triangle reasoning** that stays **structure-aware** during diffusion.
 
 ## 3. Final thoughts
 What I like about Proteus is that it sits in a very interesting place in the post-AlphaFold era.
