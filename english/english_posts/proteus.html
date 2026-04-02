@@ -311,63 +311,79 @@ flowchart LR
 
 <h3 class="blog-post-h3">2.3 Model architecture (Proteus folding block)</h3>
 
-<p class="blog-post-p"><strong>Notation.</strong> In §2.2, <span class="blog-post-math">\(\mathbf{T}^{(\tau)}\)</span> (or <span class="blog-post-math">\(\mathcal{Y}_\tau\)</span>) is the <strong>whole backbone at diffusion time</strong> <span class="blog-post-math">\(\tau\)</span>. Here, <span class="blog-post-math">\(T^\ell\)</span> is the <strong>backbone after folding-block layer</strong> <span class="blog-post-math">\(\ell\)</span>—one rigid transform per residue, as in §2.1. Write the single (node) representation <span class="blog-post-math">\(s^\ell\)</span> and the pair / edge representation <span class="blog-post-math">\(z^\ell\)</span>.</p>
+<p class="blog-post-p">This is the section where I leaned on my own figures the most, not only the paper’s Figure 2. I’ll stay consistent with §2.2: there <strong>diffusion time</strong> is <span class="blog-post-math">\(t\)</span> and the whole noisy backbone is <span class="blog-post-math">\(\mathbf{T}^{(t)}\)</span>. Here <span class="blog-post-math">\(\ell\)</span> is the <strong>folding-block layer</strong>: <span class="blog-post-math">\(T^\ell\)</span> is the stack of per-residue frames after layer <span class="blog-post-math">\(\ell\)</span> (same rigid-frame idea as §2.1). I write <span class="blog-post-math">\(s^\ell\)</span> for the <strong>single</strong> embedding and <span class="blog-post-math">\(z^\ell\)</span> for the <strong>pair / edge</strong> tensor.</p>
 
-<p class="blog-post-p">Proteus refines structure through <strong><span class="blog-post-math">\(L\)</span> folding blocks</strong> stacked in sequence. <strong>Weights are not shared</strong> across blocks.</p>
+<p class="blog-post-p">Yeah, the high-level story is simple. Proteus runs <strong><span class="blog-post-math">\(L\)</span> folding blocks</strong> one after another, and <strong>the blocks do not share weights</strong>—each has its own parameters.</p>
 
-<p class="blog-post-p">Each block takes <strong>three tracks</strong>: the <strong>single</strong> representation, the <strong>pair</strong> representation, and the <strong>structural frames</strong> (backbone). It runs <strong>three modules</strong> in order:</p>
+<p class="blog-post-p">Inside one block you always have <strong>three tracks</strong> going in: <strong>single</strong>, <strong>pair</strong>, and <strong>backbone frames</strong>. The block always does the same three steps in order:</p>
 
-<p class="blog-post-p">1. <strong>IPA–Transformer block</strong> — updates the <strong>single</strong> representation.</p>
-<p class="blog-post-p">2. <strong>Backbone update</strong> — updates the <strong>frames</strong>.</p>
-<p class="blog-post-p">3. <strong>Graph triangle block</strong> — updates the <strong>pair / edge</strong> representation.</p>
+<p class="blog-post-p">1. <strong>IPA–Transformer</strong> — refreshes <strong><span class="blog-post-math">\(s\)</span></strong>.</p>
+<p class="blog-post-p">2. <strong>Backbone update</strong> — moves the <strong>frames</strong> forward.</p>
+<p class="blog-post-p">3. <strong>Graph triangle block</strong> — refreshes <strong><span class="blog-post-math">\(z\)</span></strong> (the pair grid).</p>
 
-<p class="blog-post-p">Each module sees the other tracks as context but owns one state. Wang et al. stress the <strong>graph triangle block</strong> as the main source of gains in <strong>designability and efficiency</strong> (“Our primary emphasis is on elucidating the graph triangle block…”).</p>
+<p class="blog-post-p">Every step looks at the other tracks, but only one track is “owned” by that step. The authors say openly that the <strong>graph triangle block</strong> is what really buys <strong>designability and efficiency</strong> (“Our primary emphasis is on elucidating the graph triangle block…”).</p>
 
 <figure class="blog-post-figure">
   <img src="../markdown_posts_english/proteus/image/model_architecture_figure2.png" alt="Figure 2 from Wang et al. (2024)" class="blog-post-img" style="width: 85%">
-<figcaption class="blog-post-caption">Figure 2 (Wang et al., 2024): backbone diffusion overview (A), stacked folding blocks (B), graph triangle detail (C).</figcaption>
+<figcaption class="blog-post-caption">Figure 2 from the paper: (A) backbone diffusion in/out, (B) stack of folding blocks, (C) zoom on the graph triangle idea.</figcaption>
 </figure>
 
-<div class="mermaid">
-flowchart TB
-    subgraph oneBlock ["One folding block layer l"]
-        A["Tracks in s z T at layer l"]
-        B["IPA–Transformer"]
-        C["Backbone update"]
-        D["Graph triangle block"]
-        A --> B --> C --> D
-        E["Out s z T at layer l plus 1"]
-        D --> E
-    end
-</div>
+<p class="blog-post-p"><strong>IPA–Transformer block.</strong> So this first step is the <strong>Invariant Point Attention (IPA)</strong> story from <strong>AlphaFold2</strong>, plus a <strong>normal Transformer</strong> on top.</p>
 
-<p class="blog-post-p"><strong>IPA–Transformer block.</strong> Combines <strong>Invariant Point Attention (IPA)</strong> from <strong>AlphaFold2</strong> with a <strong>standard Transformer</strong>. <strong>Inputs:</strong> single, pair, backbone frames. <strong>Output:</strong> updated single <span class="blog-post-math">\(s^{\ell+1}\)</span>.</p>
+<p class="blog-post-p"><strong>IPA</strong> is the part that respects <strong>3D</strong>: attention should not flip just because you <strong>rigidly move</strong> the whole protein. Roughly, each residue builds <strong>Q, K, V</strong> in a <strong>local</strong> frame, maps into a <strong>global</strong> frame from the current backbone, mixes, maps back. Then the <strong>Transformer</strong> does self-attention + FFN on the <strong>single</strong> chain; the paper also <strong>concatenates</strong> the current <span class="blog-post-math">\(s_\ell\)</span> with <span class="blog-post-math">\(\mathrm{Linear}(s_0)\)</span> so the block keeps the <strong>initial</strong> sequence in view. The figure below is exactly how I wrote the update: IPA residual + layer norm, concat, Transformer + linear residual, MLP to <span class="blog-post-math">\(s_{\ell+1}\)</span>.</p>
 
-<p class="blog-post-p"><strong>IPA (intuition).</strong> Geometry lives in 3D; attention should not depend on an arbitrary <strong>global</strong> rigid motion of the whole chain. IPA forms <strong>queries, keys, and values per residue</strong> in a <strong>local</strong> frame, maps them to a <strong>global</strong> frame tied to the current backbone, lets them interact, then maps back to get attention weights—so long-range updates stay <strong>consistent with rigid geometry</strong>. Mental model: attention in 3D frame space, <strong>reweighting</strong> residue interactions each step while respecting the current layout, and <strong>refreshing the single channel</strong>.</p>
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/arch_ipa_transformer_eq.png" alt="IPA–Transformer equations" class="blog-post-img" style="width: 75%">
+<figcaption class="blog-post-caption">IPA–Transformer block as equations: IPA on <span class="blog-post-math">\((s_\ell, z_\ell, T_\ell)\)</span>, concat with <span class="blog-post-math">\(\mathrm{Linear}(s_0)\)</span>, Transformer, MLP to <span class="blog-post-math">\(s_{\ell+1}\)</span>.</figcaption>
+</figure>
 
-<p class="blog-post-p">The <strong>Transformer</strong> stack is ordinary self-attention + feed-forward on the <strong>single</strong> sequence; this sub-block is <strong>node-centric</strong> refinement.</p>
+<p class="blog-post-p"><strong>Backbone update layer.</strong> Once <span class="blog-post-math">\(s\)</span> has moved, the <strong>frames</strong> should move too. <strong>Inputs:</strong> <span class="blog-post-math">\(s_{\ell+1}\)</span> and old <span class="blog-post-math">\(T^\ell\)</span>. <strong>Outputs:</strong> <span class="blog-post-math">\(T^{\ell+1}\)</span>. A <strong>linear</strong> map predicts <span class="blog-post-math">\(b_i,c_i,d_i\)</span> and translation <span class="blog-post-math">\(\vec{x}_i^{\mathrm{update}}\)</span>; fix the first quaternion component to 1, <strong>normalize</strong>, build <span class="blog-post-math">\(R_i^{\mathrm{update}}\)</span>, pack <span class="blog-post-math">\(\mathbf{T}_i^{\mathrm{update}}\)</span>, compose with the layer-<span class="blog-post-math">\(\ell\)</span> frame (my notes’ “equations (1)–(5)” slide).</p>
 
-<p class="blog-post-p"><strong>Backbone update layer.</strong> Backbone shape is <strong>emergent from residue coupling</strong>, so when <span class="blog-post-math">\(s\)</span> changes, the frames get an explicit <strong>pose update</strong>. <strong>Inputs:</strong> <span class="blog-post-math">\(s^{\ell+1}\)</span> and <strong>previous</strong> frames <span class="blog-post-math">\(T^\ell\)</span>. <strong>Outputs:</strong> <span class="blog-post-math">\(T^{\ell+1}\)</span>.</p>
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/arch_backbone_update_eq.png" alt="Backbone update equations" class="blog-post-img" style="width: 78%">
+<figcaption class="blog-post-caption">Backbone update: linear → unit quaternion → rotation matrix → compose with <span class="blog-post-math">\(T^\ell\)</span> to get <span class="blog-post-math">\(T^{\ell+1}\)</span>.</figcaption>
+</figure>
 
-<p class="blog-post-p">A <strong>linear layer</strong> maps the residue embedding to a <strong>translation</strong> vector and to three quaternion components; the fourth is fixed so the quaternion <strong>normalizes</strong> to unit length (<span class="blog-post-math">\(a^2+b^2+c^2+d^2=1\)</span>). Convert to a <strong>rotation matrix</strong> in <span class="blog-post-math">\(SO(3)\)</span>, then <strong>compose</strong> with the old frame—same spirit as AlphaFold2’s frame update.</p>
+<p class="blog-post-p"><strong>Graph triangle block.</strong> It takes <span class="blog-post-math">\(s^{\ell+1}\)</span> (after IPA–Transformer), <span class="blog-post-math">\(T^{\ell+1}\)</span> (after backbone update), and <span class="blog-post-math">\(z^\ell\)</span>; it writes <span class="blog-post-math">\(z^{\ell+1}\)</span>. This is where Proteus stops pretending <strong>Evoformer</strong> can be pasted onto diffusion unchanged.</p>
 
-<p class="blog-post-p"><strong>Graph triangle block.</strong> Refines the <strong>pair</strong> during <strong>backbone diffusion</strong>. It reads <span class="blog-post-math">\(s^{\ell+1}\)</span>, <span class="blog-post-math">\(T^{\ell+1}\)</span>, and <span class="blog-post-math">\(z^\ell\)</span>; it writes <span class="blog-post-math">\(z^{\ell+1}\)</span>.</p>
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/arch_evoformer.png" alt="Evoformer schematic" class="blog-post-img" style="width: 72%">
+<figcaption class="blog-post-caption">Evoformer (AlphaFold2): MSA track and pair track exchange updates; triangle machinery lives on the pair side.</figcaption>
+</figure>
 
-<p class="blog-post-p"><strong>Why not reuse Evoformer triangles unchanged?</strong> (1) <strong>Cost:</strong> full triangle attention is <strong><span class="blog-post-math">\(O(N^3)\)</span></strong> in residues <span class="blog-post-math">\(N\)</span>. (2) <strong>Structure gap:</strong> Evoformer is built around <strong>MSA</strong> and <strong>pair</strong> tracks; it does not thread <strong>current 3D backbone</strong> through those updates the way a diffusion step needs.</p>
+<p class="blog-post-p"><strong>Why Evoformer-as-is hurts here.</strong> (1) <strong><span class="blog-post-math">\(O(N^3)\)</span></strong> triangle attention. (2) Evoformer is built for <strong>MSA + co-evolution</strong> → single/pair; it does not naturally feed <strong>the current noisy backbone</strong> through every pair update, which backbone <strong>diffusion</strong> needs every step.</p>
 
-<p class="blog-post-p"><strong>(A) Local graph, <span class="blog-post-math">\(O(NK^2)\)</span>.</strong> Per residue, take the <strong><span class="blog-post-math">\(K\)</span> nearest neighbors</strong> in space (typically <strong>Cα–Cα</strong>). Run attention on the <strong><span class="blog-post-math">\(N \cdot K\)</span></strong> directed edges cut from the full <span class="blog-post-math">\(N^2\)</span> grid—cost <strong><span class="blog-post-math">\(O(NK^2)\)</span></strong> instead of <strong><span class="blog-post-math">\(O(N^3)\)</span></strong>.</p>
+<p class="blog-post-p">The <strong>graph triangle block</strong> keeps <strong>triangle multiplication</strong> on the full <span class="blog-post-math">\(N \times N\)</span> grid, runs <strong>attention</strong> on only <strong><span class="blog-post-math">\(N \cdot K\)</span></strong> <strong>local</strong> edges (<span class="blog-post-math">\(K\)</span> nearest neighbors by <strong>Cα</strong>), and adds <strong>RBF</strong> bias from the <strong>third edge</strong> of each triangle, <strong>gated</strong> by <strong>single</strong> features.</p>
 
-<p class="blog-post-p"><strong>(B) Structure bias from the “third edge”.</strong> For triangle <span class="blog-post-math">\((i,j,k)\)</span>, model <strong>inter-atomic distances along the closing edge</strong>, pass them through <strong>RBFs</strong> (response decays with distance), and add that as a <strong>structural bias</strong> to attention logits. A <strong>feedforward gate</strong> (often using <strong>single</strong> features at both endpoints) <strong>scales</strong> the bias and blends it with the other tracks.</p>
+<p class="blog-post-p"><strong>Triangle multiplication (outgoing vs incoming).</strong> Same <span class="blog-post-math">\((i,j,k)\)</span> triangle as in AlphaFold2 notes: one variant uses edges that leave <span class="blog-post-math">\(i\)</span> and <span class="blog-post-math">\(j\)</span> and meet at <span class="blog-post-math">\(k\)</span>; the other uses edges that arrive at <span class="blog-post-math">\(i\)</span> and <span class="blog-post-math">\(j\)</span> from <span class="blog-post-math">\(k\)</span>.</p>
 
-<p class="blog-post-p"><strong>(C) Triangle multiplicative update first.</strong> Before local triangle attention, apply a <strong>triangle multiplicative update</strong> in the <strong>Evoformer</strong> style on the full <span class="blog-post-math">\(N \times N\)</span> pair grid (<strong>transitive</strong> consistency: <span class="blog-post-math">\((i,j)\)</span> and <span class="blog-post-math">\((j,k)\)</span> jointly constrain <span class="blog-post-math">\((i,k)\)</span>). Works such as <strong>RFdiffusion</strong> argue this kind of update helps <strong>backbone diffusion</strong>, saves <strong>memory</strong> versus naïve dense attention in some designs, and stays useful for <strong>structure-to-structure</strong> tasks. Then <strong>local triangle attention</strong> refines the gathered <span class="blog-post-math">\(N \cdot K\)</span> edges.</p>
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/arch_triangle_mult_update.png" alt="Triangle multiplicative updates" class="blog-post-img" style="width: 82%">
+<figcaption class="blog-post-caption">Triangle multiplicative update: outgoing edges (left) vs incoming edges (right).</figcaption>
+</figure>
 
-<p class="blog-post-p"><strong>Pipeline (conceptual).</strong> Triangle multiplicative update (global pair grid) → <strong>neighbour collate</strong> (per-residue <span class="blog-post-math">\(K\)</span>NN in 3D) → <strong>local pair</strong> features → <strong>distance / RBF bias</strong> → <strong>local pair geometry bias</strong> + <strong>gate</strong> → <strong>attention</strong> (linear maps, dot products, softmax, edge weights) → <strong>pair update</strong> → <strong>scatter</strong> back to the global edge tensor.</p>
+<p class="blog-post-p"><strong>Triangle self-attention</strong> attends over edges that share a <strong>start</strong> or <strong>end</strong> node so two sides of a triangle help update the third—where the “missing edge” / <strong>logit bias</strong> idea comes from on sparse graphs.</p>
 
-<p class="blog-post-p"><strong>Triangle attention intuition.</strong> Vertices are residues; edges are pair relations. For a triangle of <strong>three residues</strong>, two edges jointly inform the third—AlphaFold2’s <strong>outgoing</strong> and <strong>incoming</strong> edge pathways. If an edge is <strong>missing</strong> from the sparse active set, <strong>logit bias</strong> along one axis can still carry information from the <strong>other two sides</strong>, improving <strong>global</strong> pair consistency.</p>
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/arch_triangle_self_attention.png" alt="Triangle self-attention" class="blog-post-img" style="width: 82%">
+<figcaption class="blog-post-caption">Triangle self-attention around the starting node vs the ending node.</figcaption>
+</figure>
 
-<p class="blog-post-p"><strong>Why this stack matters (short).</strong> It avoids the worst <strong><span class="blog-post-math">\(O(N^3)\)</span></strong> cost of naïve Evoformer-style triangles, feeds <strong>current backbone</strong> into triangle reasoning, and—in the authors’ setup—supports training on <strong>longer chains</strong> (on the order of <strong>1024</strong> residues vs. a <strong>384</strong>-residue practical limit cited for AlphaFold2 / RFdiffusion–class models on similar hardware). Notes in my PDF also tie this to easing reliance on <strong>pretrained</strong> RFdiffusion-style pipelines; the headline is <strong>faster, memory-aware triangle updates</strong> that stay <strong>geometry-aware</strong> under diffusion.</p>
+<p class="blog-post-p"><strong>End-to-end flow.</strong> Single <span class="blog-post-math">\((n,c_s)\)</span>, backbone frames, pair <span class="blog-post-math">\((n,n,c_z)\)</span> → distance matrix → triangle mult on full pairs → neighbour collate to <span class="blog-post-math">\((n,k,c_z)\)</span> → gate on single + bias featurize → local pair geometry bias <span class="blog-post-math">\((n,k,k,h)\)</span> → dot-product affinities + bias + softmax → weighted values → scatter to full pair update <span class="blog-post-math">\((n,n,c_z)\)</span>.</p>
 
-<p class="blog-post-p">Full definitions: C. Wang et al., “Proteus: Exploring Protein Structure Generation for Enhanced Designability and Efficiency,” ICML, PMLR 235:51376–51395, 2024. <a href="https://proceedings.mlr.press/v235/wang24bi.html" target="_blank" rel="noopener">Proceedings page</a>.</p>
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/arch_graph_triangle_block.png" alt="Graph triangle block diagram" class="blog-post-img" style="width: 92%">
+<figcaption class="blog-post-caption">Graph triangle block: triangle mult, collate, gated RBF bias, local attention, scatter.</figcaption>
+</figure>
+
+<figure class="blog-post-figure">
+  <img src="../markdown_posts_english/proteus/image/arch_graph_triangle_block_alt.png" alt="Graph triangle block alternate layout" class="blog-post-img" style="width: 92%">
+<figcaption class="blog-post-caption">Same pipeline, alternate figure layout.</figcaption>
+</figure>
+
+<p class="blog-post-p"><strong>Why I care about this stack.</strong> You dodge the worst <strong><span class="blog-post-math">\(O(N^3)\)</span></strong> wall, you keep <strong>current 3D</strong> inside the pair update, and the paper reports training on <strong>longer</strong> chains (<strong>1024</strong> residues vs <strong>384</strong>-style limits often quoted for AlphaFold2 / RFdiffusion-class training). My punchline: <strong>fast enough to use</strong>, <strong>geometric enough to design with</strong>.</p>
+
+<p class="blog-post-p">Full paper: C. Wang et al., “Proteus: Exploring Protein Structure Generation for Enhanced Designability and Efficiency,” ICML, PMLR 235:51376–51395, 2024. <a href="https://proceedings.mlr.press/v235/wang24bi.html" target="_blank" rel="noopener">Proceedings page</a>.</p>
 
 <h3 class="blog-post-h3">2.4 A personal interpretation of which block helps which protein level</h3>
 <p class="blog-post-p">The paper itself mainly focuses on architecture and empirical performance, not on assigning each folding-block stage to exactly one biological structure level. Still, it helps to map <strong>section 2.3’s three stages</strong>—<strong>IPA–Transformer</strong> (single / node <span class="blog-post-math">\(s\)</span>), <strong>backbone update</strong> (frames <span class="blog-post-math">\(T_i\)</span>), <strong>graph triangle block</strong> (pair / edge <span class="blog-post-math">\(z\)</span>)—onto folding hierarchy in a loose way.</p>
