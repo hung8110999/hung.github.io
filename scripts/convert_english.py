@@ -94,6 +94,41 @@ def convert_markdown(md, folder_name):
         flags=re.MULTILINE
     )
 
+    # Images BEFORE inline math: alt/caption text may contain \( ... \); if math ran first,
+    # <span class="..."> would inject raw double quotes and break the alt attribute.
+    def img_repl(m):
+        alt, img_path, attrs = m.group(1), m.group(2), m.group(3)
+        normalized = img_path.replace('\\', '/')
+        final_path = f"../markdown_posts_english/{folder_name}/{normalized}"
+        alt_escaped = html_lib.escape(alt, quote=True)
+        inline_style = ''
+        fig_class = 'blog-post-figure'
+        position_map = {
+            'left': 'fig-left',
+            'right': 'fig-right',
+            'inline': 'fig-inline',
+            'behind': 'fig-behind',
+            'front': 'fig-front',
+        }
+        if attrs:
+            # Parse Pandoc-style attributes like width=50% into CSS: width: 50%
+            css_parts = []
+            for pair in re.findall(r'([\w-]+)\s*=\s*(\S+)', attrs):
+                key, val = pair
+                if key == 'position' and val in position_map:
+                    fig_class += f' {position_map[val]}'
+                else:
+                    css_parts.append(f'{key}: {val}')
+            if css_parts:
+                inline_style = f' style="{"; ".join(css_parts)}"'
+        return (
+            f'<figure class="{fig_class}">\n'
+            f'  <img src="{final_path}" alt="{alt_escaped}" class="blog-post-img"{inline_style}>\n'
+            f'</figure>'
+        )
+
+    html = re.sub(r'!\[([^\]]*)\]\(([^)]+)\)(?:\{([^}]*)\})?', img_repl, html)
+
     # Inline math: \( ... \)
     html = re.sub(
         r'\\\((.+?)\\\)',
@@ -118,38 +153,6 @@ def convert_markdown(md, folder_name):
     html = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<em>\1</em>', html)
     html = re.sub(r'~~(.*?)~~', r'<del>\1</del>', html)
     html = re.sub(r'`([^`]+)`', r'<code class="blog-post-code">\1</code>', html)
-
-    def img_repl(m):
-        alt, img_path, attrs = m.group(1), m.group(2), m.group(3)
-        normalized = img_path.replace('\\', '/')
-        final_path = f"../markdown_posts_english/{folder_name}/{normalized}"
-        inline_style = ''
-        fig_class = 'blog-post-figure'
-        position_map = {
-            'left': 'fig-left',
-            'right': 'fig-right',
-            'inline': 'fig-inline',
-            'behind': 'fig-behind',
-            'front': 'fig-front',
-        }
-        if attrs:
-            # Parse Pandoc-style attributes like width=50% into CSS: width: 50%
-            css_parts = []
-            for pair in re.findall(r'([\w-]+)\s*=\s*(\S+)', attrs):
-                key, val = pair
-                if key == 'position' and val in position_map:
-                    fig_class += f' {position_map[val]}'
-                else:
-                    css_parts.append(f'{key}: {val}')
-            if css_parts:
-                inline_style = f' style="{"; ".join(css_parts)}"'
-        return (
-            f'<figure class="{fig_class}">\n'
-            f'  <img src="{final_path}" alt="{alt}" class="blog-post-img"{inline_style}>\n'
-            f'</figure>'
-        )
-
-    html = re.sub(r'!\[([^\]]*)\]\(([^)]+)\)(?:\{([^}]*)\})?', img_repl, html)
     html = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2" target="_blank" rel="noopener">\1</a>', html)
 
     lines = html.split('\n')

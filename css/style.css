@@ -1892,13 +1892,19 @@ pre code {
   z-index: 2;
 }
 
-@media (min-width: 1200px) {
+/*
+ * Wide screens: park the note in the viewport’s right margin (outside the 900px column),
+ * right edge aligned with the page gutter — not merely “next to” the text block.
+ * Uses 50vw - 50% (= one half of the horizontal bleed when the column is centered).
+ */
+@media (min-width: 1280px) {
   .blog-post-notes {
     position: absolute;
-    left: calc(100% + 1.5rem);
+    left: auto;
+    right: calc(50% - 50vw + var(--space-xl));
     top: auto;
-    width: 17.5rem;
-    max-width: min(17.5rem, calc(100vw - 960px));
+    width: min(17.5rem, max(11.5rem, calc(50vw - 50% - var(--space-xl) - var(--space-md))));
+    max-width: calc(50vw - 50% - var(--space-md));
     margin: 0;
   }
 }

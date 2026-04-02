@@ -470,7 +470,7 @@ flowchart LR
 
 <div class="blog-post-math-block">\[\mathcal{L} = \underbrace{\mathcal{L}_{\text{trans}} + 0.5\mathcal{L}_{\text{rot}}}_{\text{dsm loss}} + \underbrace{0.25\mathcal{L}_{\text{coord}}^{t<0.25} + 0.25\mathcal{L}_{\text{dm}}^{t<0.25}}_{\text{auxiliary loss}} \quad (3)\]</div>
 <figure class="blog-post-figure">
-  <img src="../markdown_posts_english/proteus/image/proteus_loss_eq3.png" alt="Equation (3) as in the paper: DSM on translation + 0.5× rotation; auxiliary coord and distance-matrix losses with weight 0.25 when <span class="blog-post-math">\(t<0.25\)</span>." class="blog-post-img" style="width: 88%">
+  <img src="../markdown_posts_english/proteus/image/proteus_loss_eq3.png" alt="Equation (3): DSM plus auxiliary losses for coordinate and distance matrix when diffusion time t is below 0.25." class="blog-post-img" style="width: 88%">
 </figure>
 
 <p class="blog-post-p">When <span class="blog-post-math">\(t\)</span> is still large, the backbone is too corrupted for atomic coordinates or pairwise distances to be meaningful supervision; after <span class="blog-post-math">\(t\)</span> drops below <span class="blog-post-math">\(0.25\)</span>, those terms help lock in fine-grained geometry. Denoising score matching remains the main signal: it pushes the learned score to match the true score of the noised process for both translation and rotation.</p>
