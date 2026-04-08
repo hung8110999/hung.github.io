@@ -22,7 +22,7 @@
   --bg-primary: #f7fbfe;
   --bg-white: #ffffff;
   --bg-card: #ffffff;
-  --bg-nav: rgba(255, 255, 255, 0.95);
+  --bg-nav: rgba(74, 158, 206, 0.95);
   --bg-hover: #f0f7ff;
 
   /* Text */
@@ -136,9 +136,9 @@ h6 {
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: var(--space-md) var(--space-xl);
+  padding: var(--space-sm) var(--space-xl);
   background: var(--bg-nav);
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
@@ -154,20 +154,20 @@ h6 {
 .nav-logo {
   font-size: var(--fs-xl);
   font-weight: 800;
-  color: var(--blue-600);
+  color: #ffffff;
   display: flex;
   align-items: center;
   gap: var(--space-sm);
 }
 
 .nav-logo:hover {
-  color: var(--blue-700);
+  color: #dbeafe;
 }
 
 .nav-logo .logo-icon {
   width: 30px;
   height: 30px;
-  background: var(--blue-600);
+  background: var(--blue-700);
   color: #fff;
   border-radius: var(--radius-sm);
   display: flex;
@@ -190,20 +190,20 @@ h6 {
   gap: var(--space-xs);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-md);
-  color: var(--text-secondary);
+  color: #e2e8f0;
   font-size: var(--fs-sm);
   font-weight: 500;
   transition: all var(--transition-fast);
 }
 
 .nav-links a:hover {
-  color: var(--text-primary);
-  background: var(--bg-hover);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .nav-links a.active {
-  color: var(--blue-600);
-  background: var(--blue-50);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Dropdown Menu */
@@ -216,7 +216,7 @@ h6 {
   top: 100%;
   left: 0;
   background: var(--bg-nav);
-  border: 1px solid var(--border-light);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-md);
   padding: var(--space-xs);
   min-width: 150px;
@@ -240,12 +240,12 @@ h6 {
 .dropdown-menu a {
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-sm);
-  color: var(--text-secondary);
+  color: #e2e8f0;
 }
 
 .dropdown-menu a:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
 }
 
 /* Coming Soon Badge */
@@ -294,7 +294,7 @@ h6 {
 
 /* ---------- Main Content ---------- */
 .main-content {
-  padding-top: 70px;
+  padding-top: 64px;
   overflow-x: visible;
 }
 
@@ -371,14 +371,20 @@ h6 {
 .social-links a {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-md);
+  justify-content: center;
+  padding: 6px;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-size: var(--fs-sm);
-  font-weight: 500;
   transition: all var(--transition-fast);
+  width: 44px;
+  height: 44px;
+}
+
+.social-links a img {
+  width: 28px;
+  height: 28px;
+  display: block;
+  object-fit: contain;
 }
 
 .social-links a:hover {
@@ -1394,7 +1400,7 @@ pre code {
 
 /* ---------- Hero (for Blog/Coming Soon pages) ---------- */
 .hero {
-  min-height: calc(100vh - 70px);
+  min-height: calc(100vh - 64px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1521,7 +1527,7 @@ pre code {
     height: 100vh;
     background: var(--bg-white);
     flex-direction: column;
-    padding: 70px var(--space-xl) var(--space-xl);
+    padding: 64px var(--space-xl) var(--space-xl);
     gap: var(--space-xs);
     transition: right var(--transition-base);
     border-left: 1px solid var(--border-light);
