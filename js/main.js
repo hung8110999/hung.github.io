@@ -100,17 +100,8 @@ function initTopicToggles() {
   });
 }
 
-// ---------- Timeline helper ----------
-function alignTimelineDots() {
-  document.querySelectorAll('.timeline-item').forEach(item => {
-    const dot = item.querySelector('.timeline-dot');
-    const wrapper = item.querySelector('.timeline-content-wrapper');
-    if (dot && wrapper) {
-      const offset = wrapper.offsetTop + wrapper.offsetHeight / 2 - dot.offsetHeight / 2;
-      dot.style.top = offset + 'px';
-    }
-  });
-}
+// Timeline dots are centred purely in CSS (.timeline-dot / .timeline-content-wrapper::before);
+// the old JS that wrote an inline `top` fought those rules and left the connector detached.
 
 /** Wide-screen margin notes: per side (left / right), nudge top so same-side notes do not overlap. */
 function initMarginNotesStacking() {
@@ -315,7 +306,12 @@ async function loadPosts() {
       }
 
       target.innerHTML = '';
-      if (!postsToDisplay.length) return;
+      if (!postsToDisplay.length) {
+        // Every post here may be unlisted (`hide: true`); say so rather than
+        // leaving a section heading floating above empty space.
+        target.innerHTML = '<p class="posts-empty">No posts published yet.</p>';
+        return;
+      }
 
       postsToDisplay.forEach((post) => {
         const dateObj = new Date(post.date);
@@ -395,9 +391,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavbar();
   initTopicToggles();
   initTopicTagTooltips();
-  alignTimelineDots();
   initMarginNotesStacking();
   loadPosts();
 });
-
-window.addEventListener('resize', alignTimelineDots);

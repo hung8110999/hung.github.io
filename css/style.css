@@ -1226,25 +1226,13 @@ pre code {
   border-radius: 50%;
   position: absolute;
   left: -7px;
+  /* Dot and the horizontal connector share one anchor: the wrapper's vertical
+     centre. Keep these two rules in sync -- any offset here must also be applied
+     to .timeline-content-wrapper::before or the connector detaches from the dot. */
   top: 50%;
-  transform: translateY(calc(-50% - 16px - 2pt - 10px));
+  transform: translateY(-50%);
   z-index: 10;
   box-shadow: 0 0 0 4px rgba(74, 158, 206, 0.2);
-}
-
-.timeline-item:nth-of-type(1) .timeline-dot,
-.timeline-item:nth-of-type(2) .timeline-dot {
-  transform: translateY(calc(-50% - 16px - 2pt - 5px));
-}
-
-.timeline-item:nth-of-type(1) .timeline-content-wrapper,
-.timeline-item:nth-of-type(2) .timeline-content-wrapper {
-  transform: translateY(-2px);
-}
-
-.timeline-item:nth-of-type(3) .timeline-dot,
-.timeline-item:nth-of-type(4) .timeline-dot {
-  transform: translateY(calc(-50% - 16px - 2pt - 10px));
 }
 
 .timeline-landmark {
@@ -1653,30 +1641,23 @@ pre code {
   position: absolute;
   left: -7px;
   top: 50%;
-  transform: translateY(calc(-50% - 16px - 2pt - 10px));
+  transform: translateY(-50%);
   z-index: 10;
   box-shadow: 0 0 0 4px rgba(74, 158, 206, 0.2);
-}
-
-.timeline-item:nth-of-type(1) .timeline-dot,
-.timeline-item:nth-of-type(2) .timeline-dot {
-  transform: translateY(calc(-50% - 16px - 2pt - 7px));
-}
-
-.timeline-item:nth-of-type(1) .timeline-content-wrapper,
-.timeline-item:nth-of-type(2) .timeline-content-wrapper {
-  transform: translateY(-2px);
-}
-
-.timeline-item:nth-of-type(3) .timeline-dot,
-.timeline-item:nth-of-type(4) .timeline-dot {
-  transform: translateY(calc(-50% - 16px - 2pt - 10px - 1px));
 }
 
 .timeline-landmark .timeline-date {
   font-weight: 800;
   letter-spacing: 1px;
   color: var(--blue-700);
+}
+
+/* Shown when a post list resolves to nothing (e.g. every post is unlisted) */
+.posts-empty {
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  font-style: italic;
+  padding: var(--space-lg) 0;
 }
 
 /* Target Universities Grid */

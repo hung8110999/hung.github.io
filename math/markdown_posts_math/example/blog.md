@@ -3,6 +3,7 @@ date: 2026-03-18
 description: Example math post with equations
 subtitle: Integration and quadratic formula
 tag: Calculus
+hide: true
 -->
 # Example Math Post
 
