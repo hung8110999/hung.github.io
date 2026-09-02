@@ -82,13 +82,13 @@ Rigid frames, as in AlphaFold2. Proteus follows the same idea: the backbone of e
 
 Two notes that matter for the intuition:
 
-1. Rigid means distance-preserving. \(T = (R, t)\) is a rigid transformation: it does not change distances (or angles) within the object being moved—only its position and orientation in space.
+1. Rigid means distance-preserving. \(T = (R, t)\) is a rigid transformation: it does not change distances (or angles) within the object being moved-only its position and orientation in space.
 2. What the backbone atoms are. Each amino acid has an amino group (N) and a carboxyl group (C), with the alpha-carbon (Cα) sitting between them on the backbone. The local frame is built from these three backbone atoms (N, Cα, C), not from the whole side chain.
 
 **What \(R\) and \(t\) mean in that local picture**
 
 1. \(R\) (rotation matrix in \(SO(3)\)) encodes 3D rotations. It describes the relative orientation of the residue in its own (local) frame: you can think of it as rotating the axes so the residue is described in a consistent local geometry.
-2. \(t\) (translation vector in \(\mathbb{R}^3\)) encodes translation. It describes the relative position of the residue—where the origin of that local frame sits in space (in standard constructions, the origin is tied to the Cα / frame construction rather than using raw atom triples alone as the only description).
+2. \(t\) (translation vector in \(\mathbb{R}^3\)) encodes translation. It describes the relative position of the residue-where the origin of that local frame sits in space (in standard constructions, the origin is tied to the Cα / frame construction rather than using raw atom triples alone as the only description).
 
 **Why not only global \([N, Cα, C]\) coordinates?**
 
@@ -128,7 +128,7 @@ The central idea of Proteus is to use the forward process of a diffusion model, 
 ![dfs](image/dfs.png){width=120% position=left}
 *Forward diffusion corrupts structure; reverse diffusion denoises it back toward a protein backbone.*
 
-Below: (1) the general forward representation in diffusion modeling—the SDE written explicitly, with each symbol explained; (2) the SDE for the protein backbone, i.e. the same template when the state is on \(SO(3) \times \mathbb{R}^3\) per residue.
+Below: (1) the general forward representation in diffusion modeling-the SDE written explicitly, with each symbol explained; (2) the SDE for the protein backbone, i.e. the same template when the state is on \(SO(3) \times \mathbb{R}^3\) per residue.
 
 
 ### 2.3 General forward representation in diffusion modeling
@@ -141,14 +141,14 @@ $$
 
 What each part of this equation means:
 
-1. \(t\) — Diffusion time (algorithmic time), not physical folding time. Larger \(t\) means more forward corruption; typically \(t \in [0, T]\) for some horizon \(T\).
-2. \(Y_t\) — The state being noised at time \(t\) (for images: pixels; here: the tuple of all frame rotations and translations). The collection \(\{Y_t\}_{t \ge 0}\) is a stochastic process.
-3. \(dY_t\) — The infinitesimal change of \(Y_t\) over an infinitesimal step of diffusion time (Itô calculus).
-4. \(f(Y_t, t)\) — The drift coefficient: the deterministic part of the dynamics. If randomness were switched off (\(g \equiv 0\)), you would have \(dY = f(Y,t)\,dt\). Drift encodes systematic motion such as mean reversion or damping.
-5. \(dt\) — An infinitesimal time step in diffusion time; it multiplies only the drift in this standard form.
-6. \(g(Y_t, t)\) — The diffusion coefficient: how large the random kicks are at state \(Y_t\) and time \(t\) (noise scale / volatility).
-7. \(W_t\) — A standard Wiener process (Brownian motion): continuous paths, independent Gaussian increments with mean zero and incremental variance proportional to \(dt\) in the usual formal sense.
-8. \(dW_t\) — The Brownian increment on the interval of length \(dt\). The product \(g(Y_t,t)\,dW_t\) is the stochastic term; it injects randomness so trajectories diverge even from identical \(Y_0\).
+1. \(t\) - Diffusion time (algorithmic time), not physical folding time. Larger \(t\) means more forward corruption; typically \(t \in [0, T]\) for some horizon \(T\).
+2. \(Y_t\) - The state being noised at time \(t\) (for images: pixels; here: the tuple of all frame rotations and translations). The collection \(\{Y_t\}_{t \ge 0}\) is a stochastic process.
+3. \(dY_t\) - The infinitesimal change of \(Y_t\) over an infinitesimal step of diffusion time (Itô calculus).
+4. \(f(Y_t, t)\) - The drift coefficient: the deterministic part of the dynamics. If randomness were switched off (\(g \equiv 0\)), you would have \(dY = f(Y,t)\,dt\). Drift encodes systematic motion such as mean reversion or damping.
+5. \(dt\) - An infinitesimal time step in diffusion time; it multiplies only the drift in this standard form.
+6. \(g(Y_t, t)\) - The diffusion coefficient: how large the random kicks are at state \(Y_t\) and time \(t\) (noise scale / volatility).
+7. \(W_t\) - A standard Wiener process (Brownian motion): continuous paths, independent Gaussian increments with mean zero and incremental variance proportional to \(dt\) in the usual formal sense.
+8. \(dW_t\) - The Brownian increment on the interval of length \(dt\). The product \(g(Y_t,t)\,dW_t\) is the stochastic term; it injects randomness so trajectories diverge even from identical \(Y_0\).
 
 In one sentence: drift \(f\,dt\) tells you the average, rule-based motion; diffusion \(g\,dW\) adds random spreading. Forward diffusion means choosing \(f\) and \(g\) so that \(Y_t\) becomes easy to sample from at large \(t\).
 
@@ -160,12 +160,12 @@ $$
 
 Here \(x_t\) is the state at step \(t\) (what you noised). Meaning of each piece:
 
-1. \(x_t\) — The state after the \(t\)-th corruption step.
-2. \(x_{t-1}\) — The state one step earlier (slightly cleaner).
-3. \(\alpha_t\) — A scalar in the noise schedule (usually in \((0,1)\)). It fixes how much of \(x_{t-1}\) is kept versus how much new noise enters at this step.
-4. \(\sqrt{\alpha_t}\, x_{t-1}\) — Scales down the previous state. As the schedule is chosen so \(\alpha_t\) tends to shrink over the forward trajectory, this term weakens the signal from \(x_{t-1}\) and pushes the chain toward a simple (often nearly Gaussian) limit.
-5. \(\sqrt{1 - \alpha_t}\, \epsilon\) — Fresh Gaussian noise injected at step \(t\); the factor \(\sqrt{1-\alpha_t}\) sets the noise strength at that step.
-6. \(\epsilon \sim \mathcal{N}(0, I)\) — Standard normal noise: mean zero, identity covariance, so noise is isotropic across coordinates of \(x\).
+1. \(x_t\) - The state after the \(t\)-th corruption step.
+2. \(x_{t-1}\) - The state one step earlier (slightly cleaner).
+3. \(\alpha_t\) - A scalar in the noise schedule (usually in \((0,1)\)). It fixes how much of \(x_{t-1}\) is kept versus how much new noise enters at this step.
+4. \(\sqrt{\alpha_t}\, x_{t-1}\) - Scales down the previous state. As the schedule is chosen so \(\alpha_t\) tends to shrink over the forward trajectory, this term weakens the signal from \(x_{t-1}\) and pushes the chain toward a simple (often nearly Gaussian) limit.
+5. \(\sqrt{1 - \alpha_t}\, \epsilon\) - Fresh Gaussian noise injected at step \(t\); the factor \(\sqrt{1-\alpha_t}\) sets the noise strength at that step.
+6. \(\epsilon \sim \mathcal{N}(0, I)\) - Standard normal noise: mean zero, identity covariance, so noise is isotropic across coordinates of \(x\).
 
 Relation to the \(\beta_t\) notation. Many papers instead write the same Markov corruption as
 
@@ -193,13 +193,13 @@ $$
 
 Read this as two coupled blocks (rotation block first, translation block second):
 
-1. \(\mathbf{T}^{(t)}\) — Protein backbone state at diffusion time \(t\).
+1. \(\mathbf{T}^{(t)}\) - Protein backbone state at diffusion time \(t\).
 2. Drift \(\left[ 0,\; -\frac{1}{2}\mathbf{X}^{(t)} \right] dt\):
-   - First entry \(0\) — No drift on the rotational part of the forward process.
-   - Second entry \(-\frac{1}{2}\mathbf{X}^{(t)}\) — \(\mathbf{X}^{(t)}\) is the position / translation component at time \(t\); the factor \(-\frac{1}{2}\) gives mean reversion toward the origin (the structure is pulled toward a center as diffusion time runs forward, while noise competes with that pull).
+   - First entry \(0\) - No drift on the rotational part of the forward process.
+   - Second entry \(-\frac{1}{2}\mathbf{X}^{(t)}\) - \(\mathbf{X}^{(t)}\) is the position / translation component at time \(t\); the factor \(-\frac{1}{2}\) gives mean reversion toward the origin (the structure is pulled toward a center as diffusion time runs forward, while noise competes with that pull).
 3. Noise \(\left[ d\mathbf{B}_{SO(3)}^{(t)},\; d\mathbf{B}_{\mathbb{R}^3}^{(t)} \right]\):
-   - \(d\mathbf{B}_{\mathbb{R}^3}^{(t)}\) — Random translational increments in \(\mathbb{R}^3\) (isotropic across three axes).
-   - \(d\mathbf{B}_{SO(3)}^{(t)}\) — Random rotational increments intrinsic to \(SO(3)\) (Brownian motion on the rotation group), not Euclidean noise pasted onto rotation matrices.
+   - \(d\mathbf{B}_{\mathbb{R}^3}^{(t)}\) - Random translational increments in \(\mathbb{R}^3\) (isotropic across three axes).
+   - \(d\mathbf{B}_{SO(3)}^{(t)}\) - Random rotational increments intrinsic to \(SO(3)\) (Brownian motion on the rotation group), not Euclidean noise pasted onto rotation matrices.
 
 Backbone SDE in the same general form. Write the forward process on the backbone as
 
@@ -209,11 +209,11 @@ $$
 
 Explanation specialized to the backbone:
 
-- \(\mathcal{Y}_t\) — Entire backbone at diffusion time \(t\): all \(\{R_t^{(i)}, X_t^{(i)}\}\).
-- \(F(\mathcal{Y}_t,t)\,dt\) — Drift on the product manifold. In the Proteus-style forward noising setup: no extra deterministic drift on the \(SO(3)\) factors (rotation is not systematically steered by a drift term in the forward process); translations carry a mean-reverting drift \(-\tfrac{1}{2} X_t^{(i)}\) so positions are pulled toward the origin and do not wander arbitrarily in \(\mathbb{R}^3\) before noise dominates.
-- \(G(\mathcal{Y}_t,t)\,d\mathbf{W}_t\) — Noise, factored into two geometries:
-  - \(dW_t^{(i)}\) in \(\mathbb{R}^3\) — standard Brownian motion driving the translational component \(X_t^{(i)}\) (random displacement in 3D).
-  - Brownian motion on \(SO(3)\) driving \(R_t^{(i)}\) — random reorientation defined intrinsically on the rotation group (not by adding a matrix of Gaussian noise in \(\mathbb{R}^{3\times 3}\)).
+- \(\mathcal{Y}_t\) - Entire backbone at diffusion time \(t\): all \(\{R_t^{(i)}, X_t^{(i)}\}\).
+- \(F(\mathcal{Y}_t,t)\,dt\) - Drift on the product manifold. In the Proteus-style forward noising setup: no extra deterministic drift on the \(SO(3)\) factors (rotation is not systematically steered by a drift term in the forward process); translations carry a mean-reverting drift \(-\tfrac{1}{2} X_t^{(i)}\) so positions are pulled toward the origin and do not wander arbitrarily in \(\mathbb{R}^3\) before noise dominates.
+- \(G(\mathcal{Y}_t,t)\,d\mathbf{W}_t\) - Noise, factored into two geometries:
+  - \(dW_t^{(i)}\) in \(\mathbb{R}^3\) - standard Brownian motion driving the translational component \(X_t^{(i)}\) (random displacement in 3D).
+  - Brownian motion on \(SO(3)\) driving \(R_t^{(i)}\) - random reorientation defined intrinsically on the rotation group (not by adding a matrix of Gaussian noise in \(\mathbb{R}^{3\times 3}\)).
 
 Per-residue equations (explicit drift vs noise). For each residue \(i\),
 
@@ -266,7 +266,7 @@ $$
 
 Here \(\omega(t) := \omega\!\bigl(r^{(0)\mathsf{T}} r^{(t)}\bigr)\) is the rotation angle (geodesic distance), and \(\log(\cdot)\) denotes the matrix log / log map from \(SO(3)\) to its Lie algebra \(\mathfrak{so}(3)\). Conceptually, \(\partial_{\omega} f / f = \partial_{\omega} \log f\) provides the “radial” part of the score along the geodesic, while the \(\log(r^{(0)\mathsf{T}} r^{(t)})\) term provides its direction in the tangent space.
 
-Training and sampling. Exact scores on \(SO(3)\) can be heavy, so training learns an approximate score network \(s_\theta(\mathcal{Y}_t, t)\) via denoising score matching; generation runs a reverse-time discretization (e.g. Euler–Maruyama).
+Training and sampling. Exact scores on \(SO(3)\) can be heavy, so training learns an approximate score network \(s_\theta(\mathcal{Y}_t, t)\) via denoising score matching; generation runs a reverse-time discretization (e.g. Euler-Maruyama).
 
 Goal. Recover the clean backbone \(\mathcal{Y}_0\) from any forward time \(t\); same objective as image diffusion, with state space \(\prod_i \bigl(SO(3)\times\mathbb{R}^3\bigr)\) instead of a pixel vector in \(\mathbb{R}^d\). Notation: diffusion time stays \(t\) (and \(\mathbf{T}^{(t)}\) above); folding-block depth uses \(\ell\) and backbone frames \(T^\ell\) in §2.3.
 
@@ -274,20 +274,20 @@ Goal. Recover the clean backbone \(\mathcal{Y}_0\) from any forward time \(t\); 
 
 This is the section where I leaned on my own figures the most, not only the paper’s Figure 2. I’ll stay consistent with Section 2.2: there diffusion time is \(t\) and the whole noisy backbone is \(\mathbf{T}^{(t)}\). Here \(\ell\) is the folding-block layer: \(T^\ell\) is the stack of per-residue frames after layer \(\ell\) (same rigid-frame idea as Section 2.1). I write \(s^\ell\) for the single (node) embedding and \(z^\ell\) for the pair / edge tensor.
 
-Yeah, the high-level story is simple. Proteus runs \(L\) folding blocks one after another, and the blocks do not share weights—each has its own parameters.
+Yeah, the high-level story is simple. Proteus runs \(L\) folding blocks one after another, and the blocks do not share weights-each has its own parameters.
 
 Inside one block you always have three tracks going in: single, pair, and backbone frames. The block always does the same three steps in order:
 
-1. IPA–Transformer — refreshes \(s\).
-2. Backbone update — moves the frames forward.
-3. Graph triangle block — refreshes \(z\) (the pair grid).
+1. IPA-Transformer - refreshes \(s\).
+2. Backbone update - moves the frames forward.
+3. Graph triangle block - refreshes \(z\) (the pair grid).
 
 Every step looks at the other tracks, but only one track is “owned” by that step. The authors say openly that the graph triangle block is what really buys designability and efficiency (“Our primary emphasis is on elucidating the graph triangle block…”).
 
 ![model](image/GTB.png){width=65%}
 *Overall architecture sketch: \(L\) folding blocks (no weight sharing), each with IPA-Transformer \(\rightarrow\) backbone update \(\rightarrow\) graph triangle block, followed by the SDE structure denoiser.*
 
-### 3.1 IPA–Transformer block
+### 3.1 IPA-Transformer block
 
 Inputs: single representation \(s_\ell\), pair representation \(z_\ell\), current per-residue frames \(T^\ell\), and the initial singles \(s_0\) (for the skip-style path into the Transformer). Outputs: updated singles \(s_{\ell+1}\) only; \(z_\ell\) and \(T^\ell\) are unchanged until the later submodules run.
 
@@ -298,22 +298,22 @@ IPA is the part that respects 3D. You don’t want attention logits to change ju
 The block I saved as equations is just the same thing in math form: IPA residual + layer norm, concat with \(s_0\), Transformer + linear residual, then an MLP that outputs \(s_{\ell+1}\).
 
 ![ipa_eq](image/IPA_transformer.png){width=55%}
-*How I wrote the IPA–Transformer block: IPA on \((s_\ell, z_\ell, T_\ell)\), then concat with \(\mathrm{Linear}(s_0)\), Transformer, and MLP to \(s_{\ell+1}\).*
+*How I wrote the IPA-Transformer block: IPA on \((s_\ell, z_\ell, T_\ell)\), then concat with \(\mathrm{Linear}(s_0)\), Transformer, and MLP to \(s_{\ell+1}\).*
 
 ### 3.2 Backbone update layer
 
-Inputs: singles \(s_{\ell+1}\) right after the IPA–Transformer, and the current frames \(T^\ell = \{(R_i^\ell, \mathbf{t}_i^\ell)\}_{i=1}^N\) per residue \(i\). Outputs: updated frames \(T^{\ell+1}\) in the same rigid-frame format; \(s_{\ell+1}\) and \(z_\ell\) are unchanged here.
+Inputs: singles \(s_{\ell+1}\) right after the IPA-Transformer, and the current frames \(T^\ell = \{(R_i^\ell, \mathbf{t}_i^\ell)\}_{i=1}^N\) per residue \(i\). Outputs: updated frames \(T^{\ell+1}\) in the same rigid-frame format; \(s_{\ell+1}\) and \(z_\ell\) are unchanged here.
 
-Once \(s\) has moved, the frames should move too—backbone shape is really about how residues talk to each other, not a separate magic tensor.
+Once \(s\) has moved, the frames should move too-backbone shape is really about how residues talk to each other, not a separate magic tensor.
 
 What the equations are for. The network must turn a per-residue vector \(s_{\ell+1,i}\) into a small rigid motion that can actually be composed with the current pose: a rotation in \(SO(3)\) and a translation in \(\mathbb{R}^3\). The AlphaFold2-style recipe predicts a raw quaternion tail \((b_i,c_i,d_i)\) with the first component fixed to 1, predicts a translation increment \(\Delta\mathbf{t}_i\), then builds a valid rotation matrix from a normalized quaternion so every update stays a legal Euclidean motion.
 
 ![backbone_eq](image/arch_backbone_update_eq.png){width=90% position=right}
 *Backbone update: linear → unit quaternion → rotation matrix → compose with \(T^\ell\) to get \(T^{\ell+1}\).*
 
-Why that form is necessary. (1) Unconstrained \(3\times 3\) matrices from a linear layer are not guaranteed orthogonal or det = +1; quaternion normalization plus the standard quaternion-to-\(SO(3)\) map is a cheap way to guarantee \(R_i^{\mathrm{upd}}\in SO(3)\). (2) Keeping the head at 1 trims one degree of freedom so the downstream map from \(\mathbb{R}^3\) to \(S^3\) is well posed before normalization. (3) Composition \(T_i^{\ell+1} = T_i^{\mathrm{upd}} \circ T_i^\ell\) matches “update the frame in place” during diffusion: you are not solving for the whole chain in one shot—you are applying a learned local rigid transform each time.
+Why that form is necessary. (1) Unconstrained \(3\times 3\) matrices from a linear layer are not guaranteed orthogonal or det = +1; quaternion normalization plus the standard quaternion-to-\(SO(3)\) map is a cheap way to guarantee \(R_i^{\mathrm{upd}}\in SO(3)\). (2) Keeping the head at 1 trims one degree of freedom so the downstream map from \(\mathbb{R}^3\) to \(S^3\) is well posed before normalization. (3) Composition \(T_i^{\ell+1} = T_i^{\mathrm{upd}} \circ T_i^\ell\) matches “update the frame in place” during diffusion: you are not solving for the whole chain in one shot-you are applying a learned local rigid transform each time.
 
-How you “solve” them. There is no inner optimization loop here; it is a forward pass of closed-form operations. Write \(\tilde{q}_i = (1, b_i, c_i, d_i)\), \(\hat{q}_i = \tilde{q}_i / \|\tilde{q}_i\|\), convert \(\hat{q}_i\) to \(R_i^{\mathrm{upd}}\) with the usual quaternion–matrix formulas, then compose
+How you “solve” them. There is no inner optimization loop here; it is a forward pass of closed-form operations. Write \(\tilde{q}_i = (1, b_i, c_i, d_i)\), \(\hat{q}_i = \tilde{q}_i / \|\tilde{q}_i\|\), convert \(\hat{q}_i\) to \(R_i^{\mathrm{upd}}\) with the usual quaternion-matrix formulas, then compose
 
 $$
 R_i^{\ell+1} = R_i^{\mathrm{upd}}\, R_i^\ell,
@@ -321,7 +321,7 @@ R_i^{\ell+1} = R_i^{\mathrm{upd}}\, R_i^\ell,
 \mathbf{t}_i^{\ell+1} = R_i^{\mathrm{upd}}\, \mathbf{t}_i^\ell + \Delta\mathbf{t}_i
 $$
 
-(for the right-multiply convention used in many structure networks; the paper’s slide “equations (1)–(5)” pins down sign/order exactly). Backpropagation differentiates through normalization and the quaternion map automatically—the “solution” at inference is just evaluating this recipe once per block.
+(for the right-multiply convention used in many structure networks; the paper’s slide “equations (1)-(5)” pins down sign/order exactly). Backpropagation differentiates through normalization and the quaternion map automatically-the “solution” at inference is just evaluating this recipe once per block.
 
 
 ### 3.3 Graph triangle block
@@ -378,7 +378,7 @@ Two views for the same target edge \(ij\):
 1. **Outgoing:** use \(ik\) and \(jk\).
 2. **Incoming:** use \(ki\) and \(kj\).
 :::
-This is the first step applied to the pair representation, before any local attention happens. The input here is still the global pair map \(z^\ell\). Proteus borrows this idea from Evoformer: for a target edge \((i,j)\), the update is not computed from that edge alone, but from triangular interactions involving a third residue \(k\). In practice, the model combines information from the other two edges of the triangle—for example the **outgoing** pair \((ik, jk)\) or the **incoming** pair \((ki, kj)\)—so edge \((i,j)\) receives a higher-order structural message.
+This is the first step applied to the pair representation, before any local attention happens. The input here is still the global pair map \(z^\ell\). Proteus borrows this idea from Evoformer: for a target edge \((i,j)\), the update is not computed from that edge alone, but from triangular interactions involving a third residue \(k\). In practice, the model combines information from the other two edges of the triangle-for example the **outgoing** pair \((ik, jk)\) or the **incoming** pair \((ki, kj)\)-so edge \((i,j)\) receives a higher-order structural message.
 
 The important point is that this stage is a multiplicative update, not an attention step. There is no softmax here. The model uses pair-pair interactions to refresh the full edge representation before sparsifying into local neighborhoods. This is exactly the **(C)** part of the block: **before triangle attention is performed, Proteus first updates the whole initial edge representation**. One practical motivation for keeping this kind of update is that it helps backbone-diffusion modeling, is lighter in memory than relying only on attention, and works well as part of a broader geometric architecture.
 
@@ -458,13 +458,13 @@ So if I explain it in one sentence, this block takes updated single features, up
 
 ![Algorithm 1: Proteus model inference (reverse diffusion on \(SE(3)\) per residue)](image/proteus_algorithm1_inference.png){width=90% position=left}
 
-Generation is still a diffusion story, but the noise is geometric: you perturb both where each residue sits and how it is oriented (random translations in \(\mathbb{R}^3\) and random rotations per residue), not raw image pixels. The model is trained end-to-end; at inference you only run the reverse process, discretized with an Euler–Maruyama-style SDE step on the product of \(SE(3)\) factors, using the score parametrization from Section 2.2.
+Generation is still a diffusion story, but the noise is geometric: you perturb both where each residue sits and how it is oriented (random translations in \(\mathbb{R}^3\) and random rotations per residue), not raw image pixels. The model is trained end-to-end; at inference you only run the reverse process, discretized with an Euler-Maruyama-style SDE step on the product of \(SE(3)\) factors, using the score parametrization from Section 2.2.
 
-In words that match Algorithm 1 and the same structure as Section 2.3: start at diffusion time \(t = 1\) with a fully noisy backbone. At that point each residue gets a random translation and a random rotation, packed into rigid transforms \(T_i^{(t)}\), with a “previous structure” cache initialized to identity transforms. Each outer step then builds the features needed by the network, runs the folding stack, and uses an \(SE(3)\) reverse-diffusion update to move the noisy backbone toward the model’s current prediction. Concretely, after initialization the model embeds the timestep into single and pair features (`InputEmbedder`), adds conditioning from the previous predicted backbone (`ConditionEmbedder`), then runs the folding stack for \(N_{\text{layer}}\) blocks: IPA–Transformer on \((s, z, \hat{T}^{(0)})\), backbone update on \(\hat{T}^{(0)}\), then the graph triangle module on \(z\). The network’s current estimate \(\hat{T}^{(0)}\) becomes \(T^{\text{prev}}\) for the next diffusion step; \(t\) is decremented and an \(SE(3)\) SDE solver updates the noisy state \(T^{(t)}\) toward that prediction, with default settings such as \(N_{\text{step}} = 100\), \(N_{\text{layer}} = 4\), \(t_{\min} = 0.005\), and a small noise scale for the discretization.
+In words that match Algorithm 1 and the same structure as Section 2.3: start at diffusion time \(t = 1\) with a fully noisy backbone. At that point each residue gets a random translation and a random rotation, packed into rigid transforms \(T_i^{(t)}\), with a “previous structure” cache initialized to identity transforms. Each outer step then builds the features needed by the network, runs the folding stack, and uses an \(SE(3)\) reverse-diffusion update to move the noisy backbone toward the model’s current prediction. Concretely, after initialization the model embeds the timestep into single and pair features (`InputEmbedder`), adds conditioning from the previous predicted backbone (`ConditionEmbedder`), then runs the folding stack for \(N_{\text{layer}}\) blocks: IPA-Transformer on \((s, z, \hat{T}^{(0)})\), backbone update on \(\hat{T}^{(0)}\), then the graph triangle module on \(z\). The network’s current estimate \(\hat{T}^{(0)}\) becomes \(T^{\text{prev}}\) for the next diffusion step; \(t\) is decremented and an \(SE(3)\) SDE solver updates the noisy state \(T^{(t)}\) toward that prediction, with default settings such as \(N_{\text{step}} = 100\), \(N_{\text{layer}} = 4\), \(t_{\min} = 0.005\), and a small noise scale for the discretization.
 
 The **node / pair init** step can also be stated more explicitly. For the **node representation**, the input is the diffusion time \(t\) together with a one-hot residue-type feature; in the unconditional backbone-generation setup, that residue type is fixed to alanine. Those features are concatenated and passed through an MLP to produce the initial node embedding. For the **pair / edge representation**, the model combines the two endpoint node embeddings with a relative sequence-position encoding in the AlphaFold style. So the initialization already carries both “where in diffusion are we?” and “which residues / sequence positions are interacting?” before any folding block runs.
 
-Finally, the reverse process is solved by **Euler–Maruyama discretization** using the score functions described earlier. So the sampling story is: initialize a fully noisy backbone, build node / pair features, run the folding blocks, estimate the clean structure at the current step, and use an Euler–Maruyama reverse update to continue denoising.
+Finally, the reverse process is solved by **Euler-Maruyama discretization** using the score functions described earlier. So the sampling story is: initialize a fully noisy backbone, build node / pair features, run the folding blocks, estimate the clean structure at the current step, and use an Euler-Maruyama reverse update to continue denoising.
 
 ### 4.2 Data and training objective
 
@@ -504,9 +504,9 @@ For **quaternary structure** in complexes, **chain positional encoding** and **l
 
 The paper reports wet-lab checks so designability scores are not only in silico. For now, this scaffold tracks what belongs here:
 
-- **Designs versus controls** — which Proteus-generated sequences (and any baselines) went to expression; what length / fold family / oligomer state.
-- **Expression and readout** — host, induction, solubility / pellet vs supernatant, and whether folding was assessed by CD, SEC, NMR, activity, or structural methods.
-- **Outcome vs computation** — which designs behaved as folded or functional proteins, and how that lines up with **sc_TM** / **scRMSD** from the paper’s screens.
+- **Designs versus controls** - which Proteus-generated sequences (and any baselines) went to expression; what length / fold family / oligomer state.
+- **Expression and readout** - host, induction, solubility / pellet vs supernatant, and whether folding was assessed by CD, SEC, NMR, activity, or structural methods.
+- **Outcome vs computation** - which designs behaved as folded or functional proteins, and how that lines up with **sc_TM** / **scRMSD** from the paper’s screens.
 
 *Placeholder one-liner from the paper (to be replaced with detail):* designed proteins from Proteus were expressed and reported to fold consistently with intent, complementing the in silico designability tables.
 

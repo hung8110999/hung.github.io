@@ -11,8 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / 'english/markdown_posts_english/proteus/image/arch_graph_triangle_block.png'
 OUT_DIR = SRC.parent
 
-# (x0, y0, x1, y1) as fractions of width/height — tuned for 4944×1552 sketch.
-# C: triangle multiplicative update — mask like the hand-annotated ref: full node + pad above/below,
+# (x0, y0, x1, y1) as fractions of width/height - tuned for 4944×1552 sketch.
+# C: triangle multiplicative update - mask like the hand-annotated ref: full node + pad above/below,
 #    and overlap the right edge of the pair-representation grid on the left (same sketch).
 # B: upper geometry branch only; bottom trimmed so it does not wash over C.
 # A: collate → attention → scatter; starts under the yellow mask.

@@ -23,7 +23,7 @@ Và thời gian còn lại là quả bán sống bán chết của 2 thằng, tr
 Cuối cùng cũng tới ngày bảo vệ, chả hiểu sao cái công trình nghiên cứu 2 thằng nắm trong lòng bàn tay nhưng mà tới ngày bảo vệ thằng nào cũng run, đêm trước ngày bảo vệ còn không ngủ được :DD??. Lúc bảo vệ bị mấy thầy đấm sml nhưng cuối cùng vẫn 10 ( mấy em khóa sau mà đọc được cái này thì +1 kinh nghiệm nha)
 ![Chụp hình sau buổi bảo vệ](image\grad.png){width: 40%}
 
-*Chụp hình kỷ niệm sau buổi bảo vệ với "đồng chí" Huy — chung team cả quân sự, KLTN và Taiwan2025 sau này.*
+*Chụp hình kỷ niệm sau buổi bảo vệ với "đồng chí" Huy - chung team cả quân sự, KLTN và Taiwan2025 sau này.*
 Cuối cùng thì vẫn là cảm ơn thầy Thái hehe.
 
 # 2. Bạn bè

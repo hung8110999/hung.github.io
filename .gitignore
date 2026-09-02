@@ -1,0 +1,24 @@
+# NOTE: the generated post pages (blog/posts/, math/math-posts/,
+# english/english_posts/, coding/coding_posts/) and the *_posts.json indexes are
+# NOT ignored on purpose -- GitHub Pages serves this repo as-is, so the build
+# output of scripts/convert.py has to be committed for the site to work.
+
+# Python bytecode from scripts/convert.py
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS clutter
+.DS_Store
+Thumbs.db
+desktop.ini

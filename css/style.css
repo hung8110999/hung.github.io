@@ -1,5 +1,5 @@
 /* ===================================
-   DESIGN SYSTEM — hung.github.io
+   DESIGN SYSTEM - hung.github.io
    Minimalist Light Blue Theme
    =================================== */
 
@@ -65,7 +65,7 @@
   --radius-xl: 1rem;
   --radius-full: 9999px;
 
-  /* Shadow — subtle only */
+  /* Shadow - subtle only */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
 
@@ -1339,7 +1339,7 @@ pre code {
   transform: scale(1.1);
 }
 
-/* card‑logo moved outside; old class removed */
+/* card-logo moved outside; old class removed */
 
 /* Multiple logos group (Future Aspirations card) */
 .timeline-logos-group {
@@ -1550,6 +1550,26 @@ pre code {
     display: flex;
   }
 
+  /* The slide-in panel is white, but the nav colours are tuned for the blue
+     navbar: #e2e8f0 text on white is about 1.2:1, and the translucent-white
+     hover/active backgrounds vanish. Repaint near-black, tint the states. */
+  .nav-links a,
+  .nav-links a:hover,
+  .nav-links a.active,
+  .dropdown-menu a,
+  .dropdown-menu a:hover {
+    color: var(--text-heading);
+  }
+
+  .nav-links a:hover,
+  .dropdown-menu a:hover {
+    background: var(--blue-50);
+  }
+
+  .nav-links a.active {
+    background: var(--blue-100);
+  }
+
   .home-name-section h1 {
     font-size: var(--fs-3xl);
   }
@@ -1576,6 +1596,50 @@ pre code {
 
   .hero h1 {
     font-size: var(--fs-3xl);
+  }
+
+  /* Timeline: the desktop layout spends 84px on the axis offset, 64px on card
+     padding and a fixed 100px logo beside the text, which leaves ~31px for the
+     copy on a 375px screen -- every word wraps. Stack the card, shrink the
+     offsets. Two invariants keep the dot on the axis and the connector joined:
+       axis `left`      == .timeline-content-wrapper `margin-left`
+       connector width  == .timeline-card `margin-left` - 9  */
+  .timeline::before {
+    left: 16px;
+  }
+
+  .timeline-content-wrapper {
+    margin-left: 16px;
+  }
+
+  .timeline-content-wrapper::before {
+    width: 15px;
+  }
+
+  .timeline-card {
+    margin-left: 24px;
+    padding: var(--space-lg);
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-lg);
+  }
+
+  .timeline-landmark {
+    margin-left: 40px;
+  }
+
+  /* Logo drops below the text instead of competing with it for width. */
+  .timeline-logo-outside,
+  .timeline-logos-group {
+    align-self: center;
+  }
+
+  /* Three 100px logos never fitted the 118px box; let them wrap here. */
+  .timeline-logos-group {
+    width: auto;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
 
@@ -1821,7 +1885,7 @@ pre code {
 
 /* --- Image Position Variants --- */
 
-/* Float left — text wraps on the right; slight outward bleed saves column width for text */
+/* Float left - text wraps on the right; slight outward bleed saves column width for text */
 .blog-post-figure.fig-left {
   float: left;
   clear: left;
@@ -1831,7 +1895,7 @@ pre code {
   max-width: calc(50% + var(--blog-float-bleed));
 }
 
-/* Float right — text wraps on the left */
+/* Float right - text wraps on the left */
 .blog-post-figure.fig-right {
   float: right;
   clear: right;
@@ -1841,7 +1905,7 @@ pre code {
   max-width: calc(50% + var(--blog-float-bleed));
 }
 
-/* Inline — sits in the text flow, not centered */
+/* Inline - sits in the text flow, not centered */
 .blog-post-figure.fig-inline {
   display: inline-block;
   vertical-align: middle;
@@ -1849,7 +1913,7 @@ pre code {
   text-align: left;
 }
 
-/* Behind text — watermark / background style */
+/* Behind text - watermark / background style */
 .blog-post-figure.fig-behind {
   position: absolute;
   z-index: -1;
@@ -1860,7 +1924,7 @@ pre code {
   transform: translateX(-50%);
 }
 
-/* In front of text — overlay style */
+/* In front of text - overlay style */
 .blog-post-figure.fig-front {
   position: relative;
   z-index: 10;
@@ -1956,7 +2020,7 @@ pre code {
   margin-bottom: 0;
 }
 
-/* Images and figures *inside* a side note — keep them in the yellow column */
+/* Images and figures *inside* a side note - keep them in the yellow column */
 .blog-post-notes .blog-post-figure {
   float: none;
   width: 100%;
@@ -2026,7 +2090,7 @@ pre code {
   font-family: 'Fira Code', 'Consolas', monospace;
 }
 
-/* Math (KaTeX) — for math-posts from convert_math.py */
+/* Math (KaTeX) - for math-posts from convert.py */
 .math-block {
   text-align: center;
   margin: var(--space-xl) 0;
@@ -2044,7 +2108,7 @@ pre code {
   text-align: center;
 }
 
-/* Blog Listing — full-page layout */
+/* Blog Listing - full-page layout */
 .blog-listing {
   max-width: 100%;
   padding: 0 var(--space-xl);
@@ -2084,6 +2148,32 @@ pre code {
 
   .blog-post-h2 {
     font-size: var(--fs-xl);
+  }
+
+  /* Image widths written in markdown ({width: 40%}) are sized for the desktop
+     column; on a phone they leave the picture tiny. Drop the full-bleed and
+     float treatments so each figure fills the reading column. Every source
+     image is at least 960px wide, so filling the column never upscales one. */
+  .blog-post-body > .blog-post-figure:not(.fig-left):not(.fig-right):not(.fig-inline):not(.fig-behind):not(.fig-front) {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .blog-post-figure.fig-left,
+  .blog-post-figure.fig-right {
+    float: none;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    text-align: center;
+  }
+
+  /* !important is required: it beats the inline style="width: ..." that
+     convert.py writes onto every image. */
+  .blog-post-img {
+    width: 100% !important;
   }
 
 }

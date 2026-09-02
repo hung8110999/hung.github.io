@@ -1,5 +1,5 @@
 // ===================================
-// Main JavaScript — hung.github.io
+// Main JavaScript - hung.github.io
 // Minimalist Light Blue Theme
 // ===================================
 

@@ -1,5 +1,5 @@
 """
-convert.py — Markdown → HTML converter for every section of the site.
+convert.py - Markdown → HTML converter for every section of the site.
 
 Replaces the old per-section scripts (convert_math.py, convert_english.py,
 convert_coding.py), which were ~90% copies of each other. Everything a section
@@ -401,8 +401,8 @@ def convert_markdown(md, cfg, folder_name):
         if not t or t.lower() in ('note', 'notes'):
             suffix_html, aria = '', 'Note'
         else:
-            suffix_html = f'<span class="blog-post-notes-title-suffix"> — {html_lib.escape(t)}</span>'
-            aria = f'Note — {t}'
+            suffix_html = f'<span class="blog-post-notes-title-suffix"> - {html_lib.escape(t)}</span>'
+            aria = f'Note - {t}'
         side_class = 'blog-post-notes--left' if side == 'left' else 'blog-post-notes--right'
         html = html.replace(token, (
             f'<aside class="blog-post-notes {side_class}" aria-label="{html_lib.escape(aria)}">\n'
@@ -580,7 +580,7 @@ def build_post_html(meta, body_html, cfg):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{meta['title']} — {cfg['title_suffix']}</title>
+    <title>{meta['title']} - {cfg['title_suffix']}</title>
     <meta name="description" content="{meta['description']}">
     <meta name="date" content="{meta['date']}">
     <link rel="stylesheet" href="../../css/style.css">
