@@ -591,7 +591,7 @@ def build_post_html(meta, body_html, cfg):
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
-            <a href="../../index.html" class="nav-logo"><span class="logo-icon">H</span> Hung</a>
+            <a href="../../index.html" class="nav-logo"><img src="../../assets/favicon.png" alt="" class="logo-icon"> Hung Nguyen's Blog</a>
 {_nav_html(cfg)}
             <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
                 <span></span><span></span><span></span>

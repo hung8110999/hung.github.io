@@ -164,17 +164,14 @@ h6 {
   color: #dbeafe;
 }
 
+/* Now an <img> (the site favicon), not the old lettered square: drop the
+   text-centring properties and stop flex from squeezing it on narrow screens. */
 .nav-logo .logo-icon {
   width: 30px;
   height: 30px;
-  background: var(--blue-700);
-  color: #fff;
   border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--fs-sm);
-  font-weight: 700;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .nav-links {
@@ -1644,6 +1641,13 @@ pre code {
 }
 
 @media (max-width: 480px) {
+  /* "Hung Nguyen's Blog" at fs-xl needs ~198px, but a 320px screen leaves only
+     ~180px beside the logo and the toggle -- it would wrap and grow the fixed
+     navbar past the 64px that .main-content reserves for it. */
+  .nav-logo {
+    font-size: var(--fs-base);
+  }
+
   .hero-cta {
     flex-direction: column;
     align-items: center;

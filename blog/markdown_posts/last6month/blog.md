@@ -4,10 +4,10 @@ description: Nhìn lại nửa cuối năm 2025 của mình hehe
 -->
 # Nửa cuối 2025
 
-Bài viết này được viết vào **tháng 3 năm 2026**, nhưng mình vẫn muốn kể về **nửa cuối năm ngoái**.  
-Chắc bởi vì có **cực kì nhiều chuyện để kể** (có khi phải chia ra thành các post khác nữa :DD).
+Bài viết này được viết vào tháng 3 năm 2026, nhưng mình vẫn muốn kể về nửa cuối năm ngoái.  
+Chắc bởi vì có cực kì nhiều chuyện để kể (có khi phải chia ra thành các post khác nữa :DD).
 
-Tất cả mục tiêu học thuật và **giấc mơ khoa học** của mình trong **3.5 năm đại học** đều được bùng nổ trong thời gian này, và tới tận bây giờ mình vẫn còn thấy vui vì nó.
+Tất cả mục tiêu học thuật và giấc mơ khoa học của mình trong 3.5 năm đại học đều được bùng nổ trong thời gian này, và tới tận bây giờ mình vẫn còn thấy vui vì nó.
 
 # 1. Bảo vệ khóa luận tốt nghiệp và paper đầu tay
 Đầu tiên là việc bảo vệ khóa luận tốt nghiệp, mình đã hoàn thành khóa luận và đã được bảo vệ thành công công trình sau hơn 1 năm nghiên cứu.
@@ -24,7 +24,7 @@ Cuối cùng cũng tới ngày bảo vệ, chả hiểu sao cái công trình ng
 ![Chụp hình sau buổi bảo vệ](image\grad.png){width: 40%}
 
 *Chụp hình kỷ niệm sau buổi bảo vệ với "đồng chí" Huy - chung team cả quân sự, KLTN và Taiwan2025 sau này.*
-Cuối cùng thì vẫn là cảm ơn thầy Thái hehe.
+Cuối cùng thì vẫn là cảm ơn thầy Thái và Huy bu nhiều vì khóa luận hehe.
 
 # 2. Bạn bè
 Trong thời gian này mình gặp thêm nhiều người bạn mới  và gặp lại nhiều anh em cũ. Có nhiều khác biệt nhưng điểm chung là tất cả mọi người đều cho mình nhiều góc nhìn khác nhau về thứ gọi là "Khoa học"-cũng là thứ mà mình đã đang và định sẽ theo đuổi trong tương lai.
